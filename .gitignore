@@ -1,0 +1,47 @@
+# RASST keeps code and paper artifacts in Git. Runtime artifacts stay external.
+/data/**
+/logs/**
+/outputs/**
+/checkpoints/**
+/figures/**
+
+!.gitignore
+!/data/.gitkeep
+!/logs/.gitkeep
+!/outputs/.gitkeep
+!/checkpoints/.gitkeep
+!/figures/.gitkeep
+
+# Local execution clutter.
+**/__pycache__/
+*.py[cod]
+*.pyo
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+wandb/
+**/wandb/
+*.tmp
+tmp*/
+torchinductor_*/
+models--*/
+.env
+
+# Logs and detached job state.
+*.log
+*.out
+*.err
+*.pid
+
+# Paper build intermediates. The submitted PDF is tracked.
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+*.toc
+*.xdv
+!paper/**/*.pdf
