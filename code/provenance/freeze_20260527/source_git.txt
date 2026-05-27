@@ -1,0 +1,9 @@
+remote git@github.com:LeiLiLab/InfiniSST.git
+branch rasst-freeze-20260527
+tag rasst-freeze-20260527
+commit 54f3471c556473dde7fb52ac85cff62bb6fc41ee
+source_checkout /home/jiaxuanluo/InfiniSST
+created_utc 2026-05-27
+
+The legacy snapshot in code/legacy was exported from this commit with git archive.
+The paper PDF in paper/acl_latex.pdf was copied from the same commit.

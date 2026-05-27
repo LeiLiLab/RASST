@@ -1,0 +1,8 @@
+category	root_or_pattern	tracked	status	note
+data	/mnt/data2/jiaxuanluo/RASST/data	no	ignored	Runtime data root for reproduced datasets and external inputs.
+logs	/mnt/data2/jiaxuanluo/RASST/logs	no	ignored	Runtime logs and detached job stdout/stderr.
+outputs	/mnt/data2/jiaxuanluo/RASST/outputs	no	ignored	Eval outputs, reports regenerated from wrappers, and temporary result bundles.
+checkpoints	/mnt/data2/jiaxuanluo/RASST/checkpoints	no	ignored	Model checkpoints and indexes.
+figures	/mnt/data2/jiaxuanluo/RASST/figures	no	ignored	Regenerated figures; paper-local frozen assets are in code/legacy.
+wandb	**/wandb	no	ignored	Local W&B run folders are not a reproducibility source of truth.
+caches	.cache,tmp*,torchinductor_*,models--*	no	ignored	Local caches and compiler/model cache folders.
