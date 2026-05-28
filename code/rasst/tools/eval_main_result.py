@@ -115,6 +115,51 @@ def legacy_allowed() -> bool:
     return os.environ.get("RASST_USE_LEGACY_PATHS", "1") == "1"
 
 
+def hf_download_allowed() -> bool:
+    return os.environ.get("RASST_AUTO_DOWNLOAD_ASSETS", "0") == "1"
+
+
+def download_hf_asset(obj: Mapping[str, Any], *, root: Path, label: str) -> Path:
+    repo_id = str(obj.get("hf_repo_id") or "")
+    local_path = str(obj.get("local_path") or "")
+    if not repo_id or not local_path:
+        raise RasstError(f"{label} does not define both hf_repo_id and local_path.")
+    target = rel_or_abs(root, local_path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        from huggingface_hub import hf_hub_download, snapshot_download
+    except ImportError as exc:
+        raise RasstError("Install huggingface_hub or run code/rasst/scripts/download_release_assets.sh first.") from exc
+
+    revision = str(obj.get("hf_revision") or "main")
+    asset_type = obj.get("type")
+    print(f"[HF_DOWNLOAD] {label}: {repo_id}@{revision} -> {target}", file=sys.stderr)
+    if asset_type == "file":
+        filename = str(obj.get("hf_filename") or target.name)
+        downloaded = Path(
+            hf_hub_download(
+                repo_id=repo_id,
+                repo_type="model",
+                revision=revision,
+                filename=filename,
+                local_dir=str(target.parent),
+            )
+        )
+        if downloaded != target:
+            downloaded.replace(target)
+    elif asset_type == "hf_model_dir":
+        snapshot_download(
+            repo_id=repo_id,
+            repo_type="model",
+            revision=revision,
+            local_dir=str(target),
+            ignore_patterns=[".git/*"],
+        )
+    else:
+        raise RasstError(f"HF download is unsupported for {label} type={asset_type!r}.")
+    return target
+
+
 def resolve_dual_path(obj: Mapping[str, Any], *, root: Path, label: str, must_exist: bool = True) -> Path:
     env_name = str(obj.get("env") or "")
     candidates: List[Tuple[str, Path]] = []
@@ -131,7 +176,15 @@ def resolve_dual_path(obj: Mapping[str, Any], *, root: Path, label: str, must_ex
             return path
         checked.append(f"{source}={path}")
 
+    if must_exist and obj.get("hf_repo_id") and hf_download_allowed():
+        path = download_hf_asset(obj, root=root, label=label)
+        if exists_nonempty(path):
+            return path
+        checked.append(f"hf_repo_id={obj['hf_repo_id']} -> {path}")
+
     hint = "RASST_REQUIRE_LOCAL_ASSETS=1 disables legacy fallback." if not legacy_allowed() else ""
+    if obj.get("hf_repo_id") and not hf_download_allowed():
+        hint = f"{hint} Set RASST_AUTO_DOWNLOAD_ASSETS=1 to download this asset from Hugging Face.".strip()
     raise RasstError(f"Cannot resolve {label}; checked {checked}. {hint}".strip())
 
 

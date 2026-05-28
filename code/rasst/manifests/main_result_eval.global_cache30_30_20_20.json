@@ -57,6 +57,9 @@
       "direction": "input",
       "local_path": "checkpoints/retriever/hn1024.pt",
       "legacy_path": "/mnt/gemini/home/jiaxuanluo/train_outputs/q3rag_scale_lora-r128-tr128_bs8k_t=0.07_3var_gsv2full_gsdedup_varctx576_bs8k_gc128_wr1000k_m0.0_maxsim_mfa_variantE_hn1024_tcmoff_ep6_v3_smallest_dense_normAGGR_8gpu_aries_best_eval_acl6060_recallat10.pt",
+      "hf_repo_id": "gavinlaw/rasst-retriever-hn1024",
+      "hf_filename": "hn1024.pt",
+      "hf_revision": "main",
       "env": "RASST_HN1024_RETRIEVER",
       "metadata": {
         "source_run_id": "lh1b88kw"
@@ -81,6 +84,8 @@
       "direction": "input",
       "local_path": "checkpoints/slm/zh_cap16_denoise_ttag/speech_llm_zh_cap16_denoise_budget_ttag_r32a32_ep1_taurus4_hf",
       "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/models/speech_llm_zh_cap16_denoise_budget_ttag_r32a32_ep1_taurus4_hf",
+      "hf_repo_id": "gavinlaw/rasst-speech-llm-zh-cap16-denoise-ttag",
+      "hf_revision": "main",
       "env": "RASST_MODEL_ZH_CAP16_DENOISE",
       "metadata": {
         "variant": "cap16_denoise_ttag",
@@ -95,6 +100,8 @@
       "direction": "input",
       "local_path": "checkpoints/slm/de_cap16_denoise_ttag/v0-20260525-203735-hf",
       "legacy_path": "/mnt/taurus/data1/jiaxuanluo/slm_local_cache/de_tagged_acl_20260525/cap16_denoise_ttag/v0-20260525-203735-hf",
+      "hf_repo_id": "gavinlaw/rasst-speech-llm-de-cap16-denoise-ttag",
+      "hf_revision": "main",
       "env": "RASST_MODEL_DE_CAP16_DENOISE",
       "metadata": {
         "variant": "cap16_denoise_ttag"
@@ -119,6 +126,8 @@
       "direction": "input",
       "local_path": "checkpoints/slm/ja_cap16_denoise_ttag/v2-20260525-235251-hf",
       "legacy_path": "/mnt/taurus/data1/jiaxuanluo/slm_local_cache/ja_tagged_acl_20260525/cap16_denoise_ttag/v2-20260525-235251-hf",
+      "hf_repo_id": "gavinlaw/rasst-speech-llm-ja-cap16-denoise-ttag",
+      "hf_revision": "main",
       "env": "RASST_MODEL_JA_CAP16_DENOISE",
       "metadata": {
         "variant": "cap16_denoise_ttag"

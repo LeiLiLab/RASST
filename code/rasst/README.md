@@ -45,6 +45,21 @@ The release-facing eval manifest is:
 code/rasst/manifests/main_result_eval.global_cache30_30_20_20.json
 ```
 
+The top-level reproduction guide is:
+
+```text
+REPRODUCE_MAIN_RESULT.md
+```
+
+Public Hugging Face release assets for the three cap16-denoise SLMs and the
+HN1024 retriever are declared directly in the eval manifest. To stage those
+large assets under ignored `checkpoints/` paths:
+
+```bash
+bash code/rasst/scripts/download_release_assets.sh --dry-run
+RASST_ALLOW_DOWNLOAD=1 bash code/rasst/scripts/download_release_assets.sh --download
+```
+
 The submitted-paper exact RASST manifest is preserved as reference provenance:
 
 ```text
