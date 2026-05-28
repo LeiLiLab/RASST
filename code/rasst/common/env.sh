@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-export RASST_ROOT="${RASST_ROOT:-/mnt/data2/jiaxuanluo/RASST}"
+export RASST_ROOT="${RASST_ROOT:-/mnt/taurus/data2/jiaxuanluo/RASST}"
 export RASST_CODE_ROOT="${RASST_CODE_ROOT:-${RASST_ROOT}/code}"
 export RASST_LEGACY_CODE_ROOT="${RASST_LEGACY_CODE_ROOT:-${RASST_CODE_ROOT}/legacy}"
 export RASST_DATA_ROOT="${RASST_DATA_ROOT:-${RASST_ROOT}/data}"
