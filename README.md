@@ -17,3 +17,7 @@ bash code/rasst/scripts/eval_acl.sh --dry-run
 ```
 
 Actual long-running launches require `RASST_ALLOW_LAUNCH=1` and are detached with logs under `logs/curated/`.
+
+The final release main-result workflow is documented in
+`docs/reproduce_main_result_from_scratch.md`. The tracked global-cache result
+snapshot is under `docs/results/main_result_global_cache30_30_20_20/`.

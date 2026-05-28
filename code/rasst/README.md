@@ -94,3 +94,24 @@ They also write `config_cells.tsv`, `config_differences.tsv`, and
 `config_report.md` so submitted-paper exact configuration drift is explicit.
 Detached scripts, stdout/stderr, and PID files are written under
 `${RASST_LOG_ROOT:-logs}/curated/`.
+
+## SLM Reproduction
+
+The release-facing SLM recipe is unified across `de`, `ja`, and `zh`:
+cap16 denoise-budget term tagging with the manifest at
+`code/rasst/manifests/slm_training.cap16_denoise_budget_ttag.json`.
+
+Print all data-preparation and SLM-training commands:
+
+```bash
+bash code/rasst/scripts/reproduce_slm.sh --lang all --stage all
+```
+
+Launch detached only after inspecting the dry run:
+
+```bash
+RASST_ALLOW_LAUNCH=1 bash code/rasst/scripts/reproduce_slm.sh --lang all --stage all --launch
+```
+
+The old zh `new_v9` path is preserved only as reference provenance in
+`docs/reference/zh_new_v9_reference_only.md`.
