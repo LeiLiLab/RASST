@@ -69,9 +69,6 @@ uv pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 \
 uv pip install transformers==4.47.0 accelerate peft deepspeed sentence-transformers \
   huggingface_hub numpy pandas scipy scikit-learn tqdm pyyaml soundfile librosa \
   sacrebleu evaluate jiwer simuleval matplotlib tensorboardX wandb faiss-cpu
-
-# Required for batched vLLM inference.
-uv pip install vllm
 ```
 
 Some training launchers use the original Megatron/Swift Docker path. For exact SLM retraining, inspect the generated command first and run on a Slurm/Docker-capable GPU node.
@@ -156,13 +153,16 @@ The active release code lives under `code/rasst/`:
 ```text
 code/rasst/slm/                  SLM data preparation and training launchers
 code/rasst/retriever/            retriever training and MaxSim index/runtime code
-code/rasst/eval/                 serial SimulEval, batched vLLM eval, scorer, agent
+code/rasst/eval/                 serial SimulEval eval, scorer, agent
 code/rasst/analysis/main_result/ main-result table and figure builders
 code/rasst/manifests/            release manifests
 code/rasst/scripts/              public launch/download wrappers
 ```
 
-`code/legacy/` is kept as frozen provenance from the original InfiniSST-derived workspace. New users should start with the commands above rather than launching from `code/legacy/`.
+`code/legacy/` is kept as frozen provenance from the original InfiniSST-derived
+workspace. Batch/vLLM launchers are retained only for paper-canonical provenance
+checks because batch and serial decoding can differ. New users should start with
+the serial commands above rather than launching from `code/legacy/`.
 
 ## Contact
 
