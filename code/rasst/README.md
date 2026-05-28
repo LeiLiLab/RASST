@@ -45,10 +45,10 @@ The release-facing eval manifest is:
 code/rasst/manifests/main_result_eval.global_cache30_30_20_20.json
 ```
 
-The top-level reproduction guide is:
+The root release guide is:
 
 ```text
-REPRODUCE_MAIN_RESULT.md
+README.md
 ```
 
 Public Hugging Face release assets for the three cap16-denoise SLMs and the
