@@ -19,10 +19,14 @@ commands should not require launching code from `code/legacy/`.
 ```text
 code/rasst/slm/data_prep/        cap16 denoise-budget termtag data builders
 code/rasst/slm/train/            SLM training launchers and Docker wrapper
-code/rasst/eval/                 serial SimulEval, batched vLLM, scorer, agent
+code/rasst/eval/                 serial SimulEval, scorer, agent
 code/rasst/retriever/            retriever training and MaxSim index/runtime code
 code/rasst/analysis/main_result/ main-result table and figure builders
 ```
+
+Batch/vLLM eval code is retained only as paper-canonical provenance because
+batch and serial decoding can differ. It is not part of the public quickstart
+path.
 
 ## Main Result Eval Manifest
 
