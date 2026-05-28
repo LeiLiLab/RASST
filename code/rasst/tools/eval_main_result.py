@@ -66,7 +66,7 @@ def repo_root() -> Path:
 
 
 def default_manifest_path(root: Path) -> Path:
-    return root / "code/rasst/manifests/main_result_eval.paper_canonical_rasst24.json"
+    return root / "code/rasst/manifests/main_result_eval.global_cache30_30_20_20.json"
 
 
 def output_root(root: Path) -> Path:
@@ -537,9 +537,13 @@ def merged_env_for_cell(
     domain_short = "acl" if str(cell["domain"]).startswith("acl") else "med"
     eval_tmpdir = Path("/tmp") / f"rst_{tmp_stamp}_{tmp_profile}_{domain_short}_{lang}_lm{lm}"
 
+    active_code_root = root / "code/rasst"
     env: Dict[str, str] = {
-        "ROOT_DIR": str(root / "code/legacy"),
-        "ROOT_DIR_OVERRIDE": str(root / "code/legacy"),
+        "ROOT_DIR": str(active_code_root),
+        "ROOT_DIR_OVERRIDE": str(active_code_root),
+        "RASST_ROOT": str(root),
+        "RASST_ACTIVE_CODE_ROOT": str(active_code_root),
+        "PYTHONPATH": os.pathsep.join([str(active_code_root / "eval"), str(active_code_root), os.environ.get("PYTHONPATH", "")]),
         "MODEL_NAME_OVERRIDE": str(model),
         "RAG_MODEL_PATH_OVERRIDE": str(retriever),
         "LANG_CODE_OVERRIDE": lang,

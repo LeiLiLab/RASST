@@ -3,6 +3,11 @@
 This is the release-facing path for reproducing the final RASST main result.
 It is intentionally manifest-driven and dry-run first.
 
+The active reproduction code lives under `code/rasst/`: SLM data preparation
+and training under `slm/`, eval under `eval/`, retriever code under
+`retriever/`, and table/figure generation under `analysis/main_result/`.
+`code/legacy/` is kept only as frozen provenance.
+
 ## 1. Reproduce SLMs
 
 The canonical SLM recipe is cap16 denoise-budget term tagging for all three
@@ -45,6 +50,12 @@ Print eval commands without launching:
 cd /mnt/taurus/data2/jiaxuanluo/RASST
 bash code/rasst/scripts/eval_main_result.sh --dry-run \
   --cache-chunks-by-lm 1:30/30,2:30/30,3:20/20,4:20/20
+```
+
+The default eval manifest is:
+
+```text
+/mnt/taurus/data2/jiaxuanluo/RASST/code/rasst/manifests/main_result_eval.global_cache30_30_20_20.json
 ```
 
 Validate the submitted-paper exact manifest and source artifacts:

@@ -1,0 +1,894 @@
+{
+  "schema_version": 1,
+  "event_id": "20260528T000000__simuleval__main_result_eval_global_cache30_30_20_20",
+  "event_type": "simuleval",
+  "family": "main_result_eval",
+  "variant": "global_cache30_30_20_20",
+  "status": "release_manifest",
+  "project": "simuleval_eval",
+  "wandb_run_id": null,
+  "slurm_job_id": null,
+  "launcher_path": "code/rasst/scripts/eval_main_result.sh",
+  "notes_path": "docs/paper_canonical_main_result.md",
+  "cwd": "/mnt/taurus/data2/jiaxuanluo/RASST",
+  "command": "bash code/rasst/scripts/eval_main_result.sh --dry-run --cache-chunks-by-lm 1:30/30,2:30/30,3:20/20,4:20/20",
+  "parent_run_ids": [
+    "lh1b88kw",
+    "2g6kan5y"
+  ],
+  "artifacts": [
+    {
+      "key": "canonical_table",
+      "role": "report",
+      "type": "tsv",
+      "direction": "control",
+      "local_path": "docs/results/main_result_global_cache30_30_20_20/main_result.tsv",
+      "env": "RASST_CANONICAL_MAIN_RESULT_TSV",
+      "metadata": {
+        "contains": "release-canonical global 30/30/20/20 main-result table rows"
+      }
+    },
+    {
+      "key": "eval_density_driver",
+      "role": "eval_script",
+      "type": "shell",
+      "direction": "control",
+      "local_path": "code/rasst/eval/eval_density_unified.sh",
+      "env": "RASST_EVAL_DENSITY_DRIVER",
+      "metadata": {
+        "mode": "serial_simuleval"
+      }
+    },
+    {
+      "key": "batch_vllm_driver",
+      "role": "eval_script",
+      "type": "shell",
+      "direction": "control",
+      "local_path": "code/rasst/eval/launchers/20260524__batched_vllm_rag_eval.sh",
+      "env": "RASST_BATCH_VLLM_DRIVER",
+      "metadata": {
+        "mode": "batch_vllm"
+      }
+    },
+    {
+      "key": "retriever_hn1024",
+      "role": "checkpoint",
+      "type": "file",
+      "direction": "input",
+      "local_path": "checkpoints/retriever/hn1024.pt",
+      "legacy_path": "/mnt/gemini/home/jiaxuanluo/train_outputs/q3rag_scale_lora-r128-tr128_bs8k_t=0.07_3var_gsv2full_gsdedup_varctx576_bs8k_gc128_wr1000k_m0.0_maxsim_mfa_variantE_hn1024_tcmoff_ep6_v3_smallest_dense_normAGGR_8gpu_aries_best_eval_acl6060_recallat10.pt",
+      "env": "RASST_HN1024_RETRIEVER",
+      "metadata": {
+        "source_run_id": "lh1b88kw"
+      }
+    },
+    {
+      "key": "model_zh_new_v9",
+      "role": "checkpoint_dir",
+      "type": "hf_model_dir",
+      "direction": "input",
+      "local_path": "checkpoints/slm/zh_new_v9/v0-20260524-062743-hf",
+      "legacy_path": "/mnt/gemini/data1/jiaxuanluo/slm_exports/speech_llm_new_v9_assistant_termtag_delay_clean_no_gt_zero_oldnewv3_zh_r32a64_tp2_taurus8/keep1.0_r32/v0-20260524-062743-hf",
+      "env": "RASST_MODEL_ZH_NEW_V9",
+      "metadata": {
+        "speech_llm_training_run_id": "2g6kan5y"
+      }
+    },
+    {
+      "key": "model_zh_cap16_denoise",
+      "role": "checkpoint_dir",
+      "type": "hf_model_dir",
+      "direction": "input",
+      "local_path": "checkpoints/slm/zh_cap16_denoise_ttag/speech_llm_zh_cap16_denoise_budget_ttag_r32a32_ep1_taurus4_hf",
+      "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/models/speech_llm_zh_cap16_denoise_budget_ttag_r32a32_ep1_taurus4_hf",
+      "env": "RASST_MODEL_ZH_CAP16_DENOISE",
+      "metadata": {
+        "variant": "cap16_denoise_ttag",
+        "speech_llm_training_run_id": "ccgjhu4r",
+        "release_snapshot": "global_cache30_30_20_20"
+      }
+    },
+    {
+      "key": "model_de_cap16_denoise",
+      "role": "checkpoint_dir",
+      "type": "hf_model_dir",
+      "direction": "input",
+      "local_path": "checkpoints/slm/de_cap16_denoise_ttag/v0-20260525-203735-hf",
+      "legacy_path": "/mnt/taurus/data1/jiaxuanluo/slm_local_cache/de_tagged_acl_20260525/cap16_denoise_ttag/v0-20260525-203735-hf",
+      "env": "RASST_MODEL_DE_CAP16_DENOISE",
+      "metadata": {
+        "variant": "cap16_denoise_ttag"
+      }
+    },
+    {
+      "key": "model_ja_new_v9_acl",
+      "role": "checkpoint_dir",
+      "type": "hf_model_dir",
+      "direction": "input",
+      "local_path": "checkpoints/slm/ja_new_v9/v0-20260524-123624-hf",
+      "legacy_path": "/mnt/gemini/data1/jiaxuanluo/slm/speech_llm_new_v9_assistant_termtag_delay_clean_no_gt_zero_oldnewv3_ja_r32a64_tp2_taurus4/keep1.0_r32/v0-20260524-123624-hf",
+      "env": "RASST_MODEL_JA_NEW_V9_ACL",
+      "metadata": {
+        "variant": "new_v9_termtag_delay"
+      }
+    },
+    {
+      "key": "model_ja_cap16_denoise",
+      "role": "checkpoint_dir",
+      "type": "hf_model_dir",
+      "direction": "input",
+      "local_path": "checkpoints/slm/ja_cap16_denoise_ttag/v2-20260525-235251-hf",
+      "legacy_path": "/mnt/taurus/data1/jiaxuanluo/slm_local_cache/ja_tagged_acl_20260525/cap16_denoise_ttag/v2-20260525-235251-hf",
+      "env": "RASST_MODEL_JA_CAP16_DENOISE",
+      "metadata": {
+        "variant": "cap16_denoise_ttag"
+      }
+    },
+    {
+      "key": "glossary_acl_tagged_raw",
+      "role": "acl_eval_wiki_glossary",
+      "type": "json",
+      "direction": "input",
+      "local_path": "data/glossaries/acl6060_tagged_gt_raw_min_norm2.json",
+      "legacy_path": "/mnt/gemini/home/jiaxuanluo/eval_glossaries/acl6060_tagged_gt_raw_min_norm2.json",
+      "env": "RASST_GLOSSARY_ACL_TAGGED_RAW",
+      "metadata": {
+        "dataset": "acl_tagged_raw"
+      }
+    },
+    {
+      "key": "glossary_medicine_hardraw",
+      "role": "medicine_eval_wiki_glossary",
+      "type": "json",
+      "direction": "input",
+      "local_path": "data/glossaries/hard_medicine_glossary_raw_llm_judge_manual_zh215_unique212.json",
+      "legacy_path": "/mnt/gemini/home/jiaxuanluo/medicine_eval_hard_terms_llm_judge_manual_20260524/hard_medicine_glossary_raw_llm_judge_manual_zh215_unique212.json",
+      "env": "RASST_GLOSSARY_MEDICINE_HARDRAW",
+      "metadata": {
+        "dataset": "medicine_hardraw"
+      }
+    },
+    {
+      "key": "input_acl_zh",
+      "role": "acl_eval_inputs",
+      "type": "input_dir",
+      "direction": "input",
+      "local_path": "data/main_result/inputs/acl_zh",
+      "legacy_path": "/mnt/gemini/data1/jiaxuanluo/tagged_acl_new_v9_hn1024_tau078_raw_zh_lm23_20260524T0522_tagacl_newv9_hn1024_tau078_raw_zh_lm23_aries4567/__inputs__/new_v9_termtag_delay_oldnewv3_r32a64_hn1024_tau078/full_all/zh/all",
+      "env": "RASST_INPUT_ACL_ZH",
+      "files": {
+        "source": "source.list",
+        "target": "target.list",
+        "source_text": "source_text.txt",
+        "ref": "ref.txt",
+        "audio": "audio.yaml"
+      },
+      "metadata": {
+        "dataset": "acl_tagged_raw",
+        "lang": "zh"
+      }
+    },
+    {
+      "key": "input_acl_de",
+      "role": "acl_eval_inputs",
+      "type": "input_dir",
+      "direction": "input",
+      "local_path": "data/main_result/inputs/acl_de",
+      "legacy_path": "/mnt/taurus/data1/jiaxuanluo/main_result_rasst_serial_de_ja_cache30_max40lm_20260525T215831_main_result_rasst_serial_de_ja_cache30_max40lm_taurus_retry1/__inputs__/acl_de",
+      "env": "RASST_INPUT_ACL_DE",
+      "files": {
+        "source": "source.portable.list",
+        "target": "target.list",
+        "source_text": "source_text.txt",
+        "ref": "ref.txt",
+        "audio": "audio.yaml"
+      },
+      "metadata": {
+        "dataset": "acl_tagged_raw",
+        "lang": "de"
+      }
+    },
+    {
+      "key": "input_acl_ja",
+      "role": "acl_eval_inputs",
+      "type": "input_dir",
+      "direction": "input",
+      "local_path": "data/main_result/inputs/acl_ja",
+      "legacy_path": "/mnt/taurus/data1/jiaxuanluo/main_result_rasst_serial_de_ja_cache30_max40lm_20260525T215831_main_result_rasst_serial_de_ja_cache30_max40lm_taurus_retry1/__inputs__/acl_ja",
+      "env": "RASST_INPUT_ACL_JA",
+      "files": {
+        "source": "source.portable.list",
+        "target": "target.list",
+        "source_text": "source_text.txt",
+        "ref": "ref.txt",
+        "audio": "audio.yaml"
+      },
+      "metadata": {
+        "dataset": "acl_tagged_raw",
+        "lang": "ja"
+      }
+    },
+    {
+      "key": "input_medicine_zh",
+      "role": "medicine_eval_inputs",
+      "type": "input_dir",
+      "direction": "input",
+      "local_path": "data/main_result/inputs/medicine_zh",
+      "legacy_path": "/mnt/gemini/data1/jiaxuanluo/medicine_hardraw_hn1024_tau078_new_v9_batch_20260524T0242/zh/__medicine_inputs__/lists",
+      "env": "RASST_INPUT_MEDICINE_ZH",
+      "files": {
+        "source": "medicine.source__medicine5_hardraw.txt",
+        "target": "medicine.target.zh__medicine5_hardraw.txt",
+        "source_text": "medicine.source_text.en__medicine5_hardraw.txt",
+        "ref": "medicine.ref.zh__medicine5_hardraw.txt",
+        "audio": "medicine.audio__medicine5_hardraw.yaml",
+        "eval_glossary": "hard_medicine_raw__medicine5.json"
+      },
+      "metadata": {
+        "dataset": "medicine_hardraw",
+        "lang": "zh"
+      }
+    },
+    {
+      "key": "input_medicine_de",
+      "role": "medicine_eval_inputs",
+      "type": "input_dir",
+      "direction": "input",
+      "local_path": "data/main_result/inputs/medicine_de",
+      "legacy_path": "/mnt/gemini/data1/jiaxuanluo/de_cap16_denoise_medicine_acl_batch_taurus_20260525T165125_de_cap16_denoise_med_acl_batch_taurus/medicine_hardraw_de_cap16_denoise_ttag_hn1024_tau078_batch_chunks30/de/__medicine_inputs__/lists",
+      "env": "RASST_INPUT_MEDICINE_DE",
+      "files": {
+        "source": "medicine.source__medicine5_hardraw.txt",
+        "target": "medicine.target.de__medicine5_hardraw.txt",
+        "source_text": "medicine.source_text.en__medicine5_hardraw.txt",
+        "ref": "medicine.ref.de__medicine5_hardraw.txt",
+        "audio": "medicine.audio__medicine5_hardraw.yaml",
+        "eval_glossary": "hard_medicine_raw__medicine5.json"
+      },
+      "metadata": {
+        "dataset": "medicine_hardraw",
+        "lang": "de"
+      }
+    },
+    {
+      "key": "input_medicine_ja",
+      "role": "medicine_eval_inputs",
+      "type": "input_dir",
+      "direction": "input",
+      "local_path": "data/main_result/inputs/medicine_ja",
+      "legacy_path": "/mnt/gemini/data1/jiaxuanluo/medicine_hardraw_ja_new_promptfix_vllmaudio128_lm12_20260526T043330_aries/ja/__medicine_inputs__/lists",
+      "env": "RASST_INPUT_MEDICINE_JA",
+      "files": {
+        "source": "medicine.source__medicine5_hardraw.txt",
+        "target": "medicine.target.ja__medicine5_hardraw.txt",
+        "source_text": "medicine.source_text.en__medicine5_hardraw.txt",
+        "ref": "medicine.ref.ja__medicine5_hardraw.txt",
+        "audio": "medicine.audio__medicine5_hardraw.yaml",
+        "eval_glossary": "hard_medicine_raw__medicine5.json"
+      },
+      "metadata": {
+        "dataset": "medicine_hardraw",
+        "lang": "ja"
+      }
+    }
+  ],
+  "metadata": {
+    "canonical_table": {
+      "local_path": "docs/results/main_result_global_cache30_30_20_20/main_result.tsv",
+      "env": "RASST_CANONICAL_MAIN_RESULT_TSV"
+    },
+    "scope": {
+      "methods": [
+        "RASST"
+      ],
+      "domains": [
+        "acl_tagged_raw",
+        "medicine_hardraw"
+      ],
+      "langs": [
+        "zh",
+        "de",
+        "ja"
+      ],
+      "lms": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "excluded": [
+        "ablation",
+        "acl_paper_extracted",
+        "Offline ST",
+        "Offline + GT terms",
+        "InfiniSST"
+      ]
+    },
+    "path_policy": {
+      "resolution_priority": [
+        "explicit env override",
+        "RASST-local path",
+        "legacy absolute path when RASST_USE_LEGACY_PATHS=1"
+      ],
+      "require_local_only_env": "RASST_REQUIRE_LOCAL_ASSETS=1",
+      "default_legacy_fallback": true
+    },
+    "common_eval_config": {
+      "RAG_TOP_K": 10,
+      "RAG_SCORE_THRESHOLD": 0.78,
+      "RAG_TIMELINE_LOOKBACK_SEC": 1.92,
+      "TERM_MAP_FORMAT": "plain",
+      "EMPTY_TERM_MAP_POLICY": "omit",
+      "SYSTEM_PROMPT_STYLE": "given_chunks",
+      "STRIP_OUTPUT_TAGS": "term_t",
+      "TERM_FCR_POLICY": "term_map_source_ref_negative_sentence"
+    },
+    "cells": [
+      {
+        "domain": "acl_tagged_raw",
+        "lang": "zh",
+        "lm": 1,
+        "legacy_event_id": "20260524T1442__simuleval__tagged_acl_same_lm_batch_v1exact_hn1024_tau078_raw_zh_lm1_max256",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/acl_tagged_raw/zh/lm1/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/zh_cap16_denoise_2domain_serial_cache30_20_givenchunks_fix_aries_cpus8_20260528T114706Z/zh_new_model_2domain_serial_cache30_20_givenchunks_fix_aries_cpus8/cells/acl_tagged_raw__zh__lm1/zh/drasst_main_result_acl_tagged_raw_zh_lm1_lm1_k10_th0.78_gacl6060_tagged_gt_raw_min_norm2/eval_results.tsv",
+          "env": "RASST_CANONICAL_ACL_ZH_LM1"
+        },
+        "model_asset": "model_zh_cap16_denoise",
+        "input_asset": "input_acl_zh",
+        "glossary_asset": "glossary_acl_tagged_raw",
+        "runner": "serial_simuleval",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 40,
+          "MAX_NEW_TOKENS_POLICY_OVERRIDE": "fixed",
+          "VLLM_LIMIT_AUDIO_OVERRIDE": "auto",
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288,
+          "MAX_CACHE_CHUNKS_OVERRIDE": 30,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 30
+        }
+      },
+      {
+        "domain": "acl_tagged_raw",
+        "lang": "zh",
+        "lm": 2,
+        "legacy_event_id": "20260524T0522__simuleval__tagged_acl_new_v9_hn1024_tau078_raw_zh_lm23_aries4567",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/acl_tagged_raw/zh/lm2/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/zh_cap16_denoise_2domain_serial_cache30_20_givenchunks_fix_aries_cpus8_20260528T114706Z/zh_new_model_2domain_serial_cache30_20_givenchunks_fix_aries_cpus8/cells/acl_tagged_raw__zh__lm2/zh/drasst_main_result_acl_tagged_raw_zh_lm2_lm2_k10_th0.78_gacl6060_tagged_gt_raw_min_norm2/eval_results.tsv",
+          "env": "RASST_CANONICAL_ACL_ZH_LM2"
+        },
+        "model_asset": "model_zh_cap16_denoise",
+        "input_asset": "input_acl_zh",
+        "glossary_asset": "glossary_acl_tagged_raw",
+        "runner": "serial_simuleval",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 80,
+          "MAX_NEW_TOKENS_POLICY_OVERRIDE": "fixed",
+          "VLLM_LIMIT_AUDIO_OVERRIDE": "auto",
+          "MAX_CACHE_CHUNKS_OVERRIDE": 30,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 30,
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288
+        }
+      },
+      {
+        "domain": "acl_tagged_raw",
+        "lang": "zh",
+        "lm": 3,
+        "legacy_event_id": "20260524T0522__simuleval__tagged_acl_new_v9_hn1024_tau078_raw_zh_lm23_aries4567",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/acl_tagged_raw/zh/lm3/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/zh_cap16_denoise_2domain_serial_cache30_20_givenchunks_fix_aries_cpus8_20260528T114706Z/zh_new_model_2domain_serial_cache30_20_givenchunks_fix_aries_cpus8/cells/acl_tagged_raw__zh__lm3/zh/drasst_main_result_acl_tagged_raw_zh_lm3_lm3_k10_th0.78_gacl6060_tagged_gt_raw_min_norm2/eval_results.tsv",
+          "env": "RASST_CANONICAL_ACL_ZH_LM3"
+        },
+        "model_asset": "model_zh_cap16_denoise",
+        "input_asset": "input_acl_zh",
+        "glossary_asset": "glossary_acl_tagged_raw",
+        "runner": "serial_simuleval",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 120,
+          "MAX_NEW_TOKENS_POLICY_OVERRIDE": "fixed",
+          "VLLM_LIMIT_AUDIO_OVERRIDE": "auto",
+          "MAX_CACHE_CHUNKS_OVERRIDE": 20,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 20,
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288
+        }
+      },
+      {
+        "domain": "acl_tagged_raw",
+        "lang": "zh",
+        "lm": 4,
+        "legacy_event_id": "20260524T0555__simuleval__tagged_acl_new_v9_hn1024_tau078_raw_zh_lm4_aries45",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/acl_tagged_raw/zh/lm4/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/zh_cap16_denoise_2domain_serial_cache30_20_givenchunks_fix_aries_cpus8_20260528T114706Z/zh_new_model_2domain_serial_cache30_20_givenchunks_fix_aries_cpus8/cells/acl_tagged_raw__zh__lm4/zh/drasst_main_result_acl_tagged_raw_zh_lm4_lm4_k10_th0.78_gacl6060_tagged_gt_raw_min_norm2/eval_results.tsv",
+          "env": "RASST_CANONICAL_ACL_ZH_LM4"
+        },
+        "model_asset": "model_zh_cap16_denoise",
+        "input_asset": "input_acl_zh",
+        "glossary_asset": "glossary_acl_tagged_raw",
+        "runner": "serial_simuleval",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 160,
+          "MAX_NEW_TOKENS_POLICY_OVERRIDE": "fixed",
+          "VLLM_LIMIT_AUDIO_OVERRIDE": "auto",
+          "MAX_CACHE_CHUNKS_OVERRIDE": 20,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 20,
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288
+        }
+      },
+      {
+        "domain": "acl_tagged_raw",
+        "lang": "de",
+        "lm": 1,
+        "legacy_event_id": "20260526T003437__simuleval__tagged_acl_de_lm1_serial_promptfix_cache30_audioauto_max40lm_taurus",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/acl_tagged_raw/de/lm1/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data1/jiaxuanluo/tagged_acl_de_lm3_serial_promptfix_cache30_audioauto_max40lm_20260526T003437_tagged_acl_de_lm1_serial_promptfix_cache30_audioauto_max40lm_taurus/de/dtagacl_de_lm1_serial_promptfix_cache30_audioauto_max40lm_lm1_k10_th0.78_gacl6060_tagged_gt_raw_min_norm2/eval_results.tsv",
+          "env": "RASST_CANONICAL_ACL_DE_LM1"
+        },
+        "model_asset": "model_de_cap16_denoise",
+        "input_asset": "input_acl_de",
+        "glossary_asset": "glossary_acl_tagged_raw",
+        "runner": "serial_simuleval",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 40,
+          "VLLM_LIMIT_AUDIO_OVERRIDE": "auto",
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288,
+          "MAX_CACHE_CHUNKS_OVERRIDE": 30,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 30
+        }
+      },
+      {
+        "domain": "acl_tagged_raw",
+        "lang": "de",
+        "lm": 2,
+        "legacy_event_id": "20260525T215343__simuleval__main_result_rasst_serial_de_ja_acl_then_medicine_cache30_max40lm_taurus",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/acl_tagged_raw/de/lm2/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data1/jiaxuanluo/main_result_rasst_serial_de_ja_cache30_max40lm_20260525T215831_main_result_rasst_serial_de_ja_cache30_max40lm_taurus_retry1/acl_tagged_raw/de_cap16_denoise_ttag_hn1024_tau078_omit_serial_chunks30_max40lm/de/dmainres_acl_serial_de_cap16denoise_ttag_hn1024_tau078_omit_chunks30_max40lm_lm2_k10_th0.78_gacl6060_tagged_gt_raw_min_norm2/eval_results.tsv",
+          "env": "RASST_CANONICAL_ACL_DE_LM2"
+        },
+        "model_asset": "model_de_cap16_denoise",
+        "input_asset": "input_acl_de",
+        "glossary_asset": "glossary_acl_tagged_raw",
+        "runner": "serial_simuleval",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 80,
+          "VLLM_LIMIT_AUDIO_OVERRIDE": 128,
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288,
+          "MAX_CACHE_CHUNKS_OVERRIDE": 30,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 30
+        }
+      },
+      {
+        "domain": "acl_tagged_raw",
+        "lang": "de",
+        "lm": 3,
+        "legacy_event_id": "20260525T172158__simuleval__de_acl_lm23_then_ja_medicine_cap16_denoise_aries",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/acl_tagged_raw/de/lm3/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/acl_de_lm3_cache_sweep_20260528T085204Z/cache20_20/cells/acl_tagged_raw__de__lm3/de/drasst_main_result_acl_tagged_raw_de_lm3_lm3_k10_th0.78_gacl6060_tagged_gt_raw_min_norm2/eval_results.tsv",
+          "env": "RASST_CANONICAL_ACL_DE_LM3"
+        },
+        "model_asset": "model_de_cap16_denoise",
+        "input_asset": "input_acl_de",
+        "glossary_asset": "glossary_acl_tagged_raw",
+        "runner": "batch_vllm",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 40,
+          "MAX_NEW_TOKENS_POLICY_OVERRIDE": "lm_scaled",
+          "VLLM_LIMIT_AUDIO_OVERRIDE": 128,
+          "MAX_CACHE_CHUNKS_OVERRIDE": 20,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 20
+        }
+      },
+      {
+        "domain": "acl_tagged_raw",
+        "lang": "de",
+        "lm": 4,
+        "legacy_event_id": "20260526T020512__simuleval__tagged_acl_de_lm4_serial_promptfix_audioauto_cache30_max40lm_taurus_direct",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/acl_tagged_raw/de/lm4/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/acl_de_lm4_cache20_probe_20260528T101802Z/cells/acl_tagged_raw__de__lm4/de/drasst_main_result_acl_tagged_raw_de_lm4_lm4_k10_th0.78_gacl6060_tagged_gt_raw_min_norm2/eval_results.tsv",
+          "env": "RASST_CANONICAL_ACL_DE_LM4"
+        },
+        "model_asset": "model_de_cap16_denoise",
+        "input_asset": "input_acl_de",
+        "glossary_asset": "glossary_acl_tagged_raw",
+        "runner": "serial_simuleval",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 160,
+          "VLLM_LIMIT_AUDIO_OVERRIDE": "auto",
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288,
+          "MAX_CACHE_CHUNKS_OVERRIDE": 20,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 20
+        }
+      },
+      {
+        "domain": "acl_tagged_raw",
+        "lang": "ja",
+        "lm": 1,
+        "legacy_event_id": "20260526T013751__simuleval__tagged_acl_ja_lm1to4_serial_promptfix_cache30_vllmaudio128_max40lm_taurus",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/acl_tagged_raw/ja/lm1/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/cache30_30_20_20_followup_after_acl_de_20260528T1142Z/acl_ja/cells/acl_tagged_raw__ja__lm1/ja/drasst_main_result_acl_tagged_raw_ja_lm1_lm1_k10_th0.78_gacl6060_tagged_gt_raw_min_norm2/eval_results.tsv",
+          "env": "RASST_CANONICAL_ACL_JA_LM1"
+        },
+        "model_asset": "model_ja_cap16_denoise",
+        "input_asset": "input_acl_ja",
+        "glossary_asset": "glossary_acl_tagged_raw",
+        "runner": "serial_simuleval",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 40,
+          "VLLM_LIMIT_AUDIO_OVERRIDE": 128,
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288,
+          "MAX_CACHE_CHUNKS_OVERRIDE": 30,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 30
+        }
+      },
+      {
+        "domain": "acl_tagged_raw",
+        "lang": "ja",
+        "lm": 2,
+        "legacy_event_id": "20260526T013751__simuleval__tagged_acl_ja_lm1to4_serial_promptfix_cache30_vllmaudio128_max40lm_taurus",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/acl_tagged_raw/ja/lm2/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/cache30_30_20_20_followup_after_acl_de_20260528T1142Z/acl_ja/cells/acl_tagged_raw__ja__lm2/ja/drasst_main_result_acl_tagged_raw_ja_lm2_lm2_k10_th0.78_gacl6060_tagged_gt_raw_min_norm2/eval_results.tsv",
+          "env": "RASST_CANONICAL_ACL_JA_LM2"
+        },
+        "model_asset": "model_ja_cap16_denoise",
+        "input_asset": "input_acl_ja",
+        "glossary_asset": "glossary_acl_tagged_raw",
+        "runner": "serial_simuleval",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 80,
+          "VLLM_LIMIT_AUDIO_OVERRIDE": 128,
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288,
+          "MAX_CACHE_CHUNKS_OVERRIDE": 30,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 30
+        }
+      },
+      {
+        "domain": "acl_tagged_raw",
+        "lang": "ja",
+        "lm": 3,
+        "legacy_event_id": "20260526T013751__simuleval__tagged_acl_ja_lm1to4_serial_promptfix_cache30_vllmaudio128_max40lm_taurus",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/acl_tagged_raw/ja/lm3/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/cache30_30_20_20_followup_after_acl_de_20260528T1142Z/acl_ja/cells/acl_tagged_raw__ja__lm3/ja/drasst_main_result_acl_tagged_raw_ja_lm3_lm3_k10_th0.78_gacl6060_tagged_gt_raw_min_norm2/eval_results.tsv",
+          "env": "RASST_CANONICAL_ACL_JA_LM3"
+        },
+        "model_asset": "model_ja_cap16_denoise",
+        "input_asset": "input_acl_ja",
+        "glossary_asset": "glossary_acl_tagged_raw",
+        "runner": "serial_simuleval",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 120,
+          "VLLM_LIMIT_AUDIO_OVERRIDE": 128,
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288,
+          "MAX_CACHE_CHUNKS_OVERRIDE": 20,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 20
+        }
+      },
+      {
+        "domain": "acl_tagged_raw",
+        "lang": "ja",
+        "lm": 4,
+        "legacy_event_id": "20260526T013751__simuleval__tagged_acl_ja_lm1to4_serial_promptfix_cache30_vllmaudio128_max40lm_taurus",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/acl_tagged_raw/ja/lm4/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/cache30_30_20_20_followup_after_acl_de_20260528T1142Z/acl_ja/cells/acl_tagged_raw__ja__lm4/ja/drasst_main_result_acl_tagged_raw_ja_lm4_lm4_k10_th0.78_gacl6060_tagged_gt_raw_min_norm2/eval_results.tsv",
+          "env": "RASST_CANONICAL_ACL_JA_LM4"
+        },
+        "model_asset": "model_ja_cap16_denoise",
+        "input_asset": "input_acl_ja",
+        "glossary_asset": "glossary_acl_tagged_raw",
+        "runner": "serial_simuleval",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 160,
+          "VLLM_LIMIT_AUDIO_OVERRIDE": 128,
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288,
+          "MAX_CACHE_CHUNKS_OVERRIDE": 20,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 20
+        }
+      },
+      {
+        "domain": "medicine_hardraw",
+        "lang": "zh",
+        "lm": 1,
+        "legacy_event_id": "20260524T0242__simuleval__medicine_hardraw_hn1024_tau078_new_v9_batch",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/medicine_hardraw/zh/lm1/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/zh_cap16_denoise_medicine_serial_cache30_20_givenchunks_fix_aries_retry_20260528T130625Z/zh_new_model_medicine_serial_cache30_20_givenchunks_fix_aries_retry/cells/medicine_hardraw__zh__lm1/zh/drasst_main_result_medicine_hardraw_zh_lm1_lm1_k10_th0.78_ghard_medicine_glossary_raw_llm_judge_manual_zh215_unique212/eval_results.tsv",
+          "env": "RASST_CANONICAL_MEDICINE_ZH_LM1"
+        },
+        "model_asset": "model_zh_cap16_denoise",
+        "input_asset": "input_medicine_zh",
+        "glossary_asset": "glossary_medicine_hardraw",
+        "runner": "serial_simuleval",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 40,
+          "VLLM_LIMIT_AUDIO_OVERRIDE": "auto",
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288,
+          "MAX_CACHE_CHUNKS_OVERRIDE": 30,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 30,
+          "MAX_NEW_TOKENS_POLICY_OVERRIDE": "fixed"
+        }
+      },
+      {
+        "domain": "medicine_hardraw",
+        "lang": "zh",
+        "lm": 2,
+        "legacy_event_id": "20260524T0242__simuleval__medicine_hardraw_hn1024_tau078_new_v9_batch",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/medicine_hardraw/zh/lm2/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/zh_cap16_denoise_medicine_serial_cache30_20_givenchunks_fix_aries_retry_20260528T130625Z/zh_new_model_medicine_serial_cache30_20_givenchunks_fix_aries_retry/cells/medicine_hardraw__zh__lm2/zh/drasst_main_result_medicine_hardraw_zh_lm2_lm2_k10_th0.78_ghard_medicine_glossary_raw_llm_judge_manual_zh215_unique212/eval_results.tsv",
+          "env": "RASST_CANONICAL_MEDICINE_ZH_LM2"
+        },
+        "model_asset": "model_zh_cap16_denoise",
+        "input_asset": "input_medicine_zh",
+        "glossary_asset": "glossary_medicine_hardraw",
+        "runner": "serial_simuleval",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 80,
+          "VLLM_LIMIT_AUDIO_OVERRIDE": "auto",
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288,
+          "MAX_CACHE_CHUNKS_OVERRIDE": 30,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 30,
+          "MAX_NEW_TOKENS_POLICY_OVERRIDE": "fixed"
+        }
+      },
+      {
+        "domain": "medicine_hardraw",
+        "lang": "zh",
+        "lm": 3,
+        "legacy_event_id": "20260524T0242__simuleval__medicine_hardraw_hn1024_tau078_new_v9_batch",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/medicine_hardraw/zh/lm3/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/zh_cap16_denoise_medicine_serial_cache30_20_givenchunks_fix_aries_retry_20260528T130625Z/zh_new_model_medicine_serial_cache30_20_givenchunks_fix_aries_retry/cells/medicine_hardraw__zh__lm3/zh/drasst_main_result_medicine_hardraw_zh_lm3_lm3_k10_th0.78_ghard_medicine_glossary_raw_llm_judge_manual_zh215_unique212/eval_results.tsv",
+          "env": "RASST_CANONICAL_MEDICINE_ZH_LM3"
+        },
+        "model_asset": "model_zh_cap16_denoise",
+        "input_asset": "input_medicine_zh",
+        "glossary_asset": "glossary_medicine_hardraw",
+        "runner": "serial_simuleval",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 120,
+          "VLLM_LIMIT_AUDIO_OVERRIDE": "auto",
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288,
+          "MAX_CACHE_CHUNKS_OVERRIDE": 20,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 20,
+          "MAX_NEW_TOKENS_POLICY_OVERRIDE": "fixed"
+        }
+      },
+      {
+        "domain": "medicine_hardraw",
+        "lang": "zh",
+        "lm": 4,
+        "legacy_event_id": "20260524T0242__simuleval__medicine_hardraw_hn1024_tau078_new_v9_batch",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/medicine_hardraw/zh/lm4/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/zh_cap16_denoise_medicine_serial_cache30_20_givenchunks_fix_aries_retry_20260528T130625Z/zh_new_model_medicine_serial_cache30_20_givenchunks_fix_aries_retry/cells/medicine_hardraw__zh__lm4/zh/drasst_main_result_medicine_hardraw_zh_lm4_lm4_k10_th0.78_ghard_medicine_glossary_raw_llm_judge_manual_zh215_unique212/eval_results.tsv",
+          "env": "RASST_CANONICAL_MEDICINE_ZH_LM4"
+        },
+        "model_asset": "model_zh_cap16_denoise",
+        "input_asset": "input_medicine_zh",
+        "glossary_asset": "glossary_medicine_hardraw",
+        "runner": "serial_simuleval",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 160,
+          "VLLM_LIMIT_AUDIO_OVERRIDE": "auto",
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288,
+          "MAX_CACHE_CHUNKS_OVERRIDE": 20,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 20,
+          "MAX_NEW_TOKENS_POLICY_OVERRIDE": "fixed"
+        }
+      },
+      {
+        "domain": "medicine_hardraw",
+        "lang": "de",
+        "lm": 1,
+        "legacy_event_id": "20260526T035925__simuleval__medicine_de_lm1234_serial_promptfix_cache30_audioauto_max40lm_taurus",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/medicine_hardraw/de/lm1/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/cache30_30_20_20_followup_after_acl_de_20260528T1142Z/medicine_de/cells/medicine_hardraw__de__lm1/de/drasst_main_result_medicine_hardraw_de_lm1_lm1_k10_th0.78_ghard_medicine_glossary_raw_llm_judge_manual_zh215_unique212/eval_results.tsv",
+          "env": "RASST_CANONICAL_MEDICINE_DE_LM1"
+        },
+        "model_asset": "model_de_cap16_denoise",
+        "input_asset": "input_medicine_de",
+        "glossary_asset": "glossary_medicine_hardraw",
+        "runner": "serial_simuleval",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 40,
+          "VLLM_LIMIT_AUDIO_OVERRIDE": "auto",
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288,
+          "MAX_CACHE_CHUNKS_OVERRIDE": 30,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 30
+        }
+      },
+      {
+        "domain": "medicine_hardraw",
+        "lang": "de",
+        "lm": 2,
+        "legacy_event_id": "20260526T035925__simuleval__medicine_de_lm1234_serial_promptfix_cache30_audioauto_max40lm_taurus",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/medicine_hardraw/de/lm2/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/cache30_30_20_20_followup_after_acl_de_20260528T1142Z/medicine_de/cells/medicine_hardraw__de__lm2/de/drasst_main_result_medicine_hardraw_de_lm2_lm2_k10_th0.78_ghard_medicine_glossary_raw_llm_judge_manual_zh215_unique212/eval_results.tsv",
+          "env": "RASST_CANONICAL_MEDICINE_DE_LM2"
+        },
+        "model_asset": "model_de_cap16_denoise",
+        "input_asset": "input_medicine_de",
+        "glossary_asset": "glossary_medicine_hardraw",
+        "runner": "serial_simuleval",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 80,
+          "VLLM_LIMIT_AUDIO_OVERRIDE": "auto",
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288,
+          "MAX_CACHE_CHUNKS_OVERRIDE": 30,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 30
+        }
+      },
+      {
+        "domain": "medicine_hardraw",
+        "lang": "de",
+        "lm": 3,
+        "legacy_event_id": "20260525T170456__simuleval__medicine_de_cap16_denoise_lm34_batch_taurus03",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/medicine_hardraw/de/lm3/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/cache30_30_20_20_followup_after_acl_de_20260528T1142Z/medicine_de/cells/medicine_hardraw__de__lm3/de/drasst_main_result_medicine_hardraw_de_lm3_lm3_k10_th0.78_ghard_medicine_glossary_raw_llm_judge_manual_zh215_unique212/eval_results.tsv",
+          "env": "RASST_CANONICAL_MEDICINE_DE_LM3"
+        },
+        "model_asset": "model_de_cap16_denoise",
+        "input_asset": "input_medicine_de",
+        "glossary_asset": "glossary_medicine_hardraw",
+        "runner": "batch_vllm",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 40,
+          "MAX_NEW_TOKENS_POLICY_OVERRIDE": "lm_scaled",
+          "VLLM_LIMIT_AUDIO_OVERRIDE": 128,
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288,
+          "MAX_CACHE_CHUNKS_OVERRIDE": 20,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 20
+        }
+      },
+      {
+        "domain": "medicine_hardraw",
+        "lang": "de",
+        "lm": 4,
+        "legacy_event_id": "20260526T043300__simuleval__medicine_de_lm4_serial_promptfix_cache30_audioauto_max40lm_taurus23",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/medicine_hardraw/de/lm4/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/cache30_30_20_20_followup_after_acl_de_20260528T1142Z/medicine_de/cells/medicine_hardraw__de__lm4/de/drasst_main_result_medicine_hardraw_de_lm4_lm4_k10_th0.78_ghard_medicine_glossary_raw_llm_judge_manual_zh215_unique212/eval_results.tsv",
+          "env": "RASST_CANONICAL_MEDICINE_DE_LM4"
+        },
+        "model_asset": "model_de_cap16_denoise",
+        "input_asset": "input_medicine_de",
+        "glossary_asset": "glossary_medicine_hardraw",
+        "runner": "serial_simuleval",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 160,
+          "VLLM_LIMIT_AUDIO_OVERRIDE": "auto",
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288,
+          "MAX_CACHE_CHUNKS_OVERRIDE": 20,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 20
+        }
+      },
+      {
+        "domain": "medicine_hardraw",
+        "lang": "ja",
+        "lm": 1,
+        "legacy_event_id": "20260526T045605__simuleval__medicine_ja_lm1_serial_promptfix_vllmaudio128_aries45",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/medicine_hardraw/ja/lm1/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/cache30_30_20_20_followup_after_acl_de_20260528T1142Z/medicine_ja/cells/medicine_hardraw__ja__lm1/ja/drasst_main_result_medicine_hardraw_ja_lm1_lm1_k10_th0.78_ghard_medicine_glossary_raw_llm_judge_manual_zh215_unique212/eval_results.tsv",
+          "env": "RASST_CANONICAL_MEDICINE_JA_LM1"
+        },
+        "model_asset": "model_ja_cap16_denoise",
+        "input_asset": "input_medicine_ja",
+        "glossary_asset": "glossary_medicine_hardraw",
+        "runner": "serial_simuleval",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 40,
+          "VLLM_LIMIT_AUDIO_OVERRIDE": 128,
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288,
+          "MAX_CACHE_CHUNKS_OVERRIDE": 30,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 30
+        }
+      },
+      {
+        "domain": "medicine_hardraw",
+        "lang": "ja",
+        "lm": 2,
+        "legacy_event_id": "20260526T045605__simuleval__medicine_ja_lm2_serial_promptfix_vllmaudio128_aries67",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/medicine_hardraw/ja/lm2/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/cache30_30_20_20_followup_after_acl_de_20260528T1142Z/medicine_ja/cells/medicine_hardraw__ja__lm2/ja/drasst_main_result_medicine_hardraw_ja_lm2_lm2_k10_th0.78_ghard_medicine_glossary_raw_llm_judge_manual_zh215_unique212/eval_results.tsv",
+          "env": "RASST_CANONICAL_MEDICINE_JA_LM2"
+        },
+        "model_asset": "model_ja_cap16_denoise",
+        "input_asset": "input_medicine_ja",
+        "glossary_asset": "glossary_medicine_hardraw",
+        "runner": "serial_simuleval",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 80,
+          "VLLM_LIMIT_AUDIO_OVERRIDE": 128,
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288,
+          "MAX_CACHE_CHUNKS_OVERRIDE": 30,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 30
+        }
+      },
+      {
+        "domain": "medicine_hardraw",
+        "lang": "ja",
+        "lm": 3,
+        "legacy_event_id": "20260525T1840__simuleval__medicine_ja_cap16_denoise_lm1234_batch_taurus",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/medicine_hardraw/ja/lm3/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/cache30_30_20_20_followup_after_acl_de_20260528T1142Z/medicine_ja/cells/medicine_hardraw__ja__lm3/ja/drasst_main_result_medicine_hardraw_ja_lm3_lm3_k10_th0.78_ghard_medicine_glossary_raw_llm_judge_manual_zh215_unique212/eval_results.tsv",
+          "env": "RASST_CANONICAL_MEDICINE_JA_LM3"
+        },
+        "model_asset": "model_ja_cap16_denoise",
+        "input_asset": "input_medicine_ja",
+        "glossary_asset": "glossary_medicine_hardraw",
+        "runner": "batch_vllm",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 40,
+          "MAX_NEW_TOKENS_POLICY_OVERRIDE": "lm_scaled",
+          "VLLM_LIMIT_AUDIO_OVERRIDE": 128,
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288,
+          "MAX_CACHE_CHUNKS_OVERRIDE": 20,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 20
+        }
+      },
+      {
+        "domain": "medicine_hardraw",
+        "lang": "ja",
+        "lm": 4,
+        "legacy_event_id": "20260525T1840__simuleval__medicine_ja_cap16_denoise_lm1234_batch_taurus",
+        "canonical_eval_results": {
+          "local_path": "outputs/canonical/main_result/medicine_hardraw/ja/lm4/eval_results.tsv",
+          "legacy_path": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/cache30_30_20_20_followup_after_acl_de_20260528T1142Z/medicine_ja/cells/medicine_hardraw__ja__lm4/ja/drasst_main_result_medicine_hardraw_ja_lm4_lm4_k10_th0.78_ghard_medicine_glossary_raw_llm_judge_manual_zh215_unique212/eval_results.tsv",
+          "env": "RASST_CANONICAL_MEDICINE_JA_LM4"
+        },
+        "model_asset": "model_ja_cap16_denoise",
+        "input_asset": "input_medicine_ja",
+        "glossary_asset": "glossary_medicine_hardraw",
+        "runner": "batch_vllm",
+        "expected_instance_rows": 5,
+        "overrides": {
+          "MAX_NEW_TOKENS_OVERRIDE": 40,
+          "MAX_NEW_TOKENS_POLICY_OVERRIDE": "lm_scaled",
+          "VLLM_LIMIT_AUDIO_OVERRIDE": 128,
+          "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288,
+          "MAX_CACHE_CHUNKS_OVERRIDE": 20,
+          "KEEP_CACHE_CHUNKS_OVERRIDE": 20
+        }
+      }
+    ],
+    "release_policy": "global_cache30_30_20_20",
+    "paper_exact_manifest": "code/rasst/manifests/main_result_eval.paper_canonical_rasst24.json"
+  }
+}

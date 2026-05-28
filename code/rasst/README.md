@@ -1,12 +1,27 @@
-# Curated RASST Wrappers
+# Curated RASST Reproduction Code
 
-These wrappers provide a stable public path interface over the frozen legacy code. They do not rewrite legacy launchers. Each wrapper resolves the selected legacy target from `RASST_LEGACY_CODE_ROOT`, prints the command in `--dry-run`, and only launches when `RASST_ALLOW_LAUNCH=1`.
+The release-facing main-result reproduction closure is copied into
+`code/rasst/`. Public wrappers print commands in `--dry-run` and only launch
+when `RASST_ALLOW_LAUNCH=1`.
 
 Override any default target by setting the matching environment variable, for example:
 
 ```bash
-RASST_ACL_EVAL_TARGET=documents/code/simuleval/launchers/2026/05/example.sh \
+RASST_ACL_EVAL_TARGET=eval/launchers/example.sh \
   bash code/rasst/scripts/eval_acl.sh --dry-run
+```
+
+`code/legacy/` remains frozen provenance for comparison. Release-facing
+commands should not require launching code from `code/legacy/`.
+
+## RASST-Local Code Layout
+
+```text
+code/rasst/slm/data_prep/        cap16 denoise-budget termtag data builders
+code/rasst/slm/train/            SLM training launchers and Docker wrapper
+code/rasst/eval/                 serial SimulEval, batched vLLM, scorer, agent
+code/rasst/retriever/            retriever training and MaxSim index/runtime code
+code/rasst/analysis/main_result/ main-result table and figure builders
 ```
 
 ## Main Result Eval Manifest
@@ -24,7 +39,13 @@ The tracked release snapshot is:
 docs/results/main_result_global_cache30_30_20_20/
 ```
 
-The submitted-paper exact RASST manifest is:
+The release-facing eval manifest is:
+
+```text
+code/rasst/manifests/main_result_eval.global_cache30_30_20_20.json
+```
+
+The submitted-paper exact RASST manifest is preserved as reference provenance:
 
 ```text
 code/rasst/manifests/main_result_eval.paper_canonical_rasst24.json

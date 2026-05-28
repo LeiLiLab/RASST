@@ -38,6 +38,16 @@ legacy_path() {
   printf '%s\n' "${abs_path}"
 }
 
+rasst_code_path() {
+  local rel_path="$1"
+  local abs_path="${RASST_ROOT}/code/rasst/${rel_path}"
+  if [[ ! -e "${abs_path}" ]]; then
+    printf 'Missing RASST code target: %s\n' "${abs_path}" >&2
+    return 2
+  fi
+  printf '%s\n' "${abs_path}"
+}
+
 shell_join() {
   local out=""
   local part

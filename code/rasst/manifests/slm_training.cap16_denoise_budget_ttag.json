@@ -6,6 +6,7 @@
   "variant": "cap16_denoise_budget_ttag_unified_de_ja_zh",
   "status": "release_manifest",
   "root": "/mnt/taurus/data2/jiaxuanluo/RASST",
+  "code_root": "/mnt/taurus/data2/jiaxuanluo/RASST/code/rasst",
   "legacy_root": "/mnt/taurus/data2/jiaxuanluo/RASST/code/legacy",
   "notes": [
     "This is the canonical release-facing SLM reproduction path for the final global-cache main result.",
@@ -13,7 +14,7 @@
   ],
   "common_training_config": {
     "base_model": "/mnt/gemini/data2/jiaxuanluo/Qwen3-Omni-30B-A3B-Instruct-v2/",
-    "train_wrapper": "documents/code/train/sst_omni_train/auto_train_sampling_docker.sh",
+    "train_wrapper": "slm/train/auto_train_sampling_docker.sh",
     "lora_rank": 32,
     "lora_alpha": 32,
     "max_epochs": 1,
@@ -27,16 +28,16 @@
   "languages": {
     "de": {
       "prepare": {
-        "launcher": "documents/code/data_pre/hard_negative_jsonl_for_speech_llm/launchers/2026/05/20260525__build_de_cap16_denoise_budget_ttag.sh",
+        "launcher": "slm/data_prep/launchers/20260525__build_de_cap16_denoise_budget_ttag.sh",
         "provenance_manifest": "documents/code/data_pre/hard_negative_jsonl_for_speech_llm/manifests/2026/05/20260525T1225__data_prepare__de_cap16_denoise_budget_ttag.json",
         "expected_output_dir": "/mnt/gemini/data1/jiaxuanluo/speech_llm_de_cap16_denoise_budget_20260525/de/hn1024_tau078_cap16_denoise_budget_ttag_v1",
         "env": {
-          "ROOT_DIR_OVERRIDE": "{legacy_root}",
+          "ROOT_DIR_OVERRIDE": "{code_root}",
           "DATA_ROOT_OVERRIDE": "/mnt/gemini/data1/jiaxuanluo"
         }
       },
       "train": {
-        "launcher": "documents/code/train/sst_omni_train/launchers/2026/05/20260525__speech_llm_de_cap16_denoise_budget_ttag_taurus6_r32a32_ep1.sh",
+        "launcher": "slm/train/launchers/20260525__speech_llm_de_cap16_denoise_budget_ttag_taurus6_r32a32_ep1.sh",
         "provenance_manifest": "documents/code/train/sst_omni_train/manifests/2026/05/20260525T1236__speech_llm_train__de_cap16_denoise_budget_ttag_r32a32_ep1_taurus6.json",
         "provenance_event_id": "20260525T1236__speech_llm_train__de_cap16_denoise_budget_ttag_r32a32_ep1_taurus6",
         "status": "success_exported",
@@ -44,7 +45,7 @@
         "gpu_count": 6,
         "hf_model": "/mnt/gemini/data1/jiaxuanluo/slm/speech_llm_de_cap16_denoise_budget_ttag_r32a32_ep1_taurus6/keep1.0_r32/v0-20260525-203735-hf",
         "env": {
-          "ROOT_DIR_OVERRIDE": "{legacy_root}",
+          "ROOT_DIR_OVERRIDE": "{code_root}",
           "HOST_GPU_DEVICES_OVERRIDE": "1,2,3,4,5,6",
           "MASTER_PORT_OVERRIDE": "29716",
           "MAX_LENGTH_OVERRIDE": "3072"
@@ -53,16 +54,16 @@
     },
     "ja": {
       "prepare": {
-        "launcher": "documents/code/data_pre/hard_negative_jsonl_for_speech_llm/launchers/2026/05/20260525__build_ja_cap16_denoise_budget_ttag.sh",
+        "launcher": "slm/data_prep/launchers/20260525__build_ja_cap16_denoise_budget_ttag.sh",
         "provenance_manifest": "documents/code/data_pre/hard_negative_jsonl_for_speech_llm/manifests/2026/05/20260525T1506__data_prepare__ja_cap16_denoise_budget_ttag.json",
         "expected_output_dir": "/mnt/gemini/data1/jiaxuanluo/speech_llm_ja_cap16_denoise_budget_20260525/ja/hn1024_tau078_cap16_denoise_budget_ttag_v1",
         "env": {
-          "ROOT_DIR_OVERRIDE": "{legacy_root}",
+          "ROOT_DIR_OVERRIDE": "{code_root}",
           "DATA_ROOT_OVERRIDE": "/mnt/gemini/data1/jiaxuanluo"
         }
       },
       "train": {
-        "launcher": "documents/code/train/sst_omni_train/launchers/2026/05/20260525__speech_llm_ja_cap16_denoise_budget_ttag_taurus4_r32a32_ep1.sh",
+        "launcher": "slm/train/launchers/20260525__speech_llm_ja_cap16_denoise_budget_ttag_taurus4_r32a32_ep1.sh",
         "provenance_manifest": "documents/code/train/sst_omni_train/manifests/2026/05/20260525T1550__speech_llm_train__ja_cap16_denoise_budget_ttag_r32a32_ep1_taurus4_retry1.json",
         "provenance_event_id": "20260525T1550__speech_llm_train__ja_cap16_denoise_budget_ttag_r32a32_ep1_taurus4_retry1",
         "status": "success_exported",
@@ -70,21 +71,21 @@
         "gpu_count": 4,
         "hf_model": "/mnt/gemini/data1/jiaxuanluo/slm/speech_llm_ja_cap16_denoise_budget_ttag_r32a32_ep1_taurus4/keep1.0_r32/v2-20260525-235251-hf",
         "env": {
-          "ROOT_DIR_OVERRIDE": "{legacy_root}",
+          "ROOT_DIR_OVERRIDE": "{code_root}",
           "HOST_GPU_DEVICES_OVERRIDE": "0,1,2,3",
           "MASTER_PORT_OVERRIDE": "29725",
-          "NOTES_FILE_OVERRIDE": "{legacy_root}/documents/code/train/sst_omni_train/notes/2026/05/20260525__speech_llm_ja_cap16_denoise_budget_ttag_r32a32_ep1_taurus4_retry1.md",
+          "NOTES_FILE_OVERRIDE": "{root}/docs/provenance/slm/20260525__speech_llm_ja_cap16_denoise_budget_ttag_r32a32_ep1_taurus4_retry1.md",
           "WANDB_EXP_PREFIX_OVERRIDE": "speech-llm-ja-c16-denoise-ttag-r32a32-ep1-taurus4-retry1-gpu0123"
         }
       }
     },
     "zh": {
       "prepare": {
-        "launcher": "documents/code/data_pre/hard_negative_jsonl_for_speech_llm/launchers/2026/05/20260526__build_zh_cap16_denoise_budget_ttag.sh",
+        "launcher": "slm/data_prep/launchers/20260526__build_zh_cap16_denoise_budget_ttag.sh",
         "provenance_manifest": "documents/code/data_pre/hard_negative_jsonl_for_speech_llm/manifests/2026/05/20260526T0437__data_prepare__zh_cap16_denoise_budget_ttag.json",
         "expected_output_dir": "/mnt/taurus/data1/jiaxuanluo/speech_llm_zh_cap16_denoise_budget_20260526/zh/hn1024_tau078_cap16_denoise_budget_ttag_v1",
         "env": {
-          "ROOT_DIR_OVERRIDE": "{legacy_root}",
+          "ROOT_DIR_OVERRIDE": "{code_root}",
           "SOURCE_DATA_ROOT_OVERRIDE": "/mnt/gemini/data1/jiaxuanluo",
           "OUTPUT_ROOT_OVERRIDE": "/mnt/taurus/data1/jiaxuanluo/speech_llm_zh_cap16_denoise_budget_20260526",
           "LOG_ROOT_OVERRIDE": "/mnt/taurus/data1/jiaxuanluo/logs/zh_cap16_denoise_budget_ttag_20260526T0437",
@@ -92,7 +93,7 @@
         }
       },
       "train": {
-        "launcher": "documents/code/train/sst_omni_train/launchers/2026/05/20260526__speech_llm_zh_cap16_denoise_budget_ttag_taurus4_r32a32_ep1.sh",
+        "launcher": "slm/train/launchers/20260526__speech_llm_zh_cap16_denoise_budget_ttag_taurus4_r32a32_ep1.sh",
         "provenance_manifest": "documents/code/train/sst_omni_train/manifests/2026/05/20260526T0621__speech_llm_train__zh_cap16_denoise_budget_ttag_r32a32_ep1_taurus4.json",
         "provenance_event_id": "20260526T0621__speech_llm_train__zh_cap16_denoise_budget_ttag_r32a32_ep1_taurus4",
         "status": "startup_verified_manifest_used_for_final_zh_eval_lineage",
@@ -100,10 +101,10 @@
         "gpu_count": 4,
         "run_dir": "/mnt/taurus/data1/jiaxuanluo/slm/speech_llm_zh_cap16_denoise_budget_ttag_r32a32_ep1_taurus4/keep1.0_r32/v0-20260526-142452",
         "env": {
-          "ROOT_DIR_OVERRIDE": "{legacy_root}",
+          "ROOT_DIR_OVERRIDE": "{code_root}",
           "HOST_GPU_DEVICES_OVERRIDE": "0,1,2,3",
           "MASTER_PORT_OVERRIDE": "29726",
-          "NOTES_FILE_OVERRIDE": "{legacy_root}/documents/code/train/sst_omni_train/notes/2026/05/20260526__speech_llm_zh_cap16_denoise_budget_ttag_r32a32_ep1_taurus4.md",
+          "NOTES_FILE_OVERRIDE": "{root}/docs/provenance/slm/20260526__speech_llm_zh_cap16_denoise_budget_ttag_r32a32_ep1_taurus4.md",
           "WANDB_EXP_PREFIX_OVERRIDE": "speech-llm-zh-c16-denoise-ttag-r32a32-ep1-taurus4-gpu0123",
           "HF_EXPORT_SWIFT_EXTRA_ARGS_OVERRIDE": "--device_map auto"
         }

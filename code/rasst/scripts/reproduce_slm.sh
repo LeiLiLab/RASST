@@ -72,7 +72,7 @@ if [[ ! -f "${MANIFEST}" ]]; then
 fi
 
 mapfile -t SELECTED_STEPS < <(
-  python3 - "${MANIFEST}" "${RASST_ROOT}" "${RASST_LEGACY_CODE_ROOT}" "${LANG_SELECT}" "${STAGE_SELECT}" <<'PY'
+  python3 - "${MANIFEST}" "${RASST_ROOT}" "${LANG_SELECT}" "${STAGE_SELECT}" <<'PY'
 import base64
 import json
 import shlex
@@ -81,20 +81,21 @@ from pathlib import Path
 
 manifest_path = Path(sys.argv[1])
 root = Path(sys.argv[2])
-legacy_root = Path(sys.argv[3])
-lang_select = sys.argv[4]
-stage_select = sys.argv[5]
+lang_select = sys.argv[3]
+stage_select = sys.argv[4]
 manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+code_root = Path(manifest.get("code_root", str(root / "code/rasst")))
+legacy_root = Path(manifest.get("legacy_root", str(root / "code/legacy")))
 
 langs = ["de", "ja", "zh"] if lang_select == "all" else [lang_select]
 stages = ["prepare", "train"] if stage_select == "all" else [stage_select]
 
 def expand(value: str) -> str:
-    return value.format(root=str(root), legacy_root=str(legacy_root))
+    return value.format(root=str(root), code_root=str(code_root), legacy_root=str(legacy_root))
 
-def abs_from_legacy(path_text: str) -> Path:
+def abs_from_code(path_text: str) -> Path:
     path = Path(expand(path_text))
-    return path if path.is_absolute() else legacy_root / path
+    return path if path.is_absolute() else code_root / path
 
 for stage in stages:
     for lang in langs:
@@ -102,14 +103,18 @@ for stage in stages:
             spec = manifest["languages"][lang][stage]
         except KeyError as exc:
             raise SystemExit(f"Missing manifest entry for {lang}/{stage}") from exc
-        launcher = abs_from_legacy(spec["launcher"])
+        launcher = abs_from_code(spec["launcher"])
         if not launcher.exists():
             raise SystemExit(f"Missing launcher for {lang}/{stage}: {launcher}")
-        env = {"ROOT_DIR_OVERRIDE": str(legacy_root)}
+        env = {
+            "ROOT_DIR_OVERRIDE": str(code_root),
+            "RASST_ROOT": str(root),
+            "RASST_ACTIVE_CODE_ROOT": str(code_root),
+        }
         env.update({key: expand(str(value)) for key, value in spec.get("env", {}).items()})
         env_text = " ".join(f"{key}={shlex.quote(value)}" for key, value in sorted(env.items()))
         command = f"{env_text} bash {shlex.quote(str(launcher))}"
-        cwd = str(legacy_root)
+        cwd = str(code_root)
         log_slug = f"reproduce_slm_{lang}_{stage}"
         encoded = base64.b64encode(command.encode("utf-8")).decode("ascii")
         print("\t".join([lang, stage, cwd, log_slug, encoded]))
