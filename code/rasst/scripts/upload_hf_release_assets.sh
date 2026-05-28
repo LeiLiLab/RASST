@@ -2,6 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="${RASST_ROOT:-/mnt/taurus/data2/jiaxuanluo/RASST}"
+export RASST_ROOT="${ROOT_DIR}"
 MANIFEST="${RASST_RELEASE_ASSET_MANIFEST:-${ROOT_DIR}/code/rasst/manifests/main_result_eval.global_cache30_30_20_20.json}"
 
 execute_args=()

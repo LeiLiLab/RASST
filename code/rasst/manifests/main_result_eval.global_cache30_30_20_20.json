@@ -898,6 +898,13 @@
       }
     ],
     "release_policy": "global_cache30_30_20_20",
+    "release_data": {
+      "hf_repo_id": "gavinlaw/rasst-main-result-data",
+      "hf_repo_type": "dataset",
+      "hf_revision": "main",
+      "local_path": "data",
+      "description": "ACL6060 tagged and medicine main-result eval inputs, glossaries, and referenced audio for RASST."
+    },
     "paper_exact_manifest": "code/rasst/manifests/main_result_eval.paper_canonical_rasst24.json"
   }
 }

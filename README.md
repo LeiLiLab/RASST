@@ -23,11 +23,20 @@ bash code/rasst/scripts/eval_main_result.sh --dry-run
 
 Actual long-running launches require `RASST_ALLOW_LAUNCH=1` and are detached with logs under `logs/curated/`.
 
-Public Hugging Face release asset IDs for the three SLMs and HN1024 retriever
-are declared in `code/rasst/manifests/main_result_eval.global_cache30_30_20_20.json`.
-Download them into ignored `checkpoints/` paths with:
+Public Hugging Face release asset IDs for the three SLMs, HN1024 retriever, and
+eval data are declared in
+`code/rasst/manifests/main_result_eval.global_cache30_30_20_20.json`.
+Download model assets into ignored `checkpoints/` paths with:
 
 ```bash
 bash code/rasst/scripts/download_release_assets.sh --dry-run
 RASST_ALLOW_DOWNLOAD=1 bash code/rasst/scripts/download_release_assets.sh --download
+```
+
+Download ACL6060 tagged and medicine eval inputs, glossaries, and referenced
+audio into the ignored `data/` path with:
+
+```bash
+bash code/rasst/scripts/download_release_data.sh --dry-run
+RASST_ALLOW_DOWNLOAD=1 bash code/rasst/scripts/download_release_data.sh --download
 ```

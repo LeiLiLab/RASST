@@ -60,6 +60,20 @@ bash code/rasst/scripts/download_release_assets.sh --dry-run
 RASST_ALLOW_DOWNLOAD=1 bash code/rasst/scripts/download_release_assets.sh --download
 ```
 
+The release eval data package is also declared in the manifest:
+
+```text
+gavinlaw/rasst-main-result-data
+```
+
+Download ACL6060 tagged and medicine inputs, glossaries, and referenced audio
+under ignored `data/` paths:
+
+```bash
+bash code/rasst/scripts/download_release_data.sh --dry-run
+RASST_ALLOW_DOWNLOAD=1 bash code/rasst/scripts/download_release_data.sh --download
+```
+
 The submitted-paper exact RASST manifest is preserved as reference provenance:
 
 ```text

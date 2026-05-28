@@ -70,12 +70,27 @@ gavinlaw/rasst-speech-llm-zh-cap16-denoise-ttag
 gavinlaw/rasst-retriever-hn1024
 ```
 
+The eval data are released as a Hugging Face Datasets repository:
+
+```text
+gavinlaw/rasst-main-result-data
+```
+
 Download these model assets into ignored local `checkpoints/` paths:
 
 ```bash
 cd /mnt/taurus/data2/jiaxuanluo/RASST
 bash code/rasst/scripts/download_release_assets.sh --dry-run
 RASST_ALLOW_DOWNLOAD=1 bash code/rasst/scripts/download_release_assets.sh --download
+```
+
+Download ACL6060 tagged and medicine eval inputs, glossaries, and referenced
+audio into the ignored local `data/` path:
+
+```bash
+cd /mnt/taurus/data2/jiaxuanluo/RASST
+bash code/rasst/scripts/download_release_data.sh --dry-run
+RASST_ALLOW_DOWNLOAD=1 bash code/rasst/scripts/download_release_data.sh --download
 ```
 
 Maintainers can refresh the public HF uploads from the source artifacts named in
@@ -85,6 +100,8 @@ the manifest:
 cd /mnt/taurus/data2/jiaxuanluo/RASST
 bash code/rasst/scripts/upload_hf_release_assets.sh --dry-run
 RASST_ALLOW_HF_UPLOAD=1 bash code/rasst/scripts/upload_hf_release_assets.sh --upload
+bash code/rasst/scripts/upload_hf_release_data.sh prepare --force
+RASST_ALLOW_HF_UPLOAD=1 bash code/rasst/scripts/upload_hf_release_data.sh upload --execute
 ```
 
 The eval launcher can also download missing HF-declared model assets on demand:
@@ -94,10 +111,8 @@ cd /mnt/taurus/data2/jiaxuanluo/RASST
 RASST_AUTO_DOWNLOAD_ASSETS=1 bash code/rasst/scripts/eval_main_result.sh --validate-only
 ```
 
-The model side is therefore reproducible from public HF assets once the upload
-jobs complete. Fully external eval also needs the ACL6060/medicine audio data
-referenced by the manifest input YAML files; those data paths are not replaced
-by the model upload.
+The model, retriever, glossary, text input, and referenced-audio assets are
+therefore reproducible from public Hugging Face repositories.
 
 Validate the submitted-paper exact manifest and source artifacts:
 

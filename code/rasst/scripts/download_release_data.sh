@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="${RASST_ROOT:-/mnt/taurus/data2/jiaxuanluo/RASST}"
 export RASST_ROOT="${ROOT_DIR}"
-MANIFEST="${RASST_RELEASE_ASSET_MANIFEST:-${ROOT_DIR}/code/rasst/manifests/main_result_eval.global_cache30_30_20_20.json}"
+MANIFEST="${RASST_RELEASE_DATA_MANIFEST:-${ROOT_DIR}/code/rasst/manifests/main_result_eval.global_cache30_30_20_20.json}"
 
 execute_args=()
 passthrough=()
@@ -23,7 +23,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-exec python "${ROOT_DIR}/code/rasst/tools/hf_release_assets.py" download \
+exec python "${ROOT_DIR}/code/rasst/tools/hf_release_data.py" download \
   --manifest "${MANIFEST}" \
   "${execute_args[@]}" \
   "${passthrough[@]}"
