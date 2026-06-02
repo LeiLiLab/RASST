@@ -46,11 +46,13 @@ TEXT_LORA_TARGET_MODULES = "query key value dense".split()
 import logging
 import os
 import sys
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
 
 logger = logging.getLogger(__name__)
@@ -241,27 +243,163 @@ def _encode_audio_projected_seq(
     return projected_seq.float(), mask
 
 
-@torch.no_grad()
-def _encode_audio_projected_seq_batch(
-    audio_arrays: Sequence[np.ndarray],
-    retriever,
-    feat_ext,
-    device: torch.device,
-) -> Tuple[torch.Tensor, torch.Tensor]:
-    """Encode variable-length audio to projected encoder frames.
+def _audio_output_lens_tensor(feature_lens: torch.Tensor) -> torch.Tensor:
+    """Infer Qwen3-Omni AuT output lengths as a tensor."""
+    try:
+        from transformers.models.qwen3_omni_moe.modeling_qwen3_omni_moe import (
+            _get_feat_extract_output_lengths,
+        )
 
-    The Whisper feature extraction is batched for same-length arrays, but the
-    Qwen3-Omni audio encoder is intentionally kept per sample.  The Qwen audio
-    encoder accepts concatenated mel streams with ``feature_lens``, but that
-    path is not numerically equivalent to the serial SimulEval retriever near
-    tau thresholds because convolution/position handling changes at sequence
-    boundaries.  Keeping the encoder call per sample preserves exact term_map
-    semantics while still removing the CPU feature-extractor loop for the
-    common same-lm case.
+        return _get_feat_extract_output_lengths(feature_lens).clamp(min=1).long()
+    except Exception:
+        lens = feature_lens.long()
+        for _ in range(3):
+            lens = (lens + 1) // 2
+        return lens.clamp(min=1)
+
+
+def _audio_output_lens(
+    feature_lens: torch.Tensor,
+    *,
+    total_hidden_len: int,
+    total_input_len: int,
+) -> List[int]:
+    """Infer Qwen3-Omni AuT output lengths for packed audio samples."""
+    output_lens = [
+        max(1, int(value))
+        for value in _audio_output_lens_tensor(feature_lens).tolist()
+    ]
+
+    if sum(output_lens) != int(total_hidden_len):
+        output_lens = []
+        for cur in feature_lens.tolist():
+            reduced = int(cur)
+            for _ in range(3):
+                reduced = (reduced + 1) // 2
+            output_lens.append(max(1, int(reduced)))
+
+    if sum(output_lens) != int(total_hidden_len):
+        ratio = float(total_input_len) / max(float(total_hidden_len), 1.0)
+        output_lens = [
+            max(1, round(float(cur) / ratio))
+            for cur in feature_lens.tolist()
+        ]
+
+    if output_lens:
+        output_lens[-1] = int(total_hidden_len) - sum(output_lens[:-1])
+        output_lens[-1] = max(1, output_lens[-1])
+    return output_lens
+
+
+def _audio_encoder_forward_packed_isolated(
+    audio_encoder,
+    input_features: torch.Tensor,
+    feature_lens: torch.Tensor,
+) -> torch.Tensor:
+    """Run Qwen3-Omni AuT packed forward with sample/chunk isolation.
+
+    HF's AuT forward relies on FlashAttention varlen kernels for true packed
+    isolation. In eager/SDPA environments, ``cu_seqlens`` is otherwise ignored
+    unless an explicit block attention mask is passed to each encoder layer.
     """
-    if not audio_arrays:
-        raise ValueError("_encode_audio_projected_seq_batch requires non-empty audio_arrays")
+    aftercnn_lens = _audio_output_lens_tensor(feature_lens)
+    chunk_num = torch.ceil(feature_lens / (audio_encoder.n_window * 2)).long()
 
+    chunk_lengths = torch.tensor(
+        [audio_encoder.n_window * 2] * int(chunk_num.sum().item()),
+        dtype=torch.long,
+        device=feature_lens.device,
+    )
+    tail_chunk_index = F.pad(chunk_num, (1, 0), value=-1).cumsum(0)[1:]
+    chunk_lengths[tail_chunk_index] = feature_lens % (audio_encoder.n_window * 2)
+    chunk_lengths[chunk_lengths == 0] = audio_encoder.n_window * 2
+
+    chunk_list = input_features.T.split(chunk_lengths.tolist(), dim=0)
+    padded_feature = nn.utils.rnn.pad_sequence(chunk_list, batch_first=True).transpose(1, 2)
+    feature_lens_after_cnn = _audio_output_lens_tensor(chunk_lengths)
+    padded_mask_after_cnn = nn.utils.rnn.pad_sequence(
+        [
+            torch.ones(int(length), dtype=torch.bool, device=padded_feature.device)
+            for length in feature_lens_after_cnn
+        ],
+        batch_first=True,
+    )
+    padded_feature = padded_feature.unsqueeze(1)
+
+    padded_embeds = []
+    for chunk in padded_feature.split(audio_encoder.conv_chunksize, dim=0):
+        padded_embed = F.gelu(audio_encoder.conv2d1(chunk))
+        padded_embed = F.gelu(audio_encoder.conv2d2(padded_embed))
+        padded_embed = F.gelu(audio_encoder.conv2d3(padded_embed))
+        padded_embeds.append(padded_embed)
+    padded_embed = torch.cat(padded_embeds, dim=0)
+    batch_chunks, channels, freq, frames = padded_embed.size()
+    padded_embed = audio_encoder.conv_out(
+        padded_embed.permute(0, 3, 1, 2)
+        .contiguous()
+        .view(batch_chunks, frames, channels * freq)
+    )
+
+    positional_embedding = (
+        audio_encoder.positional_embedding.positional_embedding[: padded_embed.shape[1], :]
+        .unsqueeze(0)
+        .to(padded_embed.dtype)
+    )
+    padded_embed = padded_embed + positional_embedding
+    hidden_states = padded_embed[padded_mask_after_cnn]
+
+    cu_chunk_lens = [0]
+    window_aftercnn = padded_mask_after_cnn.shape[-1] * (
+        audio_encoder.n_window_infer // (audio_encoder.n_window * 2)
+    )
+    for cnn_len in aftercnn_lens.tolist():
+        cu_chunk_lens += [window_aftercnn] * (int(cnn_len) // window_aftercnn)
+        remainder = int(cnn_len) % window_aftercnn
+        if remainder != 0:
+            cu_chunk_lens.append(remainder)
+    cu_seqlens = torch.tensor(
+        cu_chunk_lens,
+        device=feature_lens.device,
+    ).cumsum(-1, dtype=torch.int32)
+
+    attention_mask = None
+    if getattr(audio_encoder.config, "_attn_implementation", "eager") != "flash_attention_2":
+        attention_mask = audio_encoder._prepare_attention_mask(hidden_states, cu_seqlens)
+
+    for encoder_layer in audio_encoder.layers:
+        layer_outputs = encoder_layer(
+            hidden_states,
+            cu_seqlens,
+            attention_mask=attention_mask,
+        )
+        hidden_states = layer_outputs[0]
+
+    hidden_states = audio_encoder.ln_post(hidden_states)
+    hidden_states = audio_encoder.proj1(hidden_states)
+    hidden_states = audio_encoder.act(hidden_states)
+    hidden_states = audio_encoder.proj2(hidden_states)
+    return hidden_states
+
+
+def _project_hidden_states(
+    hidden_states: torch.Tensor,
+    feature_lens: torch.Tensor,
+    retriever,
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    batch_size, max_len, _ = hidden_states.shape
+    mask = (
+        torch.arange(max_len, device=hidden_states.device).expand(batch_size, max_len)
+        < feature_lens.unsqueeze(1)
+    )
+    projected_seq = retriever.projector(hidden_states)
+    projected_seq = projected_seq * mask.unsqueeze(-1).float()
+    return projected_seq.float(), mask
+
+
+def _feature_extract_mels(
+    audio_arrays: Sequence[np.ndarray],
+    feat_ext,
+) -> List[torch.Tensor]:
     audio_lens = [int(np.asarray(audio).shape[0]) for audio in audio_arrays]
     if any(length <= 0 for length in audio_lens):
         raise ValueError("audio_arrays contains an empty audio segment")
@@ -273,19 +411,27 @@ def _encode_audio_projected_seq_batch(
             return_tensors="pt",
             padding=False,
         )
-        mel_list = [inp.input_features[i] for i in range(len(audio_arrays))]
-    else:
-        mel_list: List[torch.Tensor] = []
-        for audio in audio_arrays:
-            inp = feat_ext(
-                [audio],
-                sampling_rate=EXPECTED_SAMPLE_RATE,
-                return_tensors="pt",
-                padding=False,
-            )
-            mel = inp.input_features.squeeze(0)  # [C, T_mel_i]
-            mel_list.append(mel)
+        return [inp.input_features[i] for i in range(len(audio_arrays))]
 
+    mel_list: List[torch.Tensor] = []
+    for audio in audio_arrays:
+        inp = feat_ext(
+            [audio],
+            sampling_rate=EXPECTED_SAMPLE_RATE,
+            return_tensors="pt",
+            padding=False,
+        )
+        mel_list.append(inp.input_features.squeeze(0))  # [C, T_mel_i]
+    return mel_list
+
+
+@torch.no_grad()
+def _encode_audio_projected_seq_batch_serial(
+    mel_list: Sequence[torch.Tensor],
+    retriever,
+    device: torch.device,
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """Encode a mel batch by running the AuT forward path per sample."""
     projected_parts: List[torch.Tensor] = []
     mask_parts: List[torch.Tensor] = []
     with torch.amp.autocast("cuda", dtype=torch.bfloat16):
@@ -297,25 +443,19 @@ def _encode_audio_projected_seq_batch(
             hidden_states = outputs.last_hidden_state
 
             if hidden_states.ndim == 2:
-                reduced = mel_len
-                for _ in range(3):
-                    reduced = (reduced + 1) // 2
-                output_lens = [int(reduced)]
-                if output_lens[0] != hidden_states.shape[0]:
-                    ratio = input_features.shape[1] / hidden_states.shape[0]
-                    output_lens = [max(1, round(mel_len / ratio))]
-                    output_lens[-1] = hidden_states.shape[0]
-
+                output_lens = _audio_output_lens(
+                    feature_lens,
+                    total_hidden_len=int(hidden_states.shape[0]),
+                    total_input_len=int(input_features.shape[1]),
+                )
                 hidden_states = hidden_states.unsqueeze(0)
                 feature_lens = torch.tensor(output_lens, device=hidden_states.device)
 
-            batch_size, max_len, _ = hidden_states.shape
-            mask = (
-                torch.arange(max_len, device=hidden_states.device).expand(batch_size, max_len)
-                < feature_lens.unsqueeze(1)
+            projected_seq, mask = _project_hidden_states(
+                hidden_states,
+                feature_lens,
+                retriever,
             )
-            projected_seq = retriever.projector(hidden_states)
-            projected_seq = projected_seq * mask.unsqueeze(-1).float()
             projected_parts.append(projected_seq.squeeze(0).float())
             mask_parts.append(mask.squeeze(0))
 
@@ -324,6 +464,99 @@ def _encode_audio_projected_seq_batch(
     projected_seq = pad_sequence(projected_parts, batch_first=True)
     mask = pad_sequence(mask_parts, batch_first=True, padding_value=False)
     return projected_seq.float(), mask
+
+
+@torch.no_grad()
+def _encode_audio_projected_seq_batch_packed(
+    mel_list: Sequence[torch.Tensor],
+    retriever,
+    device: torch.device,
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """Encode a mel batch using Qwen3-Omni AuT's packed sequence contract.
+
+    Qwen3-Omni's HF/SGLang audio tower expects a packed mel stream
+    ``[C, sum(T_i)]`` plus per-sample ``feature_lens``. The tower then builds
+    chunk-level ``cu_seqlens`` internally so attention does not cross sample
+    boundaries.
+    """
+    if not mel_list:
+        raise ValueError("mel_list must be non-empty")
+
+    mel_lens = [int(mel.shape[-1]) for mel in mel_list]
+    input_features = torch.cat(
+        [mel.to(device, dtype=torch.bfloat16) for mel in mel_list],
+        dim=-1,
+    )
+    feature_lens = torch.tensor(mel_lens, dtype=torch.long, device=device)
+
+    with torch.amp.autocast("cuda", dtype=torch.bfloat16):
+        if os.environ.get("RASST_RAG_AUT_BATCH_ISOLATE", "1").strip().lower() in {
+            "1",
+            "true",
+            "yes",
+        }:
+            hidden_states = _audio_encoder_forward_packed_isolated(
+                retriever.audio_encoder,
+                input_features,
+                feature_lens,
+            )
+        else:
+            outputs = retriever.audio_encoder(input_features, feature_lens)
+            hidden_states = outputs.last_hidden_state
+
+        if hidden_states.ndim == 2:
+            output_lens = _audio_output_lens(
+                feature_lens,
+                total_hidden_len=int(hidden_states.shape[0]),
+                total_input_len=int(input_features.shape[1]),
+            )
+            from torch.nn.utils.rnn import pad_sequence
+
+            parts = torch.split(hidden_states, output_lens, dim=0)
+            hidden_states = pad_sequence(parts, batch_first=True)
+            feature_lens = torch.tensor(output_lens, device=hidden_states.device)
+
+        projected_seq, mask = _project_hidden_states(
+            hidden_states,
+            feature_lens,
+            retriever,
+        )
+
+    return projected_seq.float(), mask
+
+
+@torch.no_grad()
+def _encode_audio_projected_seq_batch(
+    audio_arrays: Sequence[np.ndarray],
+    retriever,
+    feat_ext,
+    device: torch.device,
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """Encode variable-length audio to projected encoder frames.
+
+    By default this uses the packed AuT path expected by Qwen3-Omni:
+    ``[C, sum(T_i)]`` plus ``feature_lens``. Set
+    ``RASST_RAG_AUT_BATCH_MODE=serial`` to force the per-sample path, or
+    ``packed_strict`` to disable fallback on packed-forward errors.
+    """
+    if not audio_arrays:
+        raise ValueError("_encode_audio_projected_seq_batch requires non-empty audio_arrays")
+
+    mel_list = _feature_extract_mels(audio_arrays, feat_ext)
+    mode = os.environ.get("RASST_RAG_AUT_BATCH_MODE", "packed").strip().lower()
+    if mode in {"serial", "per_sample", "per-sample", "0", "false"}:
+        return _encode_audio_projected_seq_batch_serial(mel_list, retriever, device)
+
+    try:
+        return _encode_audio_projected_seq_batch_packed(mel_list, retriever, device)
+    except Exception as exc:
+        if mode in {"packed_strict", "strict"}:
+            raise
+        logger.warning(
+            "Packed Qwen3-Omni AuT batch failed; falling back to serial mode: %s",
+            exc,
+        )
+        return _encode_audio_projected_seq_batch_serial(mel_list, retriever, device)
 
 
 def _retrieve_topk(
@@ -649,70 +882,113 @@ class StreamingMaxSimRetriever:
         if not chunks:
             return outputs
 
+        batch_t0 = time.perf_counter()
+        encode_t0 = time.perf_counter()
         projected_seq, mask = _encode_audio_projected_seq_batch(
             chunks, self.retriever, self.feat_ext, self.device
         )
+        encode_s = time.perf_counter() - encode_t0
+        post_t0 = time.perf_counter()
 
+        groups_by_frames: Dict[int, List[Tuple[int, Dict[str, Any]]]] = {}
         for batch_idx, meta in enumerate(metas):
             valid_frames = int(mask[batch_idx].sum().item())
             if valid_frames <= 0:
                 continue
-            seq_i = projected_seq[batch_idx : batch_idx + 1, :valid_frames, :]
-            mask_i = mask[batch_idx : batch_idx + 1, :valid_frames]
+            groups_by_frames.setdefault(valid_frames, []).append((batch_idx, meta))
+
+        text_bank_t = self.text_embs.float().T
+        for valid_frames, group_items in groups_by_frames.items():
+            group_indices = [batch_idx for batch_idx, _ in group_items]
+            seq_g = projected_seq[group_indices, :valid_frames, :]
+            mask_g = mask[group_indices, :valid_frames]
             with torch.amp.autocast("cuda", dtype=torch.bfloat16):
-                window_embs = self.retriever._multiscale_pool(seq_i, mask_i)
+                window_embs = self.retriever._multiscale_pool(seq_g, mask_g)
                 window_embs = F.normalize(window_embs, p=2, dim=-1).float()
 
-            window_embs_2d = window_embs.squeeze(0)
-            if window_embs_2d.numel() == 0:
+            if window_embs.numel() == 0:
                 continue
             rel_starts, rel_ends = _build_window_time_ranges(
                 self.retriever.maxsim_windows,
                 self.retriever.maxsim_stride,
                 valid_frames,
             )
-            if rel_starts.numel() != window_embs_2d.shape[0]:
+            if rel_starts.numel() != window_embs.shape[1]:
                 logger.warning(
                     "Batch timeline retrieval window count mismatch: ranges=%d embs=%d",
                     rel_starts.numel(),
-                    window_embs_2d.shape[0],
+                    window_embs.shape[1],
                 )
                 continue
 
             nominal_duration = max(float(rel_ends.max().item()), 1e-6)
-            scale = float(meta["actual_duration"]) / nominal_duration
-            abs_starts = float(meta["actual_start_sec"]) + rel_starts.to(self.device) * scale
-            abs_ends = float(meta["actual_start_sec"]) + rel_ends.to(self.device) * scale
+            actual_duration = torch.tensor(
+                [float(meta["actual_duration"]) for _, meta in group_items],
+                dtype=torch.float32,
+                device=self.device,
+            )
+            actual_start = torch.tensor(
+                [float(meta["actual_start_sec"]) for _, meta in group_items],
+                dtype=torch.float32,
+                device=self.device,
+            )
+            current_start = torch.tensor(
+                [float(meta["current_start_sec"]) for _, meta in group_items],
+                dtype=torch.float32,
+                device=self.device,
+            )
+            current_end = torch.tensor(
+                [float(meta["current_end_sec"]) for _, meta in group_items],
+                dtype=torch.float32,
+                device=self.device,
+            )
+            scale = actual_duration / nominal_duration
+            rel_starts_d = rel_starts.to(self.device)
+            rel_ends_d = rel_ends.to(self.device)
+            abs_starts = actual_start.unsqueeze(1) + rel_starts_d.unsqueeze(0) * scale.unsqueeze(1)
+            abs_ends = actual_start.unsqueeze(1) + rel_ends_d.unsqueeze(0) * scale.unsqueeze(1)
             valid_windows = (
-                (abs_ends > float(meta["current_start_sec"]))
-                & (abs_starts < float(meta["current_end_sec"]))
+                (abs_ends > current_start.unsqueeze(1))
+                & (abs_starts < current_end.unsqueeze(1))
             )
             if int(valid_windows.sum().item()) == 0:
                 continue
 
-            sim_by_window = window_embs_2d @ self.text_embs.float().T
+            sim_by_window = torch.matmul(window_embs, text_bank_t)
             sim_by_window = sim_by_window.masked_fill(
-                ~valid_windows.unsqueeze(1),
+                ~valid_windows.unsqueeze(2),
                 -float("inf"),
             )
-            scores, best_window_idx = sim_by_window.max(dim=0)
-            finite = torch.isfinite(scores)
-            if int(finite.sum().item()) == 0:
-                continue
+            scores, best_window_idx = sim_by_window.max(dim=1)
+            for row_idx, (_, meta) in enumerate(group_items):
+                row_scores = scores[row_idx]
+                finite = torch.isfinite(row_scores)
+                if int(finite.sum().item()) == 0:
+                    continue
 
-            n = min(int(k), int(finite.sum().item()))
-            masked_scores = scores.masked_fill(~finite, -float("inf"))
-            top_sco, top_idx = torch.topk(masked_scores, k=n, largest=True, sorted=True)
-            top_win = best_window_idx.gather(0, top_idx)
-            top_start = abs_starts.gather(0, top_win)
-            top_end = abs_ends.gather(0, top_win)
+                n = min(int(k), int(finite.sum().item()))
+                masked_scores = row_scores.masked_fill(~finite, -float("inf"))
+                top_sco, top_idx = torch.topk(masked_scores, k=n, largest=True, sorted=True)
+                top_win = best_window_idx[row_idx].gather(0, top_idx)
+                top_start = abs_starts[row_idx].gather(0, top_win)
+                top_end = abs_ends[row_idx].gather(0, top_win)
 
-            outputs[int(meta["request_idx"])] = self._build_results(
-                top_idx.detach().cpu().numpy(),
-                top_sco.detach().cpu().numpy(),
-                time_starts=top_start.detach().cpu().numpy(),
-                time_ends=top_end.detach().cpu().numpy(),
-                retrieval_mode="timeline_batch",
+                outputs[int(meta["request_idx"])] = self._build_results(
+                    top_idx.detach().cpu().numpy(),
+                    top_sco.detach().cpu().numpy(),
+                    time_starts=top_start.detach().cpu().numpy(),
+                    time_ends=top_end.detach().cpu().numpy(),
+                    retrieval_mode="timeline_batch",
+                )
+
+        if os.environ.get("RASST_RAG_PROFILE", "1") == "1":
+            print(
+                "RASST_RAG_METRIC "
+                f"batch_size={len(requests)} encoded={len(chunks)} "
+                f"frame_groups={len(groups_by_frames)} terms={len(self.term_list)} "
+                f"encode_s={encode_s:.4f} post_s={time.perf_counter() - post_t0:.4f} "
+                f"total_s={time.perf_counter() - batch_t0:.4f}",
+                flush=True,
             )
 
         return outputs
