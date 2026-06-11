@@ -1,0 +1,10 @@
+# Code owners for the RASST repository.
+#
+# Listed users are the default owners for every path and are automatically
+# requested for review on pull requests that touch the repository.
+#
+# GitHub only enforces code-owner review when these users are repository
+# collaborators (or org/team members with access) and "Require review from
+# Code Owners" branch protection is enabled for the default branch.
+
+* @owaski @luojiaxuan

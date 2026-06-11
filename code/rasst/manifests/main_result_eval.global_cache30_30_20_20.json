@@ -134,6 +134,21 @@
       }
     },
     {
+      "key": "model_infinisst_baseline",
+      "role": "checkpoint_dir",
+      "type": "hf_model_dir",
+      "direction": "input",
+      "local_path": "checkpoints/slm/infinisst_baseline/omni30b_sampling_r16_v3-20260121-021342-hf",
+      "legacy_path": "/mnt/gemini/data/jiaxuanluo/Omni-30B-sampling-0107/keep1.0_r16/v3-20260121-021342-hf",
+      "hf_repo_id": "gavinlaw/rasst-infinisst-baseline",
+      "hf_revision": "main",
+      "env": "RASST_MODEL_INFINISST_BASELINE",
+      "metadata": {
+        "variant": "infinisst_omni_sampling_r16",
+        "note": "InfiniSST no-RAG baseline speech LLM (sampling, no term tagging); used by main_result_baseline_no_rag manifest. Not referenced by RASST cells."
+      }
+    },
+    {
       "key": "glossary_acl_tagged_raw",
       "role": "acl_eval_wiki_glossary",
       "type": "json",

@@ -36,6 +36,8 @@ The tracked result tables and figure sources are in [docs/results/main_result_gl
 | SLM en-de | [gavinlaw/rasst-speech-llm-de-cap16-denoise-ttag](https://huggingface.co/gavinlaw/rasst-speech-llm-de-cap16-denoise-ttag) |
 | SLM en-ja | [gavinlaw/rasst-speech-llm-ja-cap16-denoise-ttag](https://huggingface.co/gavinlaw/rasst-speech-llm-ja-cap16-denoise-ttag) |
 | SLM en-zh | [gavinlaw/rasst-speech-llm-zh-cap16-denoise-ttag](https://huggingface.co/gavinlaw/rasst-speech-llm-zh-cap16-denoise-ttag) |
+| Baseline SLM (InfiniSST, no RAG) | [gavinlaw/rasst-infinisst-baseline](https://huggingface.co/gavinlaw/rasst-infinisst-baseline) |
+| SLM SFT dataset (de/ja/zh, JSONL only) | [gavinlaw/rasst-speech-llm-sft-cap16-denoise-ttag](https://huggingface.co/datasets/gavinlaw/rasst-speech-llm-sft-cap16-denoise-ttag) |
 
 Download all public release assets into ignored local paths:
 
@@ -103,6 +105,26 @@ RASST_ALLOW_LAUNCH=1 bash code/rasst/scripts/eval_main_result.sh --sbatch \
   --cache-chunks-by-lm 1:30/30,2:30/30,3:20/20,4:20/20
 ```
 
+### InfiniSST baseline (no RAG)
+
+The paper's InfiniSST baseline reuses the same 24 cells, eval inputs, glossaries, and global cache policy as RASST, but disables retrieval. It is driven by a separate manifest and wrapper (`eval_baseline.sh`), which sets the no-RAG path in the serial driver:
+
+```bash
+# Validate the baseline manifest, model, inputs, and glossaries.
+bash code/rasst/scripts/eval_baseline.sh --validate-only
+
+# Print one baseline cell (a no-RAG SimulEval command, with no retriever/term-map args).
+bash code/rasst/scripts/eval_baseline.sh --dry-run \
+  --domain acl_tagged_raw --lang zh --lm 1 \
+  --cache-chunks-by-lm 1:30/30,2:30/30,3:20/20,4:20/20
+
+# Launch the full baseline through Slurm after checking the dry run.
+RASST_ALLOW_LAUNCH=1 bash code/rasst/scripts/eval_baseline.sh --sbatch \
+  --cache-chunks-by-lm 1:30/30,2:30/30,3:20/20,4:20/20
+```
+
+Because the baseline shares RASST's inputs and glossaries, the two manifests are directly comparable. See [docs/baseline_infinisst_no_rag.md](docs/baseline_infinisst_no_rag.md) for details.
+
 By default, runtime outputs are written under ignored paths such as `outputs/`, `logs/`, `figures/`, and `checkpoints/`.
 
 ## Training
@@ -131,6 +153,19 @@ Launch detached SLM data-prep/training jobs only after reviewing the printed com
 RASST_ALLOW_LAUNCH=1 bash code/rasst/scripts/reproduce_slm.sh \
   --lang all --stage all --launch
 ```
+
+The SFT training data (JSONL + stats only, audio held out) is published
+separately. Stage it locally or download it with:
+
+```bash
+# Stage the JSONL-only dataset (audio paths rewritten to GigaSpeech-style keys).
+bash code/rasst/scripts/upload_hf_slm_dataset.sh prepare
+
+# Download the published dataset into data/slm_training/.
+RASST_ALLOW_DOWNLOAD=1 bash code/rasst/scripts/upload_hf_slm_dataset.sh download --execute
+```
+
+Audio is not redistributed; reconstruct it from GigaSpeech. See [docs/slm_training_dataset.md](docs/slm_training_dataset.md).
 
 Retriever training and MaxSim index construction are exposed separately:
 
