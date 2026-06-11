@@ -8,9 +8,11 @@
   "root": "/mnt/taurus/data2/jiaxuanluo/RASST",
   "code_root": "/mnt/taurus/data2/jiaxuanluo/RASST/code/rasst",
   "legacy_root": "/mnt/taurus/data2/jiaxuanluo/RASST/code/legacy",
+  "release_dataset_manifest": "code/rasst/manifests/slm_training_dataset.cap16_denoise_budget_ttag.json",
   "notes": [
     "This is the canonical release-facing SLM reproduction path for the final global-cache main result.",
-    "The older zh new_v9 path is preserved as reference-only provenance in docs/reference/zh_new_v9_reference_only.md."
+    "The older zh new_v9 path is preserved as reference-only provenance in docs/reference/zh_new_v9_reference_only.md.",
+    "The published SFT dataset (JSONL + stats/recipe, audio held out) is described by release_dataset_manifest; export it with code/rasst/scripts/upload_hf_slm_dataset.sh."
   ],
   "common_training_config": {
     "base_model": "/mnt/gemini/data2/jiaxuanluo/Qwen3-Omni-30B-A3B-Instruct-v2/",

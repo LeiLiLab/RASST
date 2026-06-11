@@ -127,6 +127,13 @@ SYSTEM_PROMPT_STYLE="${SYSTEM_PROMPT_STYLE_OVERRIDE:-translate_task}"
 
 # Pre-built index override (skip auto-build)
 INDEX_PATH_OVERRIDE="${INDEX_PATH_OVERRIDE:-}"
+
+# Baseline (no-RAG / InfiniSST) mode.  When enabled, this driver skips the
+# MaxSim index build and retriever entirely and runs SimulEval with the agent
+# in its native no-RAG mode (no --rag-enabled, no oracle term_map).
+# Accepts BASELINE_NO_RAG=1 directly, or RAG_MODE_OVERRIDE=none.
+BASELINE_NO_RAG="${BASELINE_NO_RAG:-${BASELINE_NO_RAG_OVERRIDE:-0}}"
+RAG_MODE_OVERRIDE="${RAG_MODE_OVERRIDE:-}"
 # ======Configuration=====
 
 # Apply overrides
@@ -211,6 +218,15 @@ if [[ -n "${KEEP_CACHE_SECONDS_OVERRIDE:-}" ]]; then
   KEEP_CACHE_SECONDS="${KEEP_CACHE_SECONDS_OVERRIDE}"
 fi
 
+# Resolve RAG mode.  RAG_MODE_OVERRIDE=none is an alias for BASELINE_NO_RAG=1.
+if [[ "${RAG_MODE_OVERRIDE}" == "none" ]]; then
+  BASELINE_NO_RAG="1"
+fi
+if [[ -n "${ORACLE_TERM_MAP_PATH_OVERRIDE}" && "${BASELINE_NO_RAG}" == "1" ]]; then
+  echo "[ERROR] BASELINE_NO_RAG=1 is incompatible with ORACLE_TERM_MAP_PATH_OVERRIDE." >&2
+  exit "${EXIT_CONFIG_ERROR}"
+fi
+
 # Determine glossary path
 if [[ -n "${GLOSSARY_PATH_OVERRIDE}" ]]; then
   GLOSSARY_PATH="${GLOSSARY_PATH_OVERRIDE}"
@@ -248,7 +264,9 @@ fi
 
 GLOSSARY_TAG="$(basename "${GLOSSARY_PATH}" .json)"
 RAG_SCORE_THRESHOLD="${RAG_SCORE_THRESHOLD_OVERRIDE}"
-if [[ -n "${ORACLE_TERM_MAP_PATH_OVERRIDE}" ]]; then
+if [[ "${BASELINE_NO_RAG}" == "1" ]]; then
+  OUTPUT_DIR_SUFFIX="d${DENSITY_TAG}_norag_lm${LATENCY_MULTIPLIER}_g${GLOSSARY_TAG}"
+elif [[ -n "${ORACLE_TERM_MAP_PATH_OVERRIDE}" ]]; then
   OUTPUT_DIR_SUFFIX="d${DENSITY_TAG}_oraclegt_lm${LATENCY_MULTIPLIER}_k${RAG_TOP_K}_th${RAG_SCORE_THRESHOLD}_g${GLOSSARY_TAG}"
 else
   OUTPUT_DIR_SUFFIX="d${DENSITY_TAG}_lm${LATENCY_MULTIPLIER}_k${RAG_TOP_K}_th${RAG_SCORE_THRESHOLD}_g${GLOSSARY_TAG}"
@@ -267,6 +285,7 @@ echo "[INFO] RAG_TOP_K=${RAG_TOP_K} RAG_LORA_R=${RAG_LORA_R} RAG_TEXT_LORA_R=${R
 echo "[INFO] RAG_STREAMING_MODE=${RAG_STREAMING_MODE_OVERRIDE}"
 echo "[INFO] RAG_TIMELINE_LOOKBACK_SEC=${RAG_TIMELINE_LOOKBACK_SEC_OVERRIDE}"
 echo "[INFO] ORACLE_TERM_MAP_PATH=${ORACLE_TERM_MAP_PATH_OVERRIDE:-<none>}"
+echo "[INFO] BASELINE_NO_RAG=${BASELINE_NO_RAG}"
 echo "[INFO] RAG_MAXSIM_WINDOWS=${RAG_MAXSIM_WINDOWS_OVERRIDE} RAG_MAXSIM_STRIDE=${RAG_MAXSIM_STRIDE_OVERRIDE}"
 echo "[INFO] DENSITY_TAG=${DENSITY_TAG} PAPER_ID_TAG=${PAPER_ID_TAG:-<none>}"
 echo "[INFO] VLLM_SEGMENT_SEC=${VLLM_SEGMENT_SEC} (lm=${LATENCY_MULTIPLIER}) RAG_STRIDE=${RAG_RETRIEVE_STRIDE_SEC}s"
@@ -303,7 +322,9 @@ if [[ ! -d "${MODEL_NAME}" ]]; then
   echo "[ERROR] HF model dir not found: ${MODEL_NAME}" >&2
   exit "${EXIT_CONFIG_ERROR}"
 fi
-if [[ -n "${ORACLE_TERM_MAP_PATH_OVERRIDE}" ]]; then
+if [[ "${BASELINE_NO_RAG}" == "1" ]]; then
+  echo "[INFO] Baseline mode: RAG disabled (no retriever / no index / no term_map)."
+elif [[ -n "${ORACLE_TERM_MAP_PATH_OVERRIDE}" ]]; then
   if [[ ! -f "${ORACLE_TERM_MAP_PATH_OVERRIDE}" ]]; then
     echo "[ERROR] Oracle term_map not found: ${ORACLE_TERM_MAP_PATH_OVERRIDE}" >&2
     exit "${EXIT_DATA_ERROR}"
@@ -329,7 +350,9 @@ fi
 mkdir -p "${INDEX_CACHE_DIR}"
 INDEX_PATH=""
 INDEX_MANIFEST_PATH=""
-if [[ -n "${ORACLE_TERM_MAP_PATH_OVERRIDE}" ]]; then
+if [[ "${BASELINE_NO_RAG}" == "1" ]]; then
+  echo "[INFO] Baseline mode: skipping MaxSim index build."
+elif [[ -n "${ORACLE_TERM_MAP_PATH_OVERRIDE}" ]]; then
   echo "[INFO] Oracle term_map mode: skipping MaxSim index build."
 else
   BUILD_INDEX_SCRIPT="${ROOT_DIR}/retriever/build_maxsim_index.py"
@@ -445,7 +468,9 @@ fi
 VISIBLE_GPU_COUNT="$(python3 -c "print(len('${CUDA_VISIBLE_DEVICES_PHYSICAL}'.split(',')))")"
 VLLM_TP_SIZE="${VLLM_TP_SIZE_OVERRIDE:-2}"
 export VLLM_TP_SIZE_OVERRIDE="${VLLM_TP_SIZE}"
-if [[ -n "${ORACLE_TERM_MAP_PATH_OVERRIDE}" ]]; then
+if [[ "${BASELINE_NO_RAG}" == "1" ]]; then
+  RAG_GPU="cuda:0"
+elif [[ -n "${ORACLE_TERM_MAP_PATH_OVERRIDE}" ]]; then
   RAG_GPU="cuda:0"
 elif [[ -n "${RAG_GPU_OVERRIDE:-}" ]]; then
   RAG_GPU="${RAG_GPU_OVERRIDE}"
@@ -468,7 +493,14 @@ fi
 
 read -r -a RAG_MAXSIM_WINDOWS_ARGS <<< "${RAG_MAXSIM_WINDOWS_OVERRIDE}"
 AGENT_TERM_ARGS=()
-if [[ -n "${ORACLE_TERM_MAP_PATH_OVERRIDE}" ]]; then
+if [[ "${BASELINE_NO_RAG}" == "1" ]]; then
+  # No-RAG baseline: do not pass --rag-enabled or any term_map args.  The agent
+  # builds its native no-RAG system prompt.  We still pass the prompt style so
+  # the baseline matches the configured wording (without the term_map line).
+  AGENT_TERM_ARGS=(
+    --system-prompt-style "${SYSTEM_PROMPT_STYLE}"
+  )
+elif [[ -n "${ORACLE_TERM_MAP_PATH_OVERRIDE}" ]]; then
   AGENT_TERM_ARGS=(
     --oracle-term-map-path "${ORACLE_TERM_MAP_PATH_OVERRIDE}"
     --rag-top-k "${RAG_TOP_K}"

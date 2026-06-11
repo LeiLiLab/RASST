@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "event_id": "20260611T000000__release_dataset__slm_training_cap16_denoise_budget_ttag",
+  "event_type": "release_dataset_manifest",
+  "family": "slm_training_dataset",
+  "variant": "cap16_denoise_budget_ttag_de_ja_zh",
+  "status": "release_manifest",
+  "root": "/mnt/taurus/data2/jiaxuanluo/RASST",
+  "code_root": "/mnt/taurus/data2/jiaxuanluo/RASST/code/rasst",
+  "notes": [
+    "Release-facing Speech-LLM SFT dataset (cap16 denoise-budget term tagging) for de, ja, zh.",
+    "Only JSONL metadata + stats/recipe are published. Audio is NOT redistributed: each 'audios' entry is rewritten to a GigaSpeech-style relative key 'audio/<lang>/<gigaspeech_audio_id>/<window>/<index>.wav'.",
+    "Reconstruct the referenced clips from GigaSpeech separately; see docs/slm_training_dataset.md.",
+    "The training recipe (data-prep -> train -> HF export) is described by code/rasst/manifests/slm_training.cap16_denoise_budget_ttag.json."
+  ],
+  "metadata": {
+    "release_data": {
+      "hf_repo_id": "gavinlaw/rasst-speech-llm-sft-cap16-denoise-ttag",
+      "hf_revision": "main",
+      "local_path": "data/slm_training/cap16_denoise_budget_ttag",
+      "audio_source": {
+        "dataset": "GigaSpeech",
+        "url": "https://github.com/SpeechColab/GigaSpeech",
+        "redistributed": false,
+        "relative_prefix": "audio",
+        "note": "Audio clips are derived from GigaSpeech and are not included. JSONL 'audios' fields hold relative keys only."
+      }
+    },
+    "recipe": {
+      "term_map_variant": "cap16_denoise_budget_ttag",
+      "retriever": "hn1024_tau078",
+      "max_terms_per_chunk": 16,
+      "tag_template": "<t>{translation}</t>",
+      "denoise_budget_version": "cap16_denoise_budget_v1",
+      "derived_gt_terms_version": "termmap_future_assistant_match_v1",
+      "base_model": "Qwen3-Omni-30B-A3B-Instruct",
+      "lora_rank": 32,
+      "lora_alpha": 32,
+      "max_epochs": 1,
+      "max_length": 3072,
+      "training_manifest": "code/rasst/manifests/slm_training.cap16_denoise_budget_ttag.json"
+    },
+    "languages": {
+      "de": {
+        "source_dir": "/mnt/gemini/data1/jiaxuanluo/speech_llm_de_cap16_denoise_budget_20260525/de/hn1024_tau078_cap16_denoise_budget_ttag_v1",
+        "audio_root": "/mnt/gemini/data/jiaxuanluo/audio_clips_siqi_de_v2",
+        "expected_train_rows": 12500,
+        "expected_dev_rows": 355,
+        "files": {
+          "train": "train_s_de_retriever_hn1024_tau078_cap16_denoise_budget_ttag_exactboundary.jsonl",
+          "dev": "dev_s_de_retriever_hn1024_tau078_cap16_denoise_budget_ttag_exactboundary_first355.jsonl",
+          "stats": [
+            "train_wrap_stats.json",
+            "dev_wrap_stats.json",
+            "validation_summary.json"
+          ]
+        },
+        "data_prep_launcher": "code/rasst/slm/data_prep/launchers/20260525__build_de_cap16_denoise_budget_ttag.sh",
+        "train_launcher": "code/rasst/slm/train/launchers/20260525__speech_llm_de_cap16_denoise_budget_ttag_taurus6_r32a32_ep1.sh"
+      },
+      "ja": {
+        "source_dir": "/mnt/gemini/data1/jiaxuanluo/speech_llm_ja_cap16_denoise_budget_20260525/ja/hn1024_tau078_cap16_denoise_budget_ttag_v1",
+        "audio_root": "/mnt/gemini/data/jiaxuanluo/audio_clips_siqi_ja_v2",
+        "expected_train_rows": 12500,
+        "expected_dev_rows": 355,
+        "files": {
+          "train": "train_s_ja_retriever_hn1024_tau078_cap16_denoise_budget_ttag_exactboundary.jsonl",
+          "dev": "dev_s_ja_retriever_hn1024_tau078_cap16_denoise_budget_ttag_exactboundary_first355.jsonl",
+          "stats": [
+            "train_wrap_stats.json",
+            "dev_wrap_stats.json",
+            "validation_summary.json",
+            "runtime_termmap_budget_schedule.json"
+          ]
+        },
+        "data_prep_launcher": "code/rasst/slm/data_prep/launchers/20260525__build_ja_cap16_denoise_budget_ttag.sh",
+        "train_launcher": "code/rasst/slm/train/launchers/20260525__speech_llm_ja_cap16_denoise_budget_ttag_taurus4_r32a32_ep1.sh"
+      },
+      "zh": {
+        "source_dir": "/mnt/taurus/data1/jiaxuanluo/speech_llm_zh_cap16_denoise_budget_20260526/zh/hn1024_tau078_cap16_denoise_budget_ttag_v1",
+        "audio_root": "/mnt/gemini/data/jiaxuanluo/audio_clips_siqi_zh_v2",
+        "expected_train_rows": 12500,
+        "expected_dev_rows": 355,
+        "files": {
+          "train": "train_s_zh_retriever_hn1024_tau078_cap16_denoise_budget_ttag_exactboundary.jsonl",
+          "dev": "dev_s_zh_retriever_hn1024_tau078_cap16_denoise_budget_ttag_exactboundary_first355.jsonl",
+          "stats": [
+            "train_wrap_stats.json",
+            "dev_wrap_stats.json",
+            "validation_summary.json",
+            "runtime_termmap_budget_schedule.json"
+          ]
+        },
+        "data_prep_launcher": "code/rasst/slm/data_prep/launchers/20260526__build_zh_cap16_denoise_budget_ttag.sh",
+        "train_launcher": "code/rasst/slm/train/launchers/20260526__speech_llm_zh_cap16_denoise_budget_ttag_taurus4_r32a32_ep1.sh"
+      }
+    }
+  }
+}

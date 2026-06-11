@@ -207,6 +207,31 @@ def metadata(manifest: Mapping[str, Any]) -> Mapping[str, Any]:
     return meta
 
 
+def common_eval_config(manifest: Mapping[str, Any]) -> Mapping[str, Any]:
+    common = metadata(manifest).get("common_eval_config")
+    if not isinstance(common, dict):
+        raise RasstError("metadata.common_eval_config must be an object.")
+    return common
+
+
+def rag_mode(manifest: Mapping[str, Any]) -> str:
+    """RAG retrieval mode for this manifest. 'maxsim' (default) or 'none' (no-RAG baseline)."""
+    mode = str(common_eval_config(manifest).get("rag_mode", "maxsim") or "maxsim")
+    if mode not in {"maxsim", "none"}:
+        raise RasstError(f"Unsupported common_eval_config.rag_mode={mode!r}; expected 'maxsim' or 'none'.")
+    return mode
+
+
+def canonical_method(manifest: Mapping[str, Any]) -> str:
+    """Method label used to select rows from the canonical table. Defaults to 'RASST'."""
+    return str(metadata(manifest).get("canonical_method", "RASST") or "RASST")
+
+
+def has_canonical_table(manifest: Mapping[str, Any]) -> bool:
+    """True when the manifest ships a frozen canonical table to cross-check against."""
+    return isinstance(metadata(manifest).get("canonical_table"), dict)
+
+
 def all_cells(manifest: Mapping[str, Any]) -> List[Mapping[str, Any]]:
     cells = metadata(manifest).get("cells")
     if not isinstance(cells, list):
@@ -433,9 +458,10 @@ def canonical_table_rows(manifest: Mapping[str, Any], root: Path) -> Dict[Tuple[
         raise RasstError("metadata.canonical_table must be an object.")
     path = resolve_dual_path(table_obj, root=root, label="canonical_table")
     rows = read_tsv_rows(path)
+    method = canonical_method(manifest)
     out: Dict[Tuple[str, str, str], Dict[str, str]] = {}
     for row in rows:
-        if row.get("method") != "RASST":
+        if row.get("method") != method:
             continue
         if row.get("dataset") not in DOMAINS:
             continue
@@ -449,9 +475,13 @@ def validate_manifest_shape(manifest: Mapping[str, Any], root: Path) -> None:
     if len(cells) != 24:
         raise RasstError(f"Expected exactly 24 cells, found {len(cells)}")
     seen = set()
-    canonical = canonical_table_rows(manifest, root)
+    has_table = has_canonical_table(manifest)
+    canonical = canonical_table_rows(manifest, root) if has_table else {}
+    required_keys = ["domain", "lang", "lm", "model_asset", "input_asset", "glossary_asset"]
+    if has_table:
+        required_keys += ["legacy_event_id", "canonical_eval_results"]
     for cell in cells:
-        for key in ("domain", "lang", "lm", "legacy_event_id", "canonical_eval_results", "model_asset", "input_asset", "glossary_asset"):
+        for key in required_keys:
             if key not in cell:
                 raise RasstError(f"Cell missing {key}: {cell}")
         domain = str(cell["domain"])
@@ -463,8 +493,8 @@ def validate_manifest_shape(manifest: Mapping[str, Any], root: Path) -> None:
         if key in seen:
             raise RasstError(f"Duplicate cell key: {key}")
         seen.add(key)
-        if key not in canonical:
-            raise RasstError(f"Canonical table missing RASST row for {key}")
+        if has_table and key not in canonical:
+            raise RasstError(f"Canonical table missing {canonical_method(manifest)} row for {key}")
     expected = {(d, l, lm) for d in DOMAINS for l in LANGS for lm in LMS}
     missing = sorted(expected - seen)
     if missing:
@@ -506,36 +536,40 @@ def validate_input_files(input_root: Path, asset: Mapping[str, Any]) -> None:
 
 def validate_assets(manifest: Mapping[str, Any], root: Path) -> None:
     assets = artifact_map(manifest)
-    used_assets = {"eval_density_driver", "batch_vllm_driver", "retriever_hn1024"}
-    canonical = canonical_table_rows(manifest, root)
+    used_assets = {"eval_density_driver", "batch_vllm_driver"}
+    if rag_mode(manifest) != "none":
+        used_assets.add("retriever_hn1024")
+    has_table = has_canonical_table(manifest)
+    canonical = canonical_table_rows(manifest, root) if has_table else {}
     for cell in all_cells(manifest):
         key_tuple = (str(cell["domain"]), str(cell["lang"]), str(cell["lm"]))
         used_assets.add(str(cell["model_asset"]))
         used_assets.add(str(cell["input_asset"]))
         used_assets.add(str(cell["glossary_asset"]))
-        eval_obj = cell["canonical_eval_results"]
-        if not isinstance(eval_obj, dict):
-            raise RasstError(f"canonical_eval_results must be an object for {cell_id(cell)}")
-        source_path_text = canonical[key_tuple].get("source_path", "")
-        if not source_path_text:
-            raise RasstError(f"Frozen canonical table row lacks source_path for {key_tuple}")
-        table_eval_path = rel_or_abs(root, source_path_text)
-        if not exists_nonempty(table_eval_path):
-            raise RasstError(f"Frozen canonical source_path missing for {key_tuple}: {table_eval_path}")
-        validate_result_tsv(table_eval_path)
-        if eval_obj.get("legacy_path") and not same_existing_path(
-            rel_or_abs(root, str(eval_obj["legacy_path"])),
-            table_eval_path,
-        ):
-            raise RasstError(
-                f"Manifest canonical legacy_path does not match frozen TSV source_path for {key_tuple}: "
-                f"{eval_obj['legacy_path']} != {table_eval_path}"
-            )
-        eval_path = resolve_dual_path(eval_obj, root=root, label=f"canonical_eval_results:{cell_id(cell)}")
-        validate_result_tsv(eval_path)
-        legacy_manifest = manifest_path_for_event(root, str(cell["legacy_event_id"]))
-        if not exists_nonempty(legacy_manifest):
-            raise RasstError(f"Missing legacy manifest for {cell_id(cell)}: {legacy_manifest}")
+        if has_table:
+            eval_obj = cell["canonical_eval_results"]
+            if not isinstance(eval_obj, dict):
+                raise RasstError(f"canonical_eval_results must be an object for {cell_id(cell)}")
+            source_path_text = canonical[key_tuple].get("source_path", "")
+            if not source_path_text:
+                raise RasstError(f"Frozen canonical table row lacks source_path for {key_tuple}")
+            table_eval_path = rel_or_abs(root, source_path_text)
+            if not exists_nonempty(table_eval_path):
+                raise RasstError(f"Frozen canonical source_path missing for {key_tuple}: {table_eval_path}")
+            validate_result_tsv(table_eval_path)
+            if eval_obj.get("legacy_path") and not same_existing_path(
+                rel_or_abs(root, str(eval_obj["legacy_path"])),
+                table_eval_path,
+            ):
+                raise RasstError(
+                    f"Manifest canonical legacy_path does not match frozen TSV source_path for {key_tuple}: "
+                    f"{eval_obj['legacy_path']} != {table_eval_path}"
+                )
+            eval_path = resolve_dual_path(eval_obj, root=root, label=f"canonical_eval_results:{cell_id(cell)}")
+            validate_result_tsv(eval_path)
+            legacy_manifest = manifest_path_for_event(root, str(cell["legacy_event_id"]))
+            if not exists_nonempty(legacy_manifest):
+                raise RasstError(f"Missing legacy manifest for {cell_id(cell)}: {legacy_manifest}")
 
     for key in sorted(used_assets):
         path = required_asset_path(assets, root, key)
@@ -574,8 +608,9 @@ def merged_env_for_cell(
     if not isinstance(common, dict):
         raise RasstError("metadata.common_eval_config must be an object.")
 
+    mode = rag_mode(manifest)
     model = required_asset_path(assets, root, str(cell["model_asset"]))
-    retriever = required_asset_path(assets, root, "retriever_hn1024")
+    retriever = required_asset_path(assets, root, "retriever_hn1024") if mode != "none" else None
     glossary = required_asset_path(assets, root, str(cell["glossary_asset"]))
     input_asset = assets[str(cell["input_asset"])]
     input_root = required_asset_path(assets, root, str(cell["input_asset"]))
@@ -598,7 +633,6 @@ def merged_env_for_cell(
         "RASST_ACTIVE_CODE_ROOT": str(active_code_root),
         "PYTHONPATH": os.pathsep.join([str(active_code_root / "eval"), str(active_code_root), os.environ.get("PYTHONPATH", "")]),
         "MODEL_NAME_OVERRIDE": str(model),
-        "RAG_MODEL_PATH_OVERRIDE": str(retriever),
         "LANG_CODE_OVERRIDE": lang,
         "LATENCY_MULTIPLIER_OVERRIDE": lm,
         "OUTPUT_BASE_OVERRIDE": str(cell_output),
@@ -646,6 +680,12 @@ def merged_env_for_cell(
         "DRY_RUN_OVERRIDE": "0",
         "WANDB_LOG_OVERRIDE": "0",
     }
+    if mode == "none":
+        # No-RAG / InfiniSST baseline: disable retriever wiring in the driver.
+        env["BASELINE_NO_RAG"] = "1"
+        env["RAG_MODE_OVERRIDE"] = "none"
+    else:
+        env["RAG_MODEL_PATH_OVERRIDE"] = str(retriever)
     for key, value in overrides.items():
         env[str(key)] = str(value)
     if str(cell.get("runner", "serial_simuleval")) == "batch_vllm":
@@ -748,14 +788,14 @@ def write_comparison(
     *,
     strict_metrics: bool,
 ) -> None:
-    canonical = canonical_table_rows(manifest, root)
+    canonical = canonical_table_rows(manifest, root) if has_canonical_table(manifest) else {}
     summary_rows: List[Dict[str, str]] = []
     compare_rows: List[Dict[str, str]] = []
     failures: List[str] = []
     metric_failures: List[str] = []
     for cell in cells:
         key = (str(cell["domain"]), str(cell["lang"]), str(cell["lm"]))
-        expected = canonical[key]
+        expected = canonical.get(key, {})
         summary = {
             "domain": key[0],
             "lang": key[1],
@@ -831,7 +871,7 @@ def effective_config_for_cell(
         "lang": str(cell["lang"]),
         "lm": str(cell["lm"]),
         "cell_id": cell_id(cell),
-        "legacy_event_id": str(cell["legacy_event_id"]),
+        "legacy_event_id": str(cell.get("legacy_event_id", "")),
         "runner": str(cell.get("runner", "serial_simuleval")),
         "model_asset": str(cell["model_asset"]),
         "input_asset": str(cell["input_asset"]),
