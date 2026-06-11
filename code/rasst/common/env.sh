@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-export RASST_ROOT="${RASST_ROOT:-/mnt/taurus/data2/jiaxuanluo/RASST}"
+# Derive the repo root from this file's location (code/rasst/common/env.sh)
+# so the release scripts work on any checkout; callers may still set RASST_ROOT.
+_RASST_ENV_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export RASST_ROOT="${RASST_ROOT:-$(cd "${_RASST_ENV_DIR}/../../.." && pwd)}"
 export RASST_CODE_ROOT="${RASST_CODE_ROOT:-${RASST_ROOT}/code}"
 export RASST_LEGACY_CODE_ROOT="${RASST_LEGACY_CODE_ROOT:-${RASST_CODE_ROOT}/legacy}"
 export RASST_DATA_ROOT="${RASST_DATA_ROOT:-${RASST_ROOT}/data}"

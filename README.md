@@ -58,19 +58,32 @@ checkpoints/  # SLM and retriever checkpoints
 
 ## Installation
 
-The release scripts are written for Linux with CUDA GPUs. The reference cluster is Taurus, but the public assets can be downloaded on any machine that can run the required GPU stack.
+The release scripts are written for Linux with CUDA GPUs. The reference cluster is Taurus, but the public assets can be downloaded on any machine that can run the required GPU stack. The pinned versions in [`requirements.txt`](requirements.txt) match the reference evaluation environment used for the reported results (Python 3.10, torch 2.9.0, vLLM 0.13.0, transformers 4.57.3, SimulEval 1.1.4).
 
 ```bash
 conda create -n rasst -y python=3.10
 conda activate rasst
-pip install uv
 
-uv pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 \
-  --index-url https://download.pytorch.org/whl/cu124
+# Default PyPI torch wheels are CUDA-enabled on Linux. For a specific CUDA
+# build, install torch/torchvision/torchaudio first from the matching
+# https://download.pytorch.org/whl/<cuXXX> index, then run the line below.
+pip install -r requirements.txt
+```
 
-uv pip install transformers==4.47.0 accelerate peft deepspeed sentence-transformers \
-  huggingface_hub numpy pandas scipy scikit-learn tqdm pyyaml soundfile librosa \
-  sacrebleu evaluate jiwer simuleval matplotlib tensorboardX wandb faiss-cpu
+The eval/training scripts activate a conda env named `rasst` by default (via `CONDA_ENV_NAME`). If you use a different env name, `export CONDA_ENV_NAME=<your-env>` before launching.
+
+### External tools (required for StreamLAAL term scoring)
+
+Offline StreamLAAL / terminology scoring shells out to two external tools that are not pip-installable. Set them up once and point the eval driver at them (defaults are under `third_party/`, overridable via the env vars below):
+
+```bash
+# FBK-fairseq provides examples/.../simultaneous_translation/scripts/stream_laal_term.py
+git clone https://github.com/hlt-mt/FBK-fairseq third_party/FBK-fairseq
+export FBK_FAIRSEQ_ROOT="$PWD/third_party/FBK-fairseq"
+
+# mwerSegmenter (sentence segmentation used during scoring); install per its
+# own instructions into third_party/mwerSegmenter.
+export MWERSEGMENTER_ROOT="$PWD/third_party/mwerSegmenter"
 ```
 
 Some training launchers use the original Megatron/Swift Docker path. For exact SLM retraining, inspect the generated command first and run on a Slurm/Docker-capable GPU node.

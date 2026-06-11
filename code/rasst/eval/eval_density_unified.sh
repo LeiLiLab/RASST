@@ -17,34 +17,41 @@ set -euo pipefail
 EXIT_CONFIG_ERROR="2"
 EXIT_DATA_ERROR="3"
 
-ROOT_DIR="${ROOT_DIR_OVERRIDE:-${ROOT_DIR:-/mnt/taurus/data2/jiaxuanluo/RASST/code/rasst}}"
+# Derive repo paths from this script's location so the driver is portable.
+# This file lives at code/rasst/eval/eval_density_unified.sh, so ROOT_DIR is
+# code/rasst and RASST_ROOT is the repository root.  Callers may still override
+# ROOT_DIR / RASST_ROOT explicitly.
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="${ROOT_DIR_OVERRIDE:-${ROOT_DIR:-$(cd "${_SCRIPT_DIR}/.." && pwd)}}"
+RASST_ROOT="${RASST_ROOT:-$(cd "${ROOT_DIR}/../.." && pwd)}"
 
-CONDA_BASE="${CONDA_BASE:-/mnt/taurus/home/jiaxuanluo/miniconda3}"
-CONDA_ENV_NAME="${CONDA_ENV_NAME:-spaCyEnv}"
+CONDA_BASE="${CONDA_BASE:-$(conda info --base 2>/dev/null || echo "${HOME}/miniconda3")}"
+CONDA_ENV_NAME="${CONDA_ENV_NAME:-rasst}"
 
-# Dataset
-DATA_ROOT="${DATA_ROOT:-/mnt/taurus/data/siqiouyang/datasets/acl6060}"
+# Dataset.  Eval inputs are downloaded under data/ (see download_release_data.sh).
+DATA_ROOT="${DATA_ROOT:-${RASST_ROOT}/data/acl6060}"
 SOURCE_LANG="English"
 TARGET_LANG="Chinese"
 LANG_CODE="zh"
 
-# MaxSim retriever checkpoint
-RAG_MODEL_PATH="/mnt/taurus/data/jiaxuanluo/train_outputs/q3rag_scale_lora-r128-tr128_bs10752_t=0.03_3var_clean_gc_wr1000k_m0.1_maxsim_sp07_best_acl6060_gs10000.pt"
+# MaxSim retriever checkpoint.  Normally supplied by the orchestrator via
+# RAG_MODEL_PATH_OVERRIDE (resolved from the release manifest / HF download).
+RAG_MODEL_PATH="${RAG_MODEL_PATH:-${RASST_ROOT}/checkpoints/retriever/hn1024.pt}"
 RAG_LORA_R="128"
 RAG_TEXT_LORA_R="128"
 RAG_TEXT_LORA_ALPHA="256"
 
 # Default glossary
-GLOSSARY_ACL6060="${RASST_ROOT:-/mnt/taurus/data2/jiaxuanluo/RASST}/data/glossaries/glossary_acl6060.json"
+GLOSSARY_ACL6060="${RASST_ROOT}/data/glossaries/glossary_acl6060.json"
 
-# Index cache
-INDEX_CACHE_DIR="${INDEX_CACHE_DIR_OVERRIDE:-${INDEX_CACHE_DIR:-/mnt/gemini/data2/jiaxuanluo/maxsim_index_cache}}"
+# Index cache (runtime artifact; kept under ignored outputs/).
+INDEX_CACHE_DIR="${INDEX_CACHE_DIR_OVERRIDE:-${INDEX_CACHE_DIR:-${RASST_ROOT}/outputs/maxsim_index_cache}}"
 
-# Output
-OUTPUT_BASE="/mnt/gemini/data2/jiaxuanluo/density_eval_maxsim"
+# Output base (runtime artifact; kept under ignored outputs/).
+OUTPUT_BASE="${OUTPUT_BASE:-${RASST_ROOT}/outputs/density_eval_maxsim}"
 
-# GPU selection
-CUDA_VISIBLE_DEVICES_PHYSICAL="2,3,4"
+# GPU selection (override via CUDA_VISIBLE_DEVICES_PHYSICAL or the *_OVERRIDE).
+CUDA_VISIBLE_DEVICES_PHYSICAL="${CUDA_VISIBLE_DEVICES_PHYSICAL:-0,1,2}"
 
 # vLLM
 BASE_VLLM_SEGMENT_SEC="0.96"
@@ -75,7 +82,7 @@ EVAL_MODE="acl6060"
 
 # Offline eval
 OFFLINE_EVAL_SCRIPT="${ROOT_DIR}/eval/offline_sst_eval/offline_streamlaal_eval.py"
-FBK_FAIRSEQ_ROOT="${FBK_FAIRSEQ_ROOT_OVERRIDE:-${FBK_FAIRSEQ_ROOT:-/mnt/taurus/home/jiaxuanluo/FBK-fairseq}}"
+FBK_FAIRSEQ_ROOT="${FBK_FAIRSEQ_ROOT_OVERRIDE:-${FBK_FAIRSEQ_ROOT:-${RASST_ROOT}/third_party/FBK-fairseq}}"
 STREAM_LAAL_TOOL_REL="${STREAM_LAAL_TOOL_REL_OVERRIDE:-${STREAM_LAAL_TOOL_REL:-examples/speech_to_text/simultaneous_translation/scripts/stream_laal_term.py}}"
 
 # Override env vars (set by caller)
@@ -100,7 +107,9 @@ TERM_MAP_FORMAT_OVERRIDE="${TERM_MAP_FORMAT_OVERRIDE:-plain}"
 ORACLE_TERM_MAP_PATH_OVERRIDE="${ORACLE_TERM_MAP_PATH_OVERRIDE:-}"
 GPU_MEMORY_UTILIZATION_OVERRIDE="${GPU_MEMORY_UTILIZATION_OVERRIDE:-}"
 USE_VLLM_OVERRIDE="${USE_VLLM_OVERRIDE:-}"
-EVAL_TMPDIR_OVERRIDE="${EVAL_TMPDIR_OVERRIDE:-${TMPDIR:-/mnt/gemini/data1/jiaxuanluo/tmp}}"
+# Keep this short: vLLM creates Unix-domain IPC sockets here and sockaddr_un is
+# limited to ~107 bytes, so deep paths can fail with ZMQ/IPC errors.
+EVAL_TMPDIR_OVERRIDE="${EVAL_TMPDIR_OVERRIDE:-${TMPDIR:-/tmp/rasst_eval}}"
 DENSITY_TAG="${DENSITY_TAG:-default}"
 SOURCE_LANG_OVERRIDE="${SOURCE_LANG_OVERRIDE:-}"
 TARGET_LANG_OVERRIDE="${TARGET_LANG_OVERRIDE:-}"
@@ -430,7 +439,7 @@ export NCCL_P2P_DISABLE="1"
 export NCCL_IB_DISABLE="1"
 export VLLM_WORKER_MULTIPROC_METHOD="spawn"
 export VLLM_OBJECT_STORAGE_SHM_BUFFER_NAME="${VLLM_OBJECT_STORAGE_SHM_BUFFER_NAME:-VLLM_OBJECT_STORAGE_SHM_BUFFER_${SLURM_JOB_ID:-$$}}"
-export MWERSEGMENTER_ROOT="${MWERSEGMENTER_ROOT:-/mnt/taurus/home/jiaxuanluo/mwerSegmenter}"
+export MWERSEGMENTER_ROOT="${MWERSEGMENTER_ROOT:-${RASST_ROOT}/third_party/mwerSegmenter}"
 export PATH="${MWERSEGMENTER_ROOT}:${PATH}"
 export CUDA_VISIBLE_DEVICES="${CUDA_VISIBLE_DEVICES_PHYSICAL}"
 echo "[INFO] Runtime TMPDIR=${TMPDIR}"

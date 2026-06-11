@@ -47,9 +47,10 @@ def default_manifest(root: Path) -> Path:
 
 
 def default_stage_root() -> Path:
-    return Path(
-        "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/hf_datasets/"
-        "rasst-speech-llm-sft-cap16-denoise-ttag"
+    # Repo-relative under the ignored outputs/ dir; override with --stage-root.
+    return (
+        Path(__file__).resolve().parents[3]
+        / "outputs/hf_datasets/rasst-speech-llm-sft-cap16-denoise-ttag"
     )
 
 
@@ -270,7 +271,8 @@ repository at `code/rasst/manifests/slm_training.cap16_denoise_budget_ttag.json`
 ## Download into the RASST repo
 
 ```bash
-cd /mnt/taurus/data2/jiaxuanluo/RASST
+git clone https://github.com/luojiaxuan/RASST.git
+cd RASST
 RASST_ALLOW_DOWNLOAD=1 bash code/rasst/scripts/upload_hf_slm_dataset.sh download
 ```
 
@@ -283,10 +285,9 @@ HF dataset repo: `{rid}`
 Released as a research artifact. Check the GigaSpeech license before
 redistributing any audio you reconstruct from these references.
 """
-    # The card intentionally documents the canonical public repo path in its cd
-    # commands (consistent with the rest of the release docs); it carries no
-    # internal data/audio paths, so it is exempt from the strict leak guard
-    # applied to the JSONL/stats artifacts.
+    # The card uses a public clone path in its commands and carries no internal
+    # data/audio paths, so it is exempt from the strict leak guard applied to the
+    # JSONL/stats artifacts.
     (stage_root / "README.md").write_text(text, encoding="utf-8")
 
 

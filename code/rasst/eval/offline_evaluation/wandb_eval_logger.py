@@ -18,7 +18,7 @@ Usage (from `run_one_density_eval.sh` or similar):
         --trained-from-run "${TRAINED_FROM_RUN}" \
         --baseline-run-ids ${BASELINE_RUN_IDS} \
         --density 5 --rag-top-k 10 \
-        --output-base /mnt/gemini/data2/jiaxuanluo/density_eval_maxsim \
+        --output-base outputs/density_eval_maxsim \
         --lang-code zh \
         --latency-multipliers 1 2 3 4 \
         --glossary-tag glossary_acl6060 \
@@ -40,9 +40,15 @@ from typing import Dict, List, Optional
 REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
-GENERAL_DIR = Path(__file__).resolve().parents[1] / "general"
-if str(GENERAL_DIR) not in sys.path:
-    sys.path.insert(0, str(GENERAL_DIR))
+# wandb_tags is vendored under code/rasst/common.  Allow RASST_WANDB_TAGS_DIR to
+# point at an alternate copy for non-standard layouts.
+_WANDB_TAGS_CANDIDATES = [
+    os.environ.get("RASST_WANDB_TAGS_DIR", ""),
+    str(Path(__file__).resolve().parents[2] / "common"),
+]
+for _cand in _WANDB_TAGS_CANDIDATES:
+    if _cand and os.path.isdir(_cand) and _cand not in sys.path:
+        sys.path.insert(0, _cand)
 
 from wandb_tags import prepare_wandb_tags
 

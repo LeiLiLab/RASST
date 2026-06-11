@@ -13,20 +13,20 @@ lm=3,4 -> max_chunks=keep_chunks=20
 The tracked release snapshot is:
 
 ```text
-/mnt/taurus/data2/jiaxuanluo/RASST/docs/results/main_result_global_cache30_30_20_20/
+docs/results/main_result_global_cache30_30_20_20/
 ```
 
 The release-canonical eval manifest is:
 
 ```text
-/mnt/taurus/data2/jiaxuanluo/RASST/code/rasst/manifests/main_result_eval.global_cache30_30_20_20.json
+code/rasst/manifests/main_result_eval.global_cache30_30_20_20.json
 ```
 
 The submitted-paper exact RASST rows remain preserved for provenance. Their
 historical manifest is:
 
 ```text
-/mnt/taurus/data2/jiaxuanluo/RASST/code/rasst/manifests/main_result_eval.paper_canonical_rasst24.json
+code/rasst/manifests/main_result_eval.paper_canonical_rasst24.json
 ```
 
 ## Release-Canonical Artifacts
@@ -34,20 +34,20 @@ historical manifest is:
 Tracked release snapshot:
 
 ```text
-/mnt/taurus/data2/jiaxuanluo/RASST/docs/results/main_result_global_cache30_30_20_20/main_result.tsv
-/mnt/taurus/data2/jiaxuanluo/RASST/docs/results/main_result_global_cache30_30_20_20/rasst24.tsv
-/mnt/taurus/data2/jiaxuanluo/RASST/docs/results/main_result_global_cache30_30_20_20/compare_vs_infinisst_and_paper.tsv
-/mnt/taurus/data2/jiaxuanluo/RASST/docs/results/main_result_global_cache30_30_20_20/new_main_result_tagged_global_cache30_30_20_20.pdf
-/mnt/taurus/data2/jiaxuanluo/RASST/docs/results/main_result_global_cache30_30_20_20/medicine_main_result_global_cache30_30_20_20.pdf
+docs/results/main_result_global_cache30_30_20_20/main_result.tsv
+docs/results/main_result_global_cache30_30_20_20/rasst24.tsv
+docs/results/main_result_global_cache30_30_20_20/compare_vs_infinisst_and_paper.tsv
+docs/results/main_result_global_cache30_30_20_20/new_main_result_tagged_global_cache30_30_20_20.pdf
+docs/results/main_result_global_cache30_30_20_20/medicine_main_result_global_cache30_30_20_20.pdf
 ```
 
 Runtime source artifacts:
 
 ```text
-/mnt/taurus/data2/jiaxuanluo/RASST/outputs/canonical/main_result/paper_global_cache30_30_20_20_main_result.tsv
-/mnt/taurus/data2/jiaxuanluo/RASST/outputs/canonical/main_result/paper_global_cache30_30_20_20_rasst24.tsv
-/mnt/taurus/data2/jiaxuanluo/RASST/outputs/canonical/main_result/paper_global_cache30_30_20_20_compare.tsv
-/mnt/taurus/data2/jiaxuanluo/RASST/figures/main_result_global_cache30_30_20_20/
+outputs/canonical/main_result/paper_global_cache30_30_20_20_main_result.tsv
+outputs/canonical/main_result/paper_global_cache30_30_20_20_rasst24.tsv
+outputs/canonical/main_result/paper_global_cache30_30_20_20_compare.tsv
+figures/main_result_global_cache30_30_20_20/
 ```
 
 The release-canonical table improves BLEU over InfiniSST in 19 of 24 RASST
@@ -69,15 +69,15 @@ and InfiniSST baselines.
 Submitted-paper exact TSVs in this workspace:
 
 ```text
-/mnt/taurus/data2/jiaxuanluo/RASST/outputs/canonical/main_result/paper_exact_main_result_rasst24.tsv
-/mnt/taurus/data2/jiaxuanluo/RASST/outputs/canonical/main_result/paper_exact_main_result_rasst24_de.tsv
-/mnt/taurus/data2/jiaxuanluo/RASST/outputs/canonical/main_result/paper_exact_main_result_rasst24_check.tsv
+outputs/canonical/main_result/paper_exact_main_result_rasst24.tsv
+outputs/canonical/main_result/paper_exact_main_result_rasst24_de.tsv
+outputs/canonical/main_result/paper_exact_main_result_rasst24_check.tsv
 ```
 
 The release-facing global-policy snapshot is:
 
 ```text
-/mnt/taurus/data2/jiaxuanluo/RASST/docs/results/main_result_global_cache30_30_20_20/main_result.tsv
+docs/results/main_result_global_cache30_30_20_20/main_result.tsv
 ```
 
 The submitted-paper exact TSVs remain preserved under `outputs/canonical/` as
@@ -113,8 +113,8 @@ Drivers:
 
 | Runner | Driver |
 | --- | --- |
-| `serial_simuleval` | `/mnt/taurus/data2/jiaxuanluo/RASST/code/rasst/eval/eval_density_unified.sh` |
-| `batch_vllm` | `/mnt/taurus/data2/jiaxuanluo/RASST/code/rasst/eval/launchers/20260524__batched_vllm_rag_eval.sh` |
+| `serial_simuleval` | `code/rasst/eval/eval_density_unified.sh` |
+| `batch_vllm` | `code/rasst/eval/launchers/20260524__batched_vllm_rag_eval.sh` |
 
 Input/model/glossary assets are resolved by the release wrapper in this order:
 explicit environment override, RASST-local path, then frozen legacy path when
@@ -124,15 +124,15 @@ explicit environment override, RASST-local path, then frozen legacy path when
 
 | Asset | RASST-local path |
 | --- | --- |
-| `retriever_hn1024` | `/mnt/taurus/data2/jiaxuanluo/RASST/checkpoints/retriever/hn1024.pt` |
-| `model_zh_cap16_denoise` | `/mnt/taurus/data2/jiaxuanluo/RASST/checkpoints/slm/zh_cap16_denoise_ttag/speech_llm_zh_cap16_denoise_budget_ttag_r32a32_ep1_taurus4_hf` |
-| `model_zh_new_v9` | `/mnt/taurus/data2/jiaxuanluo/RASST/checkpoints/slm/zh_new_v9/v0-20260524-062743-hf` (reference-only provenance) |
-| `model_de_cap16_denoise` | `/mnt/taurus/data2/jiaxuanluo/RASST/checkpoints/slm/de_cap16_denoise_ttag/v0-20260525-203735-hf` |
-| `model_ja_cap16_denoise` | `/mnt/taurus/data2/jiaxuanluo/RASST/checkpoints/slm/ja_cap16_denoise_ttag/v2-20260525-235251-hf` |
-| `glossary_acl_tagged_raw` | `/mnt/taurus/data2/jiaxuanluo/RASST/data/glossaries/acl6060_tagged_gt_raw_min_norm2.json` |
-| `glossary_medicine_hardraw` | `/mnt/taurus/data2/jiaxuanluo/RASST/data/glossaries/hard_medicine_glossary_raw_llm_judge_manual_zh215_unique212.json` |
-| ACL inputs | `/mnt/taurus/data2/jiaxuanluo/RASST/data/main_result/inputs/acl_<lang>` |
-| Medicine inputs | `/mnt/taurus/data2/jiaxuanluo/RASST/data/main_result/inputs/medicine_<lang>` |
+| `retriever_hn1024` | `checkpoints/retriever/hn1024.pt` |
+| `model_zh_cap16_denoise` | `checkpoints/slm/zh_cap16_denoise_ttag/speech_llm_zh_cap16_denoise_budget_ttag_r32a32_ep1_taurus4_hf` |
+| `model_zh_new_v9` | `checkpoints/slm/zh_new_v9/v0-20260524-062743-hf` (reference-only provenance) |
+| `model_de_cap16_denoise` | `checkpoints/slm/de_cap16_denoise_ttag/v0-20260525-203735-hf` |
+| `model_ja_cap16_denoise` | `checkpoints/slm/ja_cap16_denoise_ttag/v2-20260525-235251-hf` |
+| `glossary_acl_tagged_raw` | `data/glossaries/acl6060_tagged_gt_raw_min_norm2.json` |
+| `glossary_medicine_hardraw` | `data/glossaries/hard_medicine_glossary_raw_llm_judge_manual_zh215_unique212.json` |
+| ACL inputs | `data/main_result/inputs/acl_<lang>` |
+| Medicine inputs | `data/main_result/inputs/medicine_<lang>` |
 
 ## Cell-Specific Overrides
 
@@ -170,21 +170,21 @@ This table is generated from `code/rasst/manifests/main_result_eval.paper_canoni
 Validate the manifest and current-host assets:
 
 ```bash
-cd /mnt/taurus/data2/jiaxuanluo/RASST
+cd RASST
 bash code/rasst/scripts/eval_main_result.sh --validate-only
 ```
 
 Print concrete commands without launching:
 
 ```bash
-cd /mnt/taurus/data2/jiaxuanluo/RASST
+cd RASST
 bash code/rasst/scripts/eval_main_result.sh --dry-run
 ```
 
 Filter a single canonical cell:
 
 ```bash
-cd /mnt/taurus/data2/jiaxuanluo/RASST
+cd RASST
 bash code/rasst/scripts/eval_main_result.sh --dry-run --domain acl_tagged_raw --lang de --lm 1
 ```
 
