@@ -56,11 +56,15 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 torch.backends.cuda.matmul.allow_tf32 = True
 torch.backends.cudnn.benchmark = True
 
-_GENERAL_CODE_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "general")
-)
-if _GENERAL_CODE_DIR not in sys.path:
-    sys.path.append(_GENERAL_CODE_DIR)
+# wandb_tags is vendored under code/rasst/common.  Allow RASST_WANDB_TAGS_DIR to
+# point at an alternate copy for non-standard layouts.
+_WANDB_TAGS_CANDIDATES = [
+    os.environ.get("RASST_WANDB_TAGS_DIR", ""),
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "common")),
+]
+for _cand in _WANDB_TAGS_CANDIDATES:
+    if _cand and os.path.isdir(_cand) and _cand not in sys.path:
+        sys.path.append(_cand)
 from wandb_tags import prepare_wandb_tags
 
 

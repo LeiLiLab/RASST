@@ -24,9 +24,9 @@ dataset export      ->  public SFT JSONL dataset (this note)
 
 The reproduction recipe (launchers, provenance manifests, exported checkpoints)
 is in
-`/mnt/taurus/data2/jiaxuanluo/RASST/code/rasst/manifests/slm_training.cap16_denoise_budget_ttag.json`.
+`code/rasst/manifests/slm_training.cap16_denoise_budget_ttag.json`.
 The dataset export is described by
-`/mnt/taurus/data2/jiaxuanluo/RASST/code/rasst/manifests/slm_training_dataset.cap16_denoise_budget_ttag.json`.
+`code/rasst/manifests/slm_training_dataset.cap16_denoise_budget_ttag.json`.
 
 ## What is published
 
@@ -82,21 +82,21 @@ JSONL and stats, and fails fast if any internal path would survive.
 Stage the dataset locally (JSONL + stats only, audio rewritten):
 
 ```bash
-cd /mnt/taurus/data2/jiaxuanluo/RASST
+cd RASST
 bash code/rasst/scripts/upload_hf_slm_dataset.sh prepare
 ```
 
 Validate the export logic quickly on a few rows per file:
 
 ```bash
-cd /mnt/taurus/data2/jiaxuanluo/RASST
+cd RASST
 bash code/rasst/scripts/upload_hf_slm_dataset.sh prepare --max-rows 50 --force
 ```
 
 Upload (dry-run by default; `--execute` plus `RASST_ALLOW_HF_UPLOAD=1` performs it):
 
 ```bash
-cd /mnt/taurus/data2/jiaxuanluo/RASST
+cd RASST
 bash code/rasst/scripts/upload_hf_slm_dataset.sh upload                  # dry-run
 RASST_ALLOW_HF_UPLOAD=1 bash code/rasst/scripts/upload_hf_slm_dataset.sh upload --execute
 ```
@@ -104,6 +104,6 @@ RASST_ALLOW_HF_UPLOAD=1 bash code/rasst/scripts/upload_hf_slm_dataset.sh upload 
 Download into the ignored local path `data/slm_training/cap16_denoise_budget_ttag`:
 
 ```bash
-cd /mnt/taurus/data2/jiaxuanluo/RASST
+cd RASST
 RASST_ALLOW_DOWNLOAD=1 bash code/rasst/scripts/upload_hf_slm_dataset.sh download --execute
 ```

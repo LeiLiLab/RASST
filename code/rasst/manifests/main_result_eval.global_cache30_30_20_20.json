@@ -66,18 +66,6 @@
       }
     },
     {
-      "key": "model_zh_new_v9",
-      "role": "checkpoint_dir",
-      "type": "hf_model_dir",
-      "direction": "input",
-      "local_path": "checkpoints/slm/zh_new_v9/v0-20260524-062743-hf",
-      "legacy_path": "/mnt/gemini/data1/jiaxuanluo/slm_exports/speech_llm_new_v9_assistant_termtag_delay_clean_no_gt_zero_oldnewv3_zh_r32a64_tp2_taurus8/keep1.0_r32/v0-20260524-062743-hf",
-      "env": "RASST_MODEL_ZH_NEW_V9",
-      "metadata": {
-        "speech_llm_training_run_id": "2g6kan5y"
-      }
-    },
-    {
       "key": "model_zh_cap16_denoise",
       "role": "checkpoint_dir",
       "type": "hf_model_dir",
@@ -105,18 +93,6 @@
       "env": "RASST_MODEL_DE_CAP16_DENOISE",
       "metadata": {
         "variant": "cap16_denoise_ttag"
-      }
-    },
-    {
-      "key": "model_ja_new_v9_acl",
-      "role": "checkpoint_dir",
-      "type": "hf_model_dir",
-      "direction": "input",
-      "local_path": "checkpoints/slm/ja_new_v9/v0-20260524-123624-hf",
-      "legacy_path": "/mnt/gemini/data1/jiaxuanluo/slm/speech_llm_new_v9_assistant_termtag_delay_clean_no_gt_zero_oldnewv3_ja_r32a64_tp2_taurus4/keep1.0_r32/v0-20260524-123624-hf",
-      "env": "RASST_MODEL_JA_NEW_V9_ACL",
-      "metadata": {
-        "variant": "new_v9_termtag_delay"
       }
     },
     {

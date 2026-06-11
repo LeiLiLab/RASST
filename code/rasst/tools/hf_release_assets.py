@@ -105,8 +105,7 @@ def model_card(asset: Mapping[str, Any], source_path: Optional[Path]) -> str:
         f"- Manifest asset key: `{key}`",
         f"- Artifact type: `{asset.get('type')}`",
     ]
-    if source_path is not None:
-        lines.append(f"- Original release source path: `{source_path}`")
+    # Internal source paths are deliberately omitted from the public model card.
     if meta:
         lines.append("- Manifest metadata:")
         for mkey, mvalue in sorted(meta.items()):

@@ -1,0 +1,49 @@
+# RASST release requirements.
+#
+# Versions are pinned from the reference evaluation environment (Python 3.10)
+# used to produce the reported main results. The default PyPI torch wheels are
+# CUDA-enabled on Linux; for a specific CUDA build, install torch/torchvision/
+# torchaudio first from the matching https://download.pytorch.org/whl/<cuXXX>
+# index, then run `pip install -r requirements.txt`.
+#
+# Two external, non-pip tools are also required for StreamLAAL term scoring:
+# FBK-fairseq and mwerSegmenter. See README.md (Installation -> External tools).
+
+# --- Core deep learning / serving stack ---
+torch==2.9.0
+torchvision==0.24.0
+torchaudio==2.9.0
+transformers==4.57.3
+vllm==0.13.0
+qwen-omni-utils==0.0.8
+accelerate==1.12.0
+peft==0.18.0
+deepspeed==0.18.3
+sentence-transformers==4.1.0
+huggingface-hub==0.36.0
+sentencepiece==0.2.1
+protobuf==4.25.8
+
+# --- Streaming speech translation eval ---
+simuleval==1.1.4
+sacrebleu==2.5.1
+evaluate==0.4.6
+jiwer==4.0.0
+
+# --- Audio / data / numerics ---
+numpy==1.26.4
+pandas==2.2.3
+scipy==1.15.3
+soundfile==0.13.1
+librosa==0.11.0
+
+# --- Plotting / logging / misc ---
+matplotlib==3.10.8
+tqdm==4.64.1
+pyyaml==6.0.2
+tensorboardX==2.6.4
+wandb==0.23.1
+
+# --- Optional: only needed by the legacy FAISS index builder
+#     (code/rasst/retriever/build_index_v4.py), not the release eval path. ---
+faiss-cpu==1.7.2

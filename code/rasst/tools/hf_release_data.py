@@ -35,7 +35,8 @@ def default_manifest(root: Path) -> Path:
 
 
 def default_stage_root() -> Path:
-    return Path("/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/hf_datasets/rasst-main-result-data")
+    # Repo-relative under the ignored outputs/ dir; override with --stage-root.
+    return Path(__file__).resolve().parents[3] / "outputs/hf_datasets/rasst-main-result-data"
 
 
 def rel_or_abs(root: Path, path_text: str) -> Path:
@@ -179,7 +180,8 @@ It is intended to be downloaded into the RASST repository's ignored `data/`
 directory:
 
 ```bash
-cd /mnt/taurus/data2/jiaxuanluo/RASST
+git clone https://github.com/luojiaxuan/RASST.git
+cd RASST
 RASST_ALLOW_DOWNLOAD=1 bash code/rasst/scripts/download_release_data.sh --download
 ```
 
