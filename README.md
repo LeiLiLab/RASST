@@ -2,7 +2,7 @@
 
 This repository contains the release code, models, data links, and reproduction workflow for **RASST**, a retrieval-augmented streaming speech translation system for domain terminology.
 
-The tracked paper PDF is [paper/EMNLP_26_RASST.pdf](paper/EMNLP_26_RASST.pdf).
+The tracked paper PDF is [RASST](https://arxiv.org/abs/2601.22777).
 
 ## Main Results
 
