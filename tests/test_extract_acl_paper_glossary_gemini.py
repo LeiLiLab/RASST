@@ -18,6 +18,14 @@ SPEC.loader.exec_module(MODULE)
 
 
 class ExtractAclPaperGlossaryGeminiTest(unittest.TestCase):
+    def test_prompt_template_formats_json_example(self) -> None:
+        prompt = MODULE.PROMPT_TEMPLATE.format(
+            chunk_label="1/1",
+            paper_text="paper body",
+        )
+        self.assertIn('"term": "attention mechanism"', prompt)
+        self.assertIn("PAPER EXCERPT (1/1):\npaper body", prompt)
+
     def test_split_text_is_bounded_and_deterministic(self) -> None:
         text = "\n\n".join(f"paragraph {index} " + "x" * 600 for index in range(12))
         chunks = MODULE.split_text(text, chunk_chars=1_400, max_chunks=3)

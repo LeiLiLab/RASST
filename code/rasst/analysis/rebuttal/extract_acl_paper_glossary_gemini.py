@@ -27,14 +27,14 @@ the conventional target-language form.
 
 Return only a JSON array with this exact shape:
 [
-  {
+  {{
     "term": "attention mechanism",
-    "target_translations": {
+    "target_translations": {{
       "zh": "注意力机制",
       "de": "Aufmerksamkeitsmechanismus",
       "ja": "注意機構"
-    }
-  }
+    }}
+  }}
 ]
 
 Constraints:
