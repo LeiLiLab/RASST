@@ -21,10 +21,20 @@ comparison covers all four latency settings for ACL 60/60 En-Zh/De/Ja and ESO
 En-De, i.e., 16 strictly paired RASST--InfiniSST cells. We exclude ESO En-Zh and
 En-Ja for the reference-provenance reason discussed below.
 
-**[PENDING XCOMET — replace before submission: exact xCOMET model identifier,
-checkpoint/revision, sentence count, mean RASST and InfiniSST scores, mean
-paired delta, and number of positive cells, with ACL and ESO-De reported
-separately. Do not claim significance unless it is actually tested.]**
+Using `Unbabel/XCOMET-XXL` at immutable revision
+`873bac1b1c461e410c4a6e379f6790d3d1c7c214`, we score 22,728
+sentence-level system hypotheses, each aligned to its source and reference. We
+report xCOMET multiplied by 100 and average
+the paired cells equally. On ACL, RASST scores **78.704** versus **78.588** for
+InfiniSST, a mean paired difference of **+0.116**, with RASST higher in **8/12**
+cells. The language-level differences are **+0.636** for En-Zh, **+0.005** for
+En-De, and **-0.293** for En-Ja. On human-reference ESO En-De, RASST scores
+**74.869** versus **78.041**, a difference of **-3.172**, and is lower in all
+four cells. Across all 16 retained cells, the cell-macro difference is
+**-0.706** and 8/16 cells are positive. Thus, the contextual-metric evidence is
+mixed: it does not support a claim of uniformly improved overall translation
+quality, and we will narrow the main claim to terminology handling rather than
+general quality improvement. We make no significance claim for this analysis.
 
 As a complementary diagnostic, we recomputed BLEU after removing every raw-gold
 target-term string from both the aligned hypothesis and reference. This asks
@@ -118,8 +128,10 @@ evaluation and notation need correction.
 
 **Translation-quality metric.** We agree that BLEU alone is insufficient. We
 add xCOMET on the 16 retained paired cells and the target-term-masked BLEU
-diagnostic summarized above. **[PENDING: insert the verified xCOMET summary
-sentence.]**
+diagnostic summarized above. ACL is nearly unchanged on average under xCOMET
+(+0.116 points; 8/12 cells positive), whereas ESO En-De decreases by 3.172
+points in all four cells. We will report this negative result and temper the
+quality claim accordingly.
 
 **Morphology and exact matching.** We agree that exact-form terminology
 accuracy undercounts valid inflected forms, especially in German, and can also
@@ -189,8 +201,9 @@ masked-BLEU results above explain why terminology accuracy can move much more
 than BLEU while also showing that the effect is not uniformly positive: the
 human-reference ESO En-De masked-BLEU mean is -0.2047. We will report this
 negative result, avoid overgeneralizing the ACL average, and narrow the main
-claim to improved terminology handling with generally preserved or moderately
-improved translation quality.
+claim to improved terminology handling with mixed translation-quality effects
+that depend on the language and evaluation set. This is also consistent with
+the negative xCOMET result on ESO En-De.
 
 **Novelty and comparison scope.** Our intended contribution is the streaming
 integration: cross-modal retrieval from partial speech, multi-scale windows,
@@ -230,8 +243,10 @@ Before submission, the revision will:
   `docs/results/rebuttal_2026/masked_terms_quality_compare_vs_infinisst_global_cache30_30_20_20_snapshot.tsv`
 - Token and sentence prevalence:
   `docs/results/rebuttal_2026/term_prevalence.tsv`
-- xCOMET input plan (results are not yet claimed here):
-  `docs/results/rebuttal_2026/xcomet_input_manifest.taurus.tsv`
+- Verified xCOMET report, paired table, and independent validation:
+  `docs/results/rebuttal_2026/xcomet_xxl_report.md`,
+  `docs/results/rebuttal_2026/xcomet_xxl_paired.tsv`, and
+  `docs/results/rebuttal_2026/xcomet_xxl_validation.json`
 - Official xCOMET paper and implementation provenance:
   [TACL paper](https://aclanthology.org/2024.tacl-1.54/),
   [COMET repository](https://github.com/Unbabel/COMET)
@@ -259,9 +274,11 @@ Before submission, the revision will:
   are positive.
 - **Do not present masked BLEU as a causal decomposition.** Removing strings
   changes length and neighboring n-grams.
-- **Do not report xCOMET or paper-derived glossary numbers until artifacts have
-  been generated and validated.** The current fields are deliberate
-  placeholders.
+- **Do not describe xCOMET as uniformly positive.** ACL averages +0.116 points
+  with 8/12 positive cells, but En-Ja averages -0.293 and ESO En-De averages
+  -3.172 with 0/4 positive cells; the 16-cell macro average is -0.706.
+- **Do not report paper-derived glossary numbers until fresh artifacts have
+  been generated and validated.** Those fields remain deliberate placeholders.
 - **Do not reuse the legacy `acl_paper_extracted` cells as fresh evidence.** The
   tracked table labels them `user_supplied_reusable`, and the exact
   `instances.log` files for those 12 RASST cells are not recoverable. The fresh

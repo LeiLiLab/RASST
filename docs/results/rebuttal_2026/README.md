@@ -7,6 +7,10 @@ glossary 原始响应不进入 Git。
 
 ## 当前结论
 
+- **xCOMET-XXL 已完成。** ACL 12 cells 的 cell-macro 差值为 `+0.1158`
+  xCOMET points（乘以 100），8/12 为正；ESO En-De 为 `-3.1716`，0/4 为正。
+  该结果不支持“overall translation quality 普遍提升”，应将论文主张收窄为
+  terminology handling 改善且 contextual quality effects mixed。
 - **Masked BLEU 已完成并全量复算。** 排除 ESO En-Zh/En-Ja 后，RASST 相对
   InfiniSST 的 target-term-masked BLEU 在 12/16 cells 为正，平均差值
   `+0.6927`；ACL 12 cells 的平均差值为 `+0.9919`，ESO En-De 4 cells 的
@@ -25,7 +29,7 @@ glossary 原始响应不进入 Git。
 
 ## xCOMET
 
-状态：**运行中**。
+状态：**已完成并独立复算验证**。
 
 - 评分矩阵：ACL En-Zh/De/Ja 与 ESO En-De，RASST/InfiniSST，4 个 latency settings，
   共 32 system rows / 16 strict pairs / 22,728 sentence segments。
@@ -37,13 +41,22 @@ glossary 原始响应不进入 Git。
 - 可移植输入 bundle：40 个 content-addressed payloads、26,100,339 bytes；portable
   manifest SHA-256 为
   `dbf07fd4f8fc6460f2edd0cf1c167ffe61740da6cab63cab9307d3775ad84e89`。
-- 临时运行目录：`/data02/jaxan/RASST_rebuttal_20260710`（Hyper00 container 内挂载为
-  `/data`）。该路径只是 staging，不是 source of truth。
+- ACL 12 cells 的 cell-macro xCOMET（乘以 100）为 RASST `78.7042`、
+  InfiniSST `78.5884`，平均差值 `+0.1158`，8/12 cells 为正；其中 En-Zh
+  `+0.6356`、En-De `+0.0050`、En-Ja `-0.2933`。
+- ESO En-De 4 cells 为 RASST `74.8694`、InfiniSST `78.0410`，平均差值
+  `-3.1716`，0/4 cells 为正。16 cells 合计差值为 `-0.7060`，8/16 为正。
+- 结果是 mixed；不能用 xCOMET 声称 RASST 的 overall translation quality 普遍或
+  显著提升。详细结果、失败恢复链条、环境和全部哈希见
+  [`xcomet_xxl_report.md`](xcomet_xxl_report.md)。
+- Git-tracked 轻量产物：[`xcomet_xxl_summary.tsv`](xcomet_xxl_summary.tsv)、
+  [`xcomet_xxl_paired.tsv`](xcomet_xxl_paired.tsv) 和
+  [`xcomet_xxl_validation.json`](xcomet_xxl_validation.json)。独立 validator 从
+  22,728 条逐句结果反算并核对了全部 system 与 paired statistics。
 
-评分器会一次加载 checkpoint，逐 talk 用显式传入的 `mwerSegmenter` 重切所有
-hypothesis，并输出 summary、strict paired table 和带 xCOMET error spans 的逐句
-JSONL。Git 只收录最终轻量 summary/paired table；逐句 JSONL 的预定 Hugging Face
-目标为 `gavinlaw/rasst-main-result-data` 下的 rebuttal artifact。目前没有可用的
+逐句 JSONL 与 DDP prediction 文件位于 Hyper00 staging
+`/data02/jaxan/RASST_rebuttal_20260710`。它们的预定 Hugging Face 目标为
+`gavinlaw/rasst-main-result-data` 下的 versioned rebuttal artifact。目前没有可用的
 Hugging Face 写入凭据，上传状态为 **pending**，本地 staging 不能视为 canonical。
 
 ## Paper-derived realistic glossary
