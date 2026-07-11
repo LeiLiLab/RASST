@@ -27,6 +27,13 @@ On the final global-cache snapshot, RASST improves terminology accuracy over Inf
 
 The tracked result tables and figure sources are in [docs/results/main_result_global_cache30_30_20_20](docs/results/main_result_global_cache30_30_20_20/).
 
+## Rebuttal 2026
+
+Rebuttal 补实验的当前结论、provenance、artifact 状态和阻塞项统一记录在
+[docs/results/rebuttal_2026](docs/results/rebuttal_2026/)；英文回复工作稿位于
+[docs/rebuttal_2026_draft.md](docs/rebuttal_2026_draft.md)。所有标记为 `PENDING`
+的数字都不能在生成并复核对应 artifact 前提交。
+
 ## Release Assets
 
 | Asset | Link |
