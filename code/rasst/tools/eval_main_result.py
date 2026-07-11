@@ -1095,6 +1095,7 @@ def launch_sbatch(
     sbatch_time: Optional[str] = None,
     sbatch_job_name: Optional[str] = None,
     sbatch_array_limit: Optional[str] = None,
+    physical_gpu_pair: Optional[str] = None,
     prepare_only: bool = False,
 ) -> None:
     if not allow_launch and os.environ.get("RASST_ALLOW_LAUNCH", "0") != "1":
@@ -1118,6 +1119,7 @@ def launch_sbatch(
     task_status_dir.mkdir(parents=True, exist_ok=True)
     partition = sbatch_partition or os.environ.get("RASST_SBATCH_PARTITION", "taurus")
     gres = sbatch_gres or os.environ.get("RASST_SBATCH_GRES", "gpu:2")
+    omit_gres = gres.lower() in {"none", "off", "omit"}
     cpus = sbatch_cpus or os.environ.get("RASST_SBATCH_CPUS", "16")
     mem = sbatch_mem or os.environ.get("RASST_SBATCH_MEM", "128G")
     time_limit = sbatch_time or os.environ.get("RASST_SBATCH_TIME", "08:00:00")
@@ -1135,7 +1137,11 @@ def launch_sbatch(
         array_spec = f"0-{len(cells) - 1}"
 
     old_gpu_pair = os.environ.get("RASST_GPU_PAIR")
-    os.environ["RASST_GPU_PAIR"] = RAW_SHELL_PREFIX + "${CUDA_VISIBLE_DEVICES:-0,1}"
+    os.environ["RASST_GPU_PAIR"] = (
+        physical_gpu_pair
+        if physical_gpu_pair is not None
+        else RAW_SHELL_PREFIX + "${CUDA_VISIBLE_DEVICES:-0,1}"
+    )
     try:
         write_config_report(manifest, root, cells, run_root)
         commands = command_list(manifest, root, cells, run_root)
@@ -1200,6 +1206,7 @@ def launch_sbatch(
             "job_name": job_name,
             "array": array_spec,
             "array_limit": array_limit,
+            "physical_gpu_pair": physical_gpu_pair or "slurm-visible",
         },
         "runtime_overrides": {
             "force_runner": force_runner or "",
@@ -1223,7 +1230,6 @@ def launch_sbatch(
         "#!/usr/bin/env bash",
         f"#SBATCH --job-name={job_name}",
         f"#SBATCH --partition={partition}",
-        f"#SBATCH --gres={gres}",
         f"#SBATCH --cpus-per-task={cpus}",
         f"#SBATCH --mem={mem}",
         f"#SBATCH --time={time_limit}",
@@ -1257,6 +1263,8 @@ def launch_sbatch(
         "echo '[CELL_DONE] '$cid' status='$cell_status' '$(date -u +%Y-%m-%dT%H:%M:%SZ)",
         "exit \"$cell_status\"",
     ]
+    if not omit_gres:
+        body.insert(3, f"#SBATCH --gres={gres}")
     script_path.write_text("\n".join(body) + "\n", encoding="utf-8")
     script_path.chmod(0o755)
 
@@ -1372,6 +1380,7 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     p.add_argument("--sbatch-time", default=None, help="Slurm time limit for --sbatch.")
     p.add_argument("--sbatch-job-name", default=None, help="Slurm job name for --sbatch.")
     p.add_argument("--sbatch-array-limit", default=None, help="Maximum concurrent Slurm array tasks; use 1 for serial cells.")
+    p.add_argument("--physical-gpu-pair", default=None, help="Explicit physical GPU ids passed to each cell, e.g. 2,3; otherwise use Slurm-visible ids.")
     p.add_argument("--run-root", default=None, help="Exact output root. Relative paths are resolved under RASST_ROOT.")
     p.add_argument("--force-runner", default=None, choices=("serial_simuleval", "batch_vllm"), help="Temporarily override selected cell runner without editing the manifest.")
     p.add_argument("--cell-override", action="append", default=[], help="Temporarily override selected cell config, as KEY=VALUE. Repeatable.")
@@ -1458,6 +1467,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             sbatch_time=args.sbatch_time,
             sbatch_job_name=args.sbatch_job_name,
             sbatch_array_limit=args.sbatch_array_limit,
+            physical_gpu_pair=args.physical_gpu_pair,
             prepare_only=args.prepare_only,
         )
     else:
