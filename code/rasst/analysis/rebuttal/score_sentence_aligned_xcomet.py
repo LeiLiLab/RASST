@@ -620,11 +620,19 @@ def extract_xcomet_output(output: Any, expected_segments: int) -> Tuple[List[flo
 
 def load_xcomet(checkpoint: Path) -> Any:
     try:
+        import torch
         from comet import load_from_checkpoint
+        from comet.models.utils import Prediction
     except ImportError as exc:
         raise XCometScoringError(
             "unbabel-comet is required to run xCOMET scoring"
         ) from exc
+
+    # note (luojiaxuan): COMET 2.2.7 gathers multi-GPU predictions through
+    # torch.load; PyTorch 2.6+ defaults that call to weights_only=True.
+    add_safe_globals = getattr(torch.serialization, "add_safe_globals", None)
+    if callable(add_safe_globals):
+        add_safe_globals([Prediction])
     return load_from_checkpoint(str(checkpoint), local_files_only=True)
 
 

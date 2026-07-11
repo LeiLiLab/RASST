@@ -9,6 +9,7 @@ import tempfile
 import types
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -221,6 +222,40 @@ class SentenceAlignedXCometTest(unittest.TestCase):
         scores, spans = MODULE.extract_xcomet_output(output, 2)
         self.assertEqual(scores, [0.8, 0.9])
         self.assertEqual(spans[1][0]["severity"], "minor")
+
+    def test_load_xcomet_allowlists_prediction_for_torch_load(self) -> None:
+        class StubPrediction(dict):
+            pass
+
+        safe_global_calls = []
+        checkpoint_calls = []
+        torch_module = types.ModuleType("torch")
+        torch_module.serialization = types.SimpleNamespace(
+            add_safe_globals=lambda values: safe_global_calls.append(values)
+        )
+        comet_module = types.ModuleType("comet")
+        comet_models_module = types.ModuleType("comet.models")
+        comet_utils_module = types.ModuleType("comet.models.utils")
+        comet_utils_module.Prediction = StubPrediction
+        expected_model = object()
+
+        def fake_load_from_checkpoint(path: str, *, local_files_only: bool):
+            checkpoint_calls.append((path, local_files_only))
+            return expected_model
+
+        comet_module.load_from_checkpoint = fake_load_from_checkpoint
+        fake_modules = {
+            "torch": torch_module,
+            "comet": comet_module,
+            "comet.models": comet_models_module,
+            "comet.models.utils": comet_utils_module,
+        }
+        with mock.patch.dict(sys.modules, fake_modules):
+            model = MODULE.load_xcomet(Path("/models/xcomet.ckpt"))
+
+        self.assertIs(model, expected_model)
+        self.assertEqual(safe_global_calls, [[StubPrediction]])
+        self.assertEqual(checkpoint_calls, [("/models/xcomet.ckpt", True)])
 
     def test_output_paths_cannot_overwrite_inputs(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir_raw:
