@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import contextlib
 import importlib.util
+import io
 import json
 import os
 import stat
@@ -222,6 +224,14 @@ class SentenceAlignedXCometTest(unittest.TestCase):
         scores, spans = MODULE.extract_xcomet_output(output, 2)
         self.assertEqual(scores, [0.8, 0.9])
         self.assertEqual(spans[1][0]["severity"], "minor")
+        with self.assertRaisesRegex(MODULE.XCometScoringError, "error-span rows"):
+            MODULE.extract_xcomet_output(
+                FakePrediction(
+                    scores=[0.8, 0.9],
+                    metadata=FakePrediction(error_spans=[[]]),
+                ),
+                2,
+            )
 
     def test_load_xcomet_uses_local_checkpoint(self) -> None:
         checkpoint_calls = []
@@ -238,6 +248,219 @@ class SentenceAlignedXCometTest(unittest.TestCase):
 
         self.assertIs(model, expected_model)
         self.assertEqual(checkpoint_calls, [("/models/xcomet.ckpt", True)])
+
+    def test_normal_scoring_assigns_scores_without_recovery(self) -> None:
+        manifest = MODULE.ManifestRow(
+            "acl6060",
+            "RASST",
+            "de",
+            "1",
+            Path("instances.log"),
+            Path("source.txt"),
+            Path("reference.txt"),
+            Path("audio.yaml"),
+            "word",
+            2,
+        )
+        system = MODULE.PreparedSystem(
+            manifest,
+            1,
+            [
+                {
+                    "source": "source",
+                    "hypothesis": "hypothesis",
+                    "reference": "reference",
+                }
+            ],
+            {},
+        )
+
+        class StubModel:
+            def __init__(self) -> None:
+                self.calls = []
+
+            def predict(self, model_inputs, **kwargs):
+                self.calls.append((model_inputs, kwargs))
+                return FakePrediction(
+                    scores=[0.75],
+                    metadata=FakePrediction(error_spans=[[{"severity": "minor"}]]),
+                )
+
+        model = StubModel()
+        with mock.patch.object(
+            MODULE,
+            "restricted_comet_prediction_gather_loads",
+            return_value=contextlib.nullcontext(),
+        ):
+            MODULE.score_prepared_systems(
+                [system],
+                model=model,
+                devices=[4, 5],
+                batch_size=16,
+                num_workers=0,
+                progress_bar=False,
+            )
+
+        self.assertEqual(len(model.calls), 1)
+        self.assertEqual(model.calls[0][1]["devices"], [4, 5])
+        self.assertEqual(system.segments[0]["xcomet_score"], 0.75)
+        self.assertEqual(system.segments[0]["error_spans"][0]["severity"], "minor")
+
+    def test_recovery_arguments_and_gather_directory_are_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir_raw:
+            temp_dir = Path(temp_dir_raw)
+            gather_dir = temp_dir / "gather"
+            gather_dir.mkdir()
+            for rank in range(2):
+                (gather_dir / f"pred_{rank}.pt").write_bytes(f"pred-{rank}".encode())
+                (gather_dir / f"batch_indices_{rank}.pt").write_bytes(
+                    f"indices-{rank}".encode()
+                )
+
+            with self.assertRaisesRegex(MODULE.XCometScoringError, "supplied together"):
+                MODULE.resolve_recovery_config(
+                    prediction_gather_dir=gather_dir,
+                    inference_runner_sha256=None,
+                    devices=[4, 5],
+                )
+            with self.assertRaisesRegex(MODULE.XCometScoringError, "64 hexadecimal"):
+                MODULE.resolve_recovery_config(
+                    prediction_gather_dir=gather_dir,
+                    inference_runner_sha256="not-a-digest",
+                    devices=[4, 5],
+                )
+
+            recovery = MODULE.resolve_recovery_config(
+                prediction_gather_dir=gather_dir,
+                inference_runner_sha256="A" * 64,
+                devices=[4, 5],
+            )
+            assert recovery is not None
+            self.assertEqual(recovery.inference_runner_sha256, "a" * 64)
+            self.assertEqual(
+                {path.name for path in recovery.gather_files},
+                {
+                    "pred_0.pt",
+                    "pred_1.pt",
+                    "batch_indices_0.pt",
+                    "batch_indices_1.pt",
+                },
+            )
+            with self.assertRaisesRegex(MODULE.XCometScoringError, "overwrite an input"):
+                MODULE.validate_output_paths(
+                    [recovery.gather_files[0], temp_dir / "summary.tsv"],
+                    recovery.gather_files,
+                )
+
+            extra = gather_dir / "notes.txt"
+            extra.write_text("unexpected", encoding="utf-8")
+            with self.assertRaisesRegex(MODULE.XCometScoringError, "exactly one"):
+                MODULE.validate_prediction_gather_dir(gather_dir, device_count=2)
+            extra.unlink()
+
+            pred_zero = gather_dir / "pred_0.pt"
+            pred_zero.unlink()
+            symlink_target = temp_dir / "outside-pred.pt"
+            symlink_target.write_bytes(b"outside")
+            pred_zero.symlink_to(symlink_target)
+            with self.assertRaisesRegex(MODULE.XCometScoringError, "regular file"):
+                MODULE.validate_prediction_gather_dir(gather_dir, device_count=2)
+
+    def test_recovery_gathers_without_cleanup_and_records_provenance(self) -> None:
+        load_calls = []
+
+        class StubTorch:
+            def load(self, path, *args, **kwargs):
+                load_calls.append((Path(path), args, kwargs))
+                return object()
+
+        predict_writer_module = types.ModuleType("comet.models.predict_writer")
+        predict_writer_module.torch = StubTorch()
+
+        class StubWriter:
+            cleanup_called = False
+
+            def gather_all_predictions(self):
+                for entry in sorted(Path(self.output_dir).iterdir()):
+                    predict_writer_module.torch.load(entry)
+                return FakePrediction(
+                    scores=[0.8, 0.9],
+                    metadata=FakePrediction(
+                        error_spans=[[], [{"start": 1, "end": 2, "severity": "minor"}]]
+                    ),
+                )
+
+            def cleanup(self):
+                StubWriter.cleanup_called = True
+                raise AssertionError("recovery must retain its input gather directory")
+
+        predict_writer_module.CustomWriter = StubWriter
+        comet_module = types.ModuleType("comet")
+        comet_models_module = types.ModuleType("comet.models")
+        comet_models_module.predict_writer = predict_writer_module
+        fake_modules = {
+            "comet": comet_module,
+            "comet.models": comet_models_module,
+            "comet.models.predict_writer": predict_writer_module,
+        }
+
+        with tempfile.TemporaryDirectory() as temp_dir_raw:
+            gather_dir = Path(temp_dir_raw) / "gather"
+            gather_dir.mkdir()
+            for rank in range(2):
+                (gather_dir / f"pred_{rank}.pt").write_bytes(f"pred-{rank}".encode())
+                (gather_dir / f"batch_indices_{rank}.pt").write_bytes(
+                    f"indices-{rank}".encode()
+                )
+            recovery = MODULE.resolve_recovery_config(
+                prediction_gather_dir=gather_dir,
+                inference_runner_sha256="a" * 64,
+                devices=[4, 5],
+            )
+            assert recovery is not None
+            manifest = MODULE.ManifestRow(
+                "acl6060",
+                "RASST",
+                "de",
+                "1",
+                Path("instances.log"),
+                Path("source.txt"),
+                Path("reference.txt"),
+                Path("audio.yaml"),
+                "word",
+                2,
+            )
+            system = MODULE.PreparedSystem(
+                manifest,
+                1,
+                [{}, {}],
+                {"runner_sha256": recovery.inference_runner_sha256},
+            )
+            output = io.StringIO()
+            with mock.patch.dict(sys.modules, fake_modules):
+                with contextlib.redirect_stdout(output):
+                    MODULE.recover_prepared_systems(
+                        [system],
+                        recovery=recovery,
+                        devices=[4, 5],
+                        recovery_runner_sha256="b" * 64,
+                    )
+
+            self.assertIn("[RECOVER]", output.getvalue())
+            self.assertEqual([row["xcomet_score"] for row in system.segments], [0.8, 0.9])
+            self.assertEqual(system.provenance_hashes["runner_sha256"], "a" * 64)
+            self.assertEqual(system.provenance_hashes["recovery_runner_sha256"], "b" * 64)
+            for name in (
+                "pred_0_sha256",
+                "pred_1_sha256",
+                "batch_indices_0_sha256",
+                "batch_indices_1_sha256",
+            ):
+                self.assertRegex(system.provenance_hashes[name], r"^[0-9a-f]{64}$")
+            self.assertFalse(StubWriter.cleanup_called)
+            self.assertEqual(len(list(gather_dir.iterdir())), 4)
+            self.assertEqual(len(load_calls), 4)
+            self.assertTrue(all(call[2] == {"weights_only": False} for call in load_calls))
 
     def test_comet_prediction_gather_loads_only_restricted_temp_files(self) -> None:
         load_calls = []
