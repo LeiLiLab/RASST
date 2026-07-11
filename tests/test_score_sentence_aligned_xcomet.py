@@ -223,20 +223,9 @@ class SentenceAlignedXCometTest(unittest.TestCase):
         self.assertEqual(scores, [0.8, 0.9])
         self.assertEqual(spans[1][0]["severity"], "minor")
 
-    def test_load_xcomet_allowlists_prediction_for_torch_load(self) -> None:
-        class StubPrediction(dict):
-            pass
-
-        safe_global_calls = []
+    def test_load_xcomet_uses_local_checkpoint(self) -> None:
         checkpoint_calls = []
-        torch_module = types.ModuleType("torch")
-        torch_module.serialization = types.SimpleNamespace(
-            add_safe_globals=lambda values: safe_global_calls.append(values)
-        )
         comet_module = types.ModuleType("comet")
-        comet_models_module = types.ModuleType("comet.models")
-        comet_utils_module = types.ModuleType("comet.models.utils")
-        comet_utils_module.Prediction = StubPrediction
         expected_model = object()
 
         def fake_load_from_checkpoint(path: str, *, local_files_only: bool):
@@ -244,18 +233,72 @@ class SentenceAlignedXCometTest(unittest.TestCase):
             return expected_model
 
         comet_module.load_from_checkpoint = fake_load_from_checkpoint
-        fake_modules = {
-            "torch": torch_module,
-            "comet": comet_module,
-            "comet.models": comet_models_module,
-            "comet.models.utils": comet_utils_module,
-        }
-        with mock.patch.dict(sys.modules, fake_modules):
+        with mock.patch.dict(sys.modules, {"comet": comet_module}):
             model = MODULE.load_xcomet(Path("/models/xcomet.ckpt"))
 
         self.assertIs(model, expected_model)
-        self.assertEqual(safe_global_calls, [[StubPrediction]])
         self.assertEqual(checkpoint_calls, [("/models/xcomet.ckpt", True)])
+
+    def test_comet_prediction_gather_loads_only_restricted_temp_files(self) -> None:
+        load_calls = []
+
+        class StubTorch:
+            def load(self, path, *args, **kwargs):
+                load_calls.append((Path(path), args, kwargs))
+                return "loaded"
+
+        predict_writer_module = types.ModuleType("comet.models.predict_writer")
+        predict_writer_module.torch = StubTorch()
+
+        class StubWriter:
+            def __init__(self, output_dir: Path, requested_path: Path) -> None:
+                self.output_dir = output_dir
+                self.requested_path = requested_path
+
+            def gather_all_predictions(self):
+                return predict_writer_module.torch.load(self.requested_path)
+
+        predict_writer_module.CustomWriter = StubWriter
+        comet_module = types.ModuleType("comet")
+        comet_models_module = types.ModuleType("comet.models")
+        comet_models_module.predict_writer = predict_writer_module
+        fake_modules = {
+            "comet": comet_module,
+            "comet.models": comet_models_module,
+            "comet.models.predict_writer": predict_writer_module,
+        }
+
+        with tempfile.TemporaryDirectory() as temp_dir_raw:
+            temp_dir = Path(temp_dir_raw)
+            allowed = temp_dir / "pred_0.pt"
+            disallowed_name = temp_dir / "checkpoint.pt"
+            outside_dir = temp_dir / "outside"
+            outside_dir.mkdir()
+            outside = outside_dir / "pred_0.pt"
+            for path in (allowed, disallowed_name, outside):
+                path.touch()
+
+            original_gather = StubWriter.gather_all_predictions
+            with mock.patch.dict(sys.modules, fake_modules):
+                with MODULE.restricted_comet_prediction_gather_loads():
+                    writer = StubWriter(temp_dir, allowed)
+                    self.assertEqual(writer.gather_all_predictions(), "loaded")
+                    with self.assertRaisesRegex(
+                        MODULE.XCometScoringError,
+                        "Refusing non-COMET",
+                    ):
+                        StubWriter(temp_dir, disallowed_name).gather_all_predictions()
+                    with self.assertRaisesRegex(
+                        MODULE.XCometScoringError,
+                        "Refusing non-COMET",
+                    ):
+                        StubWriter(temp_dir, outside).gather_all_predictions()
+
+            self.assertIs(StubWriter.gather_all_predictions, original_gather)
+            self.assertIs(predict_writer_module.torch.__class__, StubTorch)
+            self.assertEqual(len(load_calls), 1)
+            self.assertEqual(load_calls[0][0], allowed.resolve())
+            self.assertEqual(load_calls[0][2], {"weights_only": False})
 
     def test_output_paths_cannot_overwrite_inputs(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir_raw:

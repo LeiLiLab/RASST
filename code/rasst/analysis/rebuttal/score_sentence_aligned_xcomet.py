@@ -32,6 +32,7 @@ import subprocess
 import sys
 import tempfile
 from collections import defaultdict
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, Iterator, List, Mapping, MutableMapping, Optional, Sequence, Tuple
@@ -51,10 +52,54 @@ MANIFEST_FIELDS = (
 )
 PATH_FIELDS = ("instances_log", "source_text", "reference", "audio_yaml")
 TAG_NAME_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_-]*$")
+COMET_GATHER_FILE_RE = re.compile(r"^(?:pred|batch_indices)_[0-9]+[.]pt$")
 
 
 class XCometScoringError(RuntimeError):
     """Raised when inputs cannot be scored without silently changing the data."""
+
+
+class _RestrictedCometPredictionTorch:
+    """Delegate torch operations while restricting unsafe COMET gather loads."""
+
+    def __init__(self, torch_module: Any, output_dir: Any) -> None:
+        self._torch = torch_module
+        try:
+            self._output_dir = Path(output_dir).resolve(strict=True)
+        except (OSError, TypeError) as exc:
+            raise XCometScoringError(
+                f"COMET prediction output directory is invalid: {output_dir!r}"
+            ) from exc
+        if not self._output_dir.is_dir():
+            raise XCometScoringError(
+                f"COMET prediction output path is not a directory: {self._output_dir}"
+            )
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._torch, name)
+
+    def load(self, path: Any, *args: Any, **kwargs: Any) -> Any:
+        if "weights_only" in kwargs:
+            raise XCometScoringError(
+                "COMET prediction gather unexpectedly supplied weights_only; "
+                "review the installed COMET implementation before scoring"
+            )
+        try:
+            resolved = Path(os.fsdecode(os.fspath(path))).resolve(strict=True)
+        except (OSError, TypeError) as exc:
+            raise XCometScoringError(
+                f"COMET prediction gather requested an invalid file: {path!r}"
+            ) from exc
+        if (
+            resolved.parent != self._output_dir
+            or not COMET_GATHER_FILE_RE.fullmatch(resolved.name)
+            or not resolved.is_file()
+        ):
+            raise XCometScoringError(
+                "Refusing non-COMET temporary prediction load outside the restricted "
+                f"gather set: {resolved}"
+            )
+        return self._torch.load(resolved, *args, weights_only=False, **kwargs)
 
 
 @dataclass(frozen=True)
@@ -620,20 +665,48 @@ def extract_xcomet_output(output: Any, expected_segments: int) -> Tuple[List[flo
 
 def load_xcomet(checkpoint: Path) -> Any:
     try:
-        import torch
         from comet import load_from_checkpoint
-        from comet.models.utils import Prediction
     except ImportError as exc:
         raise XCometScoringError(
             "unbabel-comet is required to run xCOMET scoring"
         ) from exc
 
-    # note (luojiaxuan): COMET 2.2.7 gathers multi-GPU predictions through
-    # torch.load; PyTorch 2.6+ defaults that call to weights_only=True.
-    add_safe_globals = getattr(torch.serialization, "add_safe_globals", None)
-    if callable(add_safe_globals):
-        add_safe_globals([Prediction])
     return load_from_checkpoint(str(checkpoint), local_files_only=True)
+
+
+@contextmanager
+def restricted_comet_prediction_gather_loads() -> Iterator[None]:
+    """Permit unsafe pickle only for COMET's private prediction gather files."""
+
+    try:
+        from comet.models import predict_writer
+    except ImportError as exc:
+        raise XCometScoringError(
+            "unbabel-comet is required to run xCOMET scoring"
+        ) from exc
+
+    writer_class = predict_writer.CustomWriter
+    original_gather = writer_class.gather_all_predictions
+
+    # note (luojiaxuan): COMET 2.2.7 pickles its Prediction OrderedDict subclass
+    # during DDP gather. PyTorch 2.6+ cannot weights-only load that subclass even
+    # when allowlisted, so limit weights_only=False to COMET's private temp files.
+    def restricted_gather(writer: Any, *args: Any, **kwargs: Any) -> Any:
+        original_torch = predict_writer.torch
+        predict_writer.torch = _RestrictedCometPredictionTorch(
+            original_torch,
+            writer.output_dir,
+        )
+        try:
+            return original_gather(writer, *args, **kwargs)
+        finally:
+            predict_writer.torch = original_torch
+
+    writer_class.gather_all_predictions = restricted_gather
+    try:
+        yield
+    finally:
+        writer_class.gather_all_predictions = original_gather
 
 
 def score_prepared_systems(
@@ -665,16 +738,17 @@ def score_prepared_systems(
         }
         for segment in flat_segments
     ]
-    output = model.predict(
-        model_inputs,
-        batch_size=batch_size,
-        gpus=len(devices),
-        devices=list(devices),
-        accelerator="gpu",
-        num_workers=num_workers,
-        progress_bar=progress_bar,
-        length_batching=True,
-    )
+    with restricted_comet_prediction_gather_loads():
+        output = model.predict(
+            model_inputs,
+            batch_size=batch_size,
+            gpus=len(devices),
+            devices=list(devices),
+            accelerator="gpu",
+            num_workers=num_workers,
+            progress_bar=progress_bar,
+            length_batching=True,
+        )
     scores, error_spans = extract_xcomet_output(output, len(flat_segments))
     for segment, score, spans in zip(flat_segments, scores, error_spans):
         segment["xcomet_score"] = score
