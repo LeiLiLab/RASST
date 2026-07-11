@@ -1087,10 +1087,18 @@ def launch_sbatch(
     cache_chunks_by_lm_text: Optional[str],
     cache_seconds_rounding: str,
     max_new_tokens_per_lm: Optional[int],
+    allow_launch: bool = False,
+    sbatch_partition: Optional[str] = None,
+    sbatch_gres: Optional[str] = None,
+    sbatch_cpus: Optional[str] = None,
+    sbatch_mem: Optional[str] = None,
+    sbatch_time: Optional[str] = None,
+    sbatch_job_name: Optional[str] = None,
+    sbatch_array_limit: Optional[str] = None,
     prepare_only: bool = False,
 ) -> None:
-    if os.environ.get("RASST_ALLOW_LAUNCH", "0") != "1":
-        raise RasstError("Set RASST_ALLOW_LAUNCH=1 to launch. Use --dry-run first.")
+    if not allow_launch and os.environ.get("RASST_ALLOW_LAUNCH", "0") != "1":
+        raise RasstError("Pass --allow-launch to launch. Use --dry-run first.")
     if not shutil_which("sbatch"):
         raise RasstError("sbatch is not available on PATH.")
     log_dir = log_root(root) / "curated"
@@ -1108,13 +1116,15 @@ def launch_sbatch(
     task_status_dir = run_root / "task_status"
     cell_scripts_dir.mkdir(parents=True, exist_ok=True)
     task_status_dir.mkdir(parents=True, exist_ok=True)
-    partition = os.environ.get("RASST_SBATCH_PARTITION", "taurus")
-    gres = os.environ.get("RASST_SBATCH_GRES", "gpu:2")
-    cpus = os.environ.get("RASST_SBATCH_CPUS", "16")
-    mem = os.environ.get("RASST_SBATCH_MEM", "128G")
-    time_limit = os.environ.get("RASST_SBATCH_TIME", "08:00:00")
-    job_name = os.environ.get("RASST_SBATCH_JOB_NAME", "rasst24_eval")[:64]
-    array_limit = os.environ.get("RASST_SBATCH_ARRAY_LIMIT")
+    partition = sbatch_partition or os.environ.get("RASST_SBATCH_PARTITION", "taurus")
+    gres = sbatch_gres or os.environ.get("RASST_SBATCH_GRES", "gpu:2")
+    cpus = sbatch_cpus or os.environ.get("RASST_SBATCH_CPUS", "16")
+    mem = sbatch_mem or os.environ.get("RASST_SBATCH_MEM", "128G")
+    time_limit = sbatch_time or os.environ.get("RASST_SBATCH_TIME", "08:00:00")
+    job_name = (sbatch_job_name or os.environ.get("RASST_SBATCH_JOB_NAME", "rasst24_eval"))[:64]
+    array_limit = sbatch_array_limit
+    if array_limit is None:
+        array_limit = os.environ.get("RASST_SBATCH_ARRAY_LIMIT")
     if array_limit is None:
         array_limit = "4" if partition == "taurus" else "3" if partition == "aries" else "1"
     if len(cells) == 1:
@@ -1354,6 +1364,14 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     p.add_argument("--launch-backend", default="local", choices=("local", "sbatch"), help="Launch backend for real runs.")
     p.add_argument("--sbatch", action="store_true", help="Shortcut for --launch-backend sbatch.")
     p.add_argument("--prepare-only", action="store_true", help="Prepare generated launch scripts and metadata without submitting.")
+    p.add_argument("--allow-launch", action="store_true", help="Explicitly authorize submitting an sbatch run after a dry run.")
+    p.add_argument("--sbatch-partition", default=None, help="Slurm partition for --sbatch.")
+    p.add_argument("--sbatch-gres", default=None, help="Slurm GRES request for --sbatch, e.g. gpu:2.")
+    p.add_argument("--sbatch-cpus", default=None, help="Slurm CPUs per task for --sbatch.")
+    p.add_argument("--sbatch-mem", default=None, help="Slurm memory request for --sbatch.")
+    p.add_argument("--sbatch-time", default=None, help="Slurm time limit for --sbatch.")
+    p.add_argument("--sbatch-job-name", default=None, help="Slurm job name for --sbatch.")
+    p.add_argument("--sbatch-array-limit", default=None, help="Maximum concurrent Slurm array tasks; use 1 for serial cells.")
     p.add_argument("--run-root", default=None, help="Exact output root. Relative paths are resolved under RASST_ROOT.")
     p.add_argument("--force-runner", default=None, choices=("serial_simuleval", "batch_vllm"), help="Temporarily override selected cell runner without editing the manifest.")
     p.add_argument("--cell-override", action="append", default=[], help="Temporarily override selected cell config, as KEY=VALUE. Repeatable.")
@@ -1432,6 +1450,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             cache_chunks_by_lm_text=args.cache_chunks_by_lm,
             cache_seconds_rounding=args.cache_seconds_rounding,
             max_new_tokens_per_lm=args.max_new_tokens_per_lm,
+            allow_launch=args.allow_launch,
+            sbatch_partition=args.sbatch_partition,
+            sbatch_gres=args.sbatch_gres,
+            sbatch_cpus=args.sbatch_cpus,
+            sbatch_mem=args.sbatch_mem,
+            sbatch_time=args.sbatch_time,
+            sbatch_job_name=args.sbatch_job_name,
+            sbatch_array_limit=args.sbatch_array_limit,
             prepare_only=args.prepare_only,
         )
     else:
