@@ -13,7 +13,7 @@ lm=1,2 -> max_chunks=keep_chunks=30
 lm=3,4 -> max_chunks=keep_chunks=20
 ```
 
-On the final global-cache snapshot, RASST improves terminology accuracy over InfiniSST in all 24 evaluated cells, with positive BLEU deltas in 19/24 cells.
+On the final global-cache snapshot, RASST improves terminology accuracy over InfiniSST in all 24 evaluated cells, with positive BLEU deltas in 19/24 cells. A target-term-masked BLEU audit is included in the tracked result directory; on the 24 cells with artifact-backed InfiniSST hypotheses, RASST keeps positive masked-term BLEU deltas in 19/24 cells.
 
 | Track | Avg. BLEU delta vs. InfiniSST | Avg. TERM_ACC delta vs. InfiniSST |
 | --- | ---: | ---: |
@@ -26,6 +26,7 @@ On the final global-cache snapshot, RASST improves terminology accuracy over Inf
 ![Medicine main result](docs/results/main_result_global_cache30_30_20_20/medicine_main_result_global_cache30_30_20_20.png)
 
 The tracked result tables and figure sources are in [docs/results/main_result_global_cache30_30_20_20](docs/results/main_result_global_cache30_30_20_20/).
+The retriever compute RTF audit is in [docs/results/rag_compute_rtf](docs/results/rag_compute_rtf/).
 
 ## Release Assets
 
