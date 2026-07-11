@@ -26,6 +26,7 @@ On the final global-cache snapshot, RASST improves terminology accuracy over Inf
 ![Medicine main result](docs/results/main_result_global_cache30_30_20_20/medicine_main_result_global_cache30_30_20_20.png)
 
 The tracked result tables and figure sources are in [docs/results/main_result_global_cache30_30_20_20](docs/results/main_result_global_cache30_30_20_20/).
+The retriever compute RTF audit is in [docs/results/rag_compute_rtf](docs/results/rag_compute_rtf/).
 
 ## Release Assets
 
