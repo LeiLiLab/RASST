@@ -1,0 +1,690 @@
+{
+  "bert": {
+    "term": "BERT",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "BERT",
+      "de": "BERT",
+      "ja": "BERT"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "attention mechanism": {
+    "term": "attention mechanism",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "注意力机制",
+      "de": "Aufmerksamkeitsmechanismus",
+      "ja": "注意機構"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "nlp": {
+    "term": "NLP",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "自然语言处理",
+      "de": "NLP",
+      "ja": "自然言語処理"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "language model": {
+    "term": "language model",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "语言模型",
+      "de": "Sprachmodell",
+      "ja": "言語モデル"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "pre-training": {
+    "term": "pre-training",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "预训练",
+      "de": "Vorabtraining",
+      "ja": "事前学習"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "fine-tuning": {
+    "term": "fine-tuning",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "微调",
+      "de": "Feinabstimmung",
+      "ja": "ファインチューニング"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "tokenization": {
+    "term": "tokenization",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "分词",
+      "de": "Tokenisierung",
+      "ja": "トークン化"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "morphology": {
+    "term": "morphology",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "形态学",
+      "de": "Morphologie",
+      "ja": "形態論"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "morpheme": {
+    "term": "morpheme",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "语素",
+      "de": "Morphem",
+      "ja": "形態素"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "pos tagging": {
+    "term": "POS tagging",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "词性标注",
+      "de": "POS-Tagging",
+      "ja": "品詞タグ付け"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "hidden markov model": {
+    "term": "hidden Markov model",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "隐马尔可夫模型",
+      "de": "Hidden-Markov-Modell",
+      "ja": "隠れマルコフモデル"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "embedding": {
+    "term": "embedding",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "嵌入",
+      "de": "Einbettung",
+      "ja": "埋め込み"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "transformer encoder": {
+    "term": "transformer encoder",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "Transformer编码器",
+      "de": "Transformer-Encoder",
+      "ja": "Transformerエンコーダ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "downstream task": {
+    "term": "downstream task",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "下游任务",
+      "de": "Downstream-Aufgabe",
+      "ja": "下流タスク"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "named entity recognition": {
+    "term": "named entity recognition",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "命名实体识别",
+      "de": "Named Entity Recognition",
+      "ja": "固有表現認識"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "glue benchmark": {
+    "term": "GLUE benchmark",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "GLUE基准",
+      "de": "GLUE-Benchmark",
+      "ja": "GLUEベンチマーク"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "bpe": {
+    "term": "BPE",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "字节对编码",
+      "de": "Byte-Paar-Codierung",
+      "ja": "バイトペアエンコーディング"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "xlm-r": {
+    "term": "XLM-R",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "XLM-R",
+      "de": "XLM-R",
+      "ja": "XLM-R"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "machine translation": {
+    "term": "machine translation",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "机器翻译",
+      "de": "Maschinelle Übersetzung",
+      "ja": "機械翻訳"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "kullback–leibler divergence": {
+    "term": "Kullback–Leibler divergence",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "库尔贝克-莱布勒散度",
+      "de": "Kullback-Leibler-Divergenz",
+      "ja": "カルバック・ライブラー情報量"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "roberta": {
+    "term": "RoBERTa",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "RoBERTa",
+      "de": "RoBERTa",
+      "ja": "RoBERTa"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "vector representation": {
+    "term": "vector representation",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "向量表示",
+      "de": "Vektordarstellung",
+      "ja": "ベクトル表現"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "stemming": {
+    "term": "stemming",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "词干提取",
+      "de": "Stemming",
+      "ja": "ステミング"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "affix": {
+    "term": "affix",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "词缀",
+      "de": "Affix",
+      "ja": "接辞"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "vocabulary size": {
+    "term": "vocabulary size",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "词汇量",
+      "de": "Vokabulargröße",
+      "ja": "語彙サイズ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "ablation study": {
+    "term": "ablation study",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "消融研究",
+      "de": "Ablationsstudie",
+      "ja": "アブレーションスタディ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "downstream tasks": {
+    "term": "downstream tasks",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "下游任务",
+      "de": "Downstream-Aufgaben",
+      "ja": "下流タスク"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "rnn": {
+    "term": "RNN",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "循环神经网络",
+      "de": "RNN",
+      "ja": "RNN"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "convolutional networks": {
+    "term": "convolutional networks",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "卷积神经网络",
+      "de": "Faltungsnetzwerke",
+      "ja": "畳み込みニューラルネットワーク"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "plm": {
+    "term": "PLM",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "预训练语言模型",
+      "de": "PLM",
+      "ja": "PLM"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "sub-word tokenization": {
+    "term": "sub-word tokenization",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "子词分词",
+      "de": "Subwort-Tokenisierung",
+      "ja": "サブワードトークン化"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "transformer": {
+    "term": "Transformer",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "Transformer",
+      "de": "Transformer",
+      "ja": "Transformer"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "glue": {
+    "term": "GLUE",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "GLUE",
+      "de": "GLUE",
+      "ja": "GLUE"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "parsing": {
+    "term": "Parsing",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "句法分析",
+      "de": "Parsing",
+      "ja": "構文解析"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "adamw": {
+    "term": "AdamW",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "AdamW",
+      "de": "AdamW",
+      "ja": "AdamW"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "mlm": {
+    "term": "MLM",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "掩码语言模型",
+      "de": "Masked Language Model",
+      "ja": "マスク言語モデル"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "nsp": {
+    "term": "NSP",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "下一句预测",
+      "de": "Next Sentence Prediction",
+      "ja": "次文予測"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "wwm": {
+    "term": "WWM",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "全词掩码",
+      "de": "Whole Word Masking",
+      "ja": "単語全体マスキング"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "masked language model": {
+    "term": "Masked language model",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "掩码语言模型",
+      "de": "Masked Language Model",
+      "ja": "マスクされた言語モデル"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "next sentence prediction": {
+    "term": "Next Sentence Prediction",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "下一句预测",
+      "de": "Nächste Satzvorhersage",
+      "ja": "次の文予測"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "positional attention bias": {
+    "term": "positional attention bias",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "位置注意力偏差",
+      "de": "Positionelle Aufmerksamkeitsverzerrung",
+      "ja": "位置的注意バイアス"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "attention heads": {
+    "term": "attention heads",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "注意力头",
+      "de": "Aufmerksamkeitsköpfe",
+      "ja": "注意ヘッド"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "tokens": {
+    "term": "tokens",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.367.pdf",
+    "target_translations": {
+      "zh": "词元",
+      "de": "Token",
+      "ja": "トークン"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  }
+}

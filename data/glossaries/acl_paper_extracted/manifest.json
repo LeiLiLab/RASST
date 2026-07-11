@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "dataset_id": "acl6060_paper_extracted_realistic_glossary_v1",
+  "description": "Per-paper terminology extracted from five ACL6060 source papers for the realistic-glossary rebuttal evaluation.",
+  "extraction": {
+    "provider": "Google Gemini",
+    "classification_reason_in_entries": "llm_extracted",
+    "translation_source_in_entries": "llm translation",
+    "historical_tool_default": "gemini-1.5-flash",
+    "exact_historical_model_verified": false,
+    "note": "The original artifacts retain source-paper and extraction labels, but the exact historical command/model was not stored beside them."
+  },
+  "target_languages": ["zh", "de", "ja"],
+  "papers": {
+    "2022.acl-long.110": {
+      "path": "data/glossaries/acl_paper_extracted/extracted_glossary__2022.acl-long.110.json",
+      "term_count": 56,
+      "sha256": "5437b8d04793c50bbd3c161e521c07cc497ffa61b173b671e81e780276a49c19"
+    },
+    "2022.acl-long.117": {
+      "path": "data/glossaries/acl_paper_extracted/extracted_glossary__2022.acl-long.117.json",
+      "term_count": 66,
+      "sha256": "467d270026257c720adefe6ad2be787c56ebc5c31c33f295ca2ca733d9a767a7"
+    },
+    "2022.acl-long.268": {
+      "path": "data/glossaries/acl_paper_extracted/extracted_glossary__2022.acl-long.268.json",
+      "term_count": 58,
+      "sha256": "a6836dd150bb628a1c9e1ecfbc0825dc433c4c52fa4f3287a1e77509b25fb213"
+    },
+    "2022.acl-long.367": {
+      "path": "data/glossaries/acl_paper_extracted/extracted_glossary__2022.acl-long.367.json",
+      "term_count": 43,
+      "sha256": "c0953a0c4b8e79f3a71617bd1ec775d7c29ddfb3d528c84fae790853642530c8"
+    },
+    "2022.acl-long.590": {
+      "path": "data/glossaries/acl_paper_extracted/extracted_glossary__2022.acl-long.590.json",
+      "term_count": 63,
+      "sha256": "cb45c0b8b445290bd34be67f3a641173444262865453a441fc27d9276ffd761a"
+    }
+  }
+}

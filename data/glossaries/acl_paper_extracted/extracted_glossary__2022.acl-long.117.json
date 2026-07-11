@@ -1,0 +1,1058 @@
+{
+  "counterfactual": {
+    "term": "counterfactual",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "反事实",
+      "de": "kontrafaktisch",
+      "ja": "反事実的"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "data augmentation": {
+    "term": "data augmentation",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "数据增强",
+      "de": "Datenerweiterung",
+      "ja": "データ拡張"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "question answering": {
+    "term": "question answering",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "问答",
+      "de": "Fragebeantwortung",
+      "ja": "質問応答"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "open-domain qa": {
+    "term": "open-domain QA",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "开放域问答",
+      "de": "Open-Domain-QA",
+      "ja": "オープンなドメインQA"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "reading comprehension": {
+    "term": "reading comprehension",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "阅读理解",
+      "de": "Leseverständnis",
+      "ja": "読解"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "nlu": {
+    "term": "NLU",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "自然语言理解",
+      "de": "NLU",
+      "ja": "自然言語理解"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "spurious correlations": {
+    "term": "spurious correlations",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "虚假相关",
+      "de": "Scheinkorrelationen",
+      "ja": "見せかけの相関"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "causal model": {
+    "term": "causal model",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "因果模型",
+      "de": "Kausalmodell",
+      "ja": "因果モデル"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "sequence-to-sequence": {
+    "term": "sequence-to-sequence",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "序列到序列",
+      "de": "Sequenz-zu-Sequenz",
+      "ja": "シーケンス-ツー-シーケンス"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "semantic phenomena": {
+    "term": "semantic phenomena",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "语义现象",
+      "de": "semantische Phänomene",
+      "ja": "意味的現象"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "generalization": {
+    "term": "generalization",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "泛化",
+      "de": "Generalisierung",
+      "ja": "一般化"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "retrieve-and-read model": {
+    "term": "retrieve-and-read model",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "检索和阅读模型",
+      "de": "Retrieve-and-Read-Modell",
+      "ja": "検索アンドリードモデル"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "realm": {
+    "term": "REALM",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "REALM",
+      "de": "REALM",
+      "ja": "REALM"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "bi-encoder": {
+    "term": "bi-encoder",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "双编码器",
+      "de": "Bi-Encoder",
+      "ja": "バイエンコーダ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "dense retrieval": {
+    "term": "dense retrieval",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "密集检索",
+      "de": "dichte Suche",
+      "ja": "密な検索"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "answer-span extraction": {
+    "term": "answer-span extraction",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "答案范围提取",
+      "de": "Antwortspanne-Extraktion",
+      "ja": "回答スパン抽出"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "t5": {
+    "term": "T5",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "T5",
+      "de": "T5",
+      "ja": "T5"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "beam decoding": {
+    "term": "beam decoding",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "束搜索解码",
+      "de": "Beam-Decoding",
+      "ja": "ビームデコーディング"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "round-trip consistency": {
+    "term": "round-trip consistency",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "往返一致性",
+      "de": "Round-Trip-Konsistenz",
+      "ja": "ラウンドトリップ一貫性"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "ensemble": {
+    "term": "ensemble",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "集成",
+      "de": "Ensemble",
+      "ja": "アンサンブル"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "levenshtein distance": {
+    "term": "Levenshtein distance",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "莱文斯坦距离",
+      "de": "Levenshtein-Distanz",
+      "ja": "レーベンシュタイン距離"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "qed": {
+    "term": "QED",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "QED",
+      "de": "QED",
+      "ja": "QED"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "predicate": {
+    "term": "predicate",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "谓词",
+      "de": "Prädikat",
+      "ja": "述語"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "reference": {
+    "term": "reference",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "引用",
+      "de": "Referenz",
+      "ja": "参照"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "exact match": {
+    "term": "Exact Match",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "完全匹配",
+      "de": "Exakte Übereinstimmung",
+      "ja": "完全一致"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "f1 score": {
+    "term": "F1 score",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "F1 分数",
+      "de": "F1-Score",
+      "ja": "F1スコア"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "mrqa": {
+    "term": "MRQA",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "MRQA",
+      "de": "MRQA",
+      "ja": "MRQA"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "cda": {
+    "term": "CDA",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "CDA",
+      "de": "CDA",
+      "ja": "CDA"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "domain generalization": {
+    "term": "domain generalization",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "领域泛化",
+      "de": "Domänengeneralisierung",
+      "ja": "ドメイン一般化"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "nq": {
+    "term": "NQ",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "NQ",
+      "de": "NQ",
+      "ja": "NQ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "bert": {
+    "term": "BERT",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "BERT",
+      "de": "BERT",
+      "ja": "BERT"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "open-domain question answering": {
+    "term": "open-domain question answering",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "开放域问答",
+      "de": "Open-Domain-Fragebeantwortung",
+      "ja": "オープンな質問応答"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "retrieval": {
+    "term": "retrieval",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "检索",
+      "de": "Abruf",
+      "ja": "検索"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "query": {
+    "term": "query",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "查询",
+      "de": "Abfrage",
+      "ja": "クエリ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "document representation": {
+    "term": "document representation",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "文档表示",
+      "de": "Dokumentdarstellung",
+      "ja": "ドキュメント表現"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "local consistency": {
+    "term": "local consistency",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "局部一致性",
+      "de": "Lokale Konsistenz",
+      "ja": "ローカル一貫性"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "counterfactual examples": {
+    "term": "counterfactual examples",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "反事实例子",
+      "de": "Kontrafaktische Beispiele",
+      "ja": "反事実的な例"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "pairwise consistency": {
+    "term": "pairwise consistency",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "成对一致性",
+      "de": "Paarweise Konsistenz",
+      "ja": "ペアワイズ一貫性"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "baseline": {
+    "term": "baseline",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "基线",
+      "de": "Basislinie",
+      "ja": "ベースライン"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "generalization bias": {
+    "term": "generalization bias",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "泛化偏差",
+      "de": "Generalisierungs-Bias",
+      "ja": "一般化バイアス"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "low-resource": {
+    "term": "low-resource",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "低资源",
+      "de": "Ressourcenarm",
+      "ja": "低リソース"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "transfer setting": {
+    "term": "transfer setting",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "迁移设置",
+      "de": "Transfereinstellung",
+      "ja": "転送設定"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "domain-targeted": {
+    "term": "domain-targeted",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "面向领域",
+      "de": "Domain-spezifisch",
+      "ja": "ドメインターゲット"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "synthetic data": {
+    "term": "synthetic data",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "合成数据",
+      "de": "Synthetische Daten",
+      "ja": "合成データ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "knowledge": {
+    "term": "knowledge",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "知识",
+      "de": "Wissen",
+      "ja": "知識"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "semantic": {
+    "term": "semantic",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "语义的",
+      "de": "Semantisch",
+      "ja": "セマンティック"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "dropout": {
+    "term": "dropout",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "丢弃",
+      "de": "Dropout",
+      "ja": "ドロップアウト"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "beam size": {
+    "term": "beam size",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "束大小",
+      "de": "Strahlengröße",
+      "ja": "ビームサイズ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "span selection": {
+    "term": "span selection",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "跨度选择",
+      "de": "Span-Auswahl",
+      "ja": "スパン選択"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "seed values": {
+    "term": "seed values",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "种子值",
+      "de": "Seed-Werte",
+      "ja": "シード値"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "optimizer": {
+    "term": "optimizer",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "优化器",
+      "de": "Optimierer",
+      "ja": "オプティマイザ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "fine-tuning": {
+    "term": "fine-tuning",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "微调",
+      "de": "Feinabstimmung",
+      "ja": "微調整"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "nli": {
+    "term": "NLI",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "自然语言推理",
+      "de": "Natural Language Inference",
+      "ja": "自然言語推論"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "edit distance": {
+    "term": "edit distance",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "编辑距离",
+      "de": "Edit-Distanz",
+      "ja": "編集距離"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "semantic similarity": {
+    "term": "semantic similarity",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "语义相似性",
+      "de": "Semantische Ähnlichkeit",
+      "ja": "意味的類似性"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "monotonic relation": {
+    "term": "monotonic relation",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "单调关系",
+      "de": "Monotone Beziehung",
+      "ja": "単調な関係"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "question type": {
+    "term": "question type",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "问题类型",
+      "de": "Fragetyp",
+      "ja": "質問タイプ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "predicate type": {
+    "term": "predicate type",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "谓词类型",
+      "de": "Prädikatstyp",
+      "ja": "述語タイプ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "t5x": {
+    "term": "T5X",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "T5X",
+      "de": "T5X",
+      "ja": "T5X"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "qed annotations": {
+    "term": "QED annotations",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "QED注释",
+      "de": "QED-Annotationen",
+      "ja": "QEDアノテーション"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "semantic diversity": {
+    "term": "semantic diversity",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "语义多样性",
+      "de": "Semantische Vielfalt",
+      "ja": "意味的多様性"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "itil": {
+    "term": "ITIL",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "ITIL",
+      "de": "ITIL",
+      "ja": "ITIL"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "cartesian coordinates": {
+    "term": "Cartesian coordinates",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "笛卡尔坐标",
+      "de": "Kartesische Koordinaten",
+      "ja": "デカルト座標"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "general relativity": {
+    "term": "general relativity",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "广义相对论",
+      "de": "Allgemeine Relativitätstheorie",
+      "ja": "一般相対性理論"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "rgf": {
+    "term": "RGF",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "RGF",
+      "de": "RGF",
+      "ja": "RGF"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "qa": {
+    "term": "QA",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.117.pdf",
+    "target_translations": {
+      "zh": "问答",
+      "de": "QA",
+      "ja": "QA"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  }
+}
