@@ -27,6 +27,7 @@ import json
 import math
 import os
 import re
+import stat
 import statistics
 import subprocess
 import sys
@@ -53,6 +54,7 @@ MANIFEST_FIELDS = (
 PATH_FIELDS = ("instances_log", "source_text", "reference", "audio_yaml")
 TAG_NAME_RE = re.compile(r"^[A-Za-z][A-Za-z0-9_-]*$")
 COMET_GATHER_FILE_RE = re.compile(r"^(?:pred|batch_indices)_[0-9]+[.]pt$")
+SHA256_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 
 
 class XCometScoringError(RuntimeError):
@@ -126,6 +128,13 @@ class PreparedSystem:
     talk_count: int
     segments: List[Dict[str, Any]]
     provenance_hashes: Dict[str, str]
+
+
+@dataclass(frozen=True)
+class RecoveryConfig:
+    prediction_gather_dir: Path
+    inference_runner_sha256: str
+    gather_files: Tuple[Path, ...]
 
 
 class FileHasher:
@@ -302,6 +311,109 @@ def validate_checkpoint(path: Path) -> Path:
             f"COMET hparams.yaml is missing beside the checkpoint snapshot: {hparams_path}"
         )
     return resolved
+
+
+def _normalise_sha256(value: str, label: str) -> str:
+    cleaned = str(value or "").strip()
+    if not SHA256_RE.fullmatch(cleaned):
+        raise XCometScoringError(
+            f"{label} must be exactly 64 hexadecimal characters"
+        )
+    return cleaned.lower()
+
+
+def validate_prediction_gather_dir(
+    path: Path,
+    *,
+    device_count: int,
+) -> Tuple[Path, Tuple[Path, ...]]:
+    if device_count <= 0:
+        raise XCometScoringError(
+            "Cannot validate a COMET prediction gather directory without devices"
+        )
+    raw_path = Path(path)
+    if raw_path.is_symlink():
+        raise XCometScoringError(
+            f"COMET prediction gather directory must not be a symlink: {raw_path}"
+        )
+    try:
+        resolved = raw_path.resolve(strict=True)
+        directory_stat = os.lstat(resolved)
+    except (OSError, TypeError) as exc:
+        raise XCometScoringError(
+            f"COMET prediction gather directory is invalid: {raw_path}"
+        ) from exc
+    if not stat.S_ISDIR(directory_stat.st_mode):
+        raise XCometScoringError(
+            f"COMET prediction gather path is not a directory: {resolved}"
+        )
+
+    expected_names = {
+        f"{prefix}_{rank}.pt"
+        for rank in range(device_count)
+        for prefix in ("pred", "batch_indices")
+    }
+    try:
+        entries = list(resolved.iterdir())
+    except OSError as exc:
+        raise XCometScoringError(
+            f"Cannot list COMET prediction gather directory: {resolved}"
+        ) from exc
+    actual_names = {entry.name for entry in entries}
+    if len(entries) != len(expected_names) or actual_names != expected_names:
+        missing = sorted(expected_names - actual_names)
+        unexpected = sorted(actual_names - expected_names)
+        raise XCometScoringError(
+            "COMET prediction gather directory must contain exactly one pred_<rank>.pt "
+            "and batch_indices_<rank>.pt per device; "
+            f"missing={missing!r} unexpected={unexpected!r}: {resolved}"
+        )
+
+    gather_files: List[Path] = []
+    for name in sorted(expected_names):
+        entry = resolved / name
+        try:
+            entry_stat = os.lstat(entry)
+        except OSError as exc:
+            raise XCometScoringError(
+                f"Cannot stat COMET prediction gather file: {entry}"
+            ) from exc
+        if not stat.S_ISREG(entry_stat.st_mode):
+            raise XCometScoringError(
+                f"COMET prediction gather entry must be a regular file: {entry}"
+            )
+        gather_files.append(entry)
+    return resolved, tuple(gather_files)
+
+
+def resolve_recovery_config(
+    *,
+    prediction_gather_dir: Optional[Path],
+    inference_runner_sha256: Optional[str],
+    devices: Sequence[int],
+) -> Optional[RecoveryConfig]:
+    has_gather_dir = prediction_gather_dir is not None
+    has_runner_hash = inference_runner_sha256 is not None
+    if has_gather_dir != has_runner_hash:
+        raise XCometScoringError(
+            "--prediction-gather-dir and --inference-runner-sha256 must be supplied together"
+        )
+    if not has_gather_dir:
+        return None
+    assert prediction_gather_dir is not None
+    assert inference_runner_sha256 is not None
+    resolved_dir, gather_files = validate_prediction_gather_dir(
+        prediction_gather_dir,
+        device_count=len(devices),
+    )
+    return RecoveryConfig(
+        prediction_gather_dir=resolved_dir,
+        inference_runner_sha256=_normalise_sha256(
+            inference_runner_sha256,
+            "inference_runner_sha256",
+        ),
+        gather_files=gather_files,
+    )
 
 
 def normalise_output_tag_names(names: Sequence[str]) -> Tuple[str, ...]:
@@ -709,6 +821,93 @@ def restricted_comet_prediction_gather_loads() -> Iterator[None]:
         writer_class.gather_all_predictions = original_gather
 
 
+def _assign_xcomet_output(
+    systems: Sequence[PreparedSystem],
+    output: Any,
+) -> None:
+    flat_segments = [segment for system in systems for segment in system.segments]
+    scores, error_spans = extract_xcomet_output(output, len(flat_segments))
+    for segment, score, spans in zip(flat_segments, scores, error_spans):
+        segment["xcomet_score"] = score
+        segment["error_spans"] = spans
+
+
+def _hash_gather_files(paths: Sequence[Path]) -> Dict[str, str]:
+    hasher = FileHasher()
+    return {
+        f"{path.stem}_sha256": hasher.sha256(path)
+        for path in paths
+    }
+
+
+def recover_prepared_systems(
+    systems: Sequence[PreparedSystem],
+    *,
+    recovery: RecoveryConfig,
+    devices: Sequence[int],
+    recovery_runner_sha256: str,
+) -> None:
+    if not systems:
+        raise XCometScoringError("No prepared systems to recover")
+    if not devices:
+        raise XCometScoringError("At least one GPU device index is required")
+
+    gather_dir, gather_files = validate_prediction_gather_dir(
+        recovery.prediction_gather_dir,
+        device_count=len(devices),
+    )
+    if gather_dir != recovery.prediction_gather_dir or gather_files != recovery.gather_files:
+        raise XCometScoringError(
+            "COMET prediction gather directory entries changed after initial validation"
+        )
+    before_hashes = _hash_gather_files(gather_files)
+    total_segments = sum(len(system.segments) for system in systems)
+    print(
+        f"[RECOVER] gathering predictions from {gather_dir} "
+        f"files={len(gather_files)} expected_segments={total_segments}",
+        flush=True,
+    )
+
+    try:
+        from comet.models import predict_writer
+
+        writer = predict_writer.CustomWriter()
+        writer.output_dir = str(gather_dir)
+        with restricted_comet_prediction_gather_loads():
+            output = writer.gather_all_predictions()
+    except XCometScoringError:
+        raise
+    except Exception as exc:
+        raise XCometScoringError(
+            f"Failed to recover COMET predictions from {gather_dir}: {exc}"
+        ) from exc
+
+    after_dir, after_files = validate_prediction_gather_dir(
+        gather_dir,
+        device_count=len(devices),
+    )
+    after_hashes = _hash_gather_files(after_files)
+    if after_dir != gather_dir or after_files != gather_files or after_hashes != before_hashes:
+        raise XCometScoringError(
+            "COMET prediction gather files changed while recovery was reading them"
+        )
+
+    _assign_xcomet_output(systems, output)
+    recovery_hashes = {
+        "recovery_runner_sha256": _normalise_sha256(
+            recovery_runner_sha256,
+            "recovery_runner_sha256",
+        ),
+        **after_hashes,
+    }
+    for system in systems:
+        system.provenance_hashes.update(recovery_hashes)
+    print(
+        f"[RECOVER] restored scores_and_metadata={total_segments}; input gather retained",
+        flush=True,
+    )
+
+
 def score_prepared_systems(
     systems: Sequence[PreparedSystem],
     *,
@@ -749,10 +948,7 @@ def score_prepared_systems(
             progress_bar=progress_bar,
             length_batching=True,
         )
-    scores, error_spans = extract_xcomet_output(output, len(flat_segments))
-    for segment, score, spans in zip(flat_segments, scores, error_spans):
-        segment["xcomet_score"] = score
-        segment["error_spans"] = spans
+    _assign_xcomet_output(systems, output)
 
 
 def _mean(values: Sequence[float]) -> float:
@@ -1012,6 +1208,22 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--batch-size", type=int, required=True)
     parser.add_argument("--num-workers", type=int, required=True)
     parser.add_argument(
+        "--prediction-gather-dir",
+        type=Path,
+        help=(
+            "Recover from a complete COMET DDP prediction directory instead of "
+            "loading the model or running inference. Must be paired with "
+            "--inference-runner-sha256."
+        ),
+    )
+    parser.add_argument(
+        "--inference-runner-sha256",
+        help=(
+            "SHA-256 of the scoring runner that produced --prediction-gather-dir; "
+            "required only in recovery mode."
+        ),
+    )
+    parser.add_argument(
         "--segmenter-timeout-seconds",
         type=float,
         default=300.0,
@@ -1048,6 +1260,11 @@ def run(args: argparse.Namespace) -> None:
         raise XCometScoringError("batch_size must be positive")
     if args.num_workers < 0:
         raise XCometScoringError("num_workers must be non-negative")
+    recovery = resolve_recovery_config(
+        prediction_gather_dir=args.prediction_gather_dir,
+        inference_runner_sha256=args.inference_runner_sha256,
+        devices=devices,
+    )
     validate_output_paths(
         [args.summary_tsv, args.paired_tsv, args.segments_jsonl],
         [
@@ -1055,6 +1272,7 @@ def run(args: argparse.Namespace) -> None:
             checkpoint,
             checkpoint_hparams_path(checkpoint),
             segmenter,
+            *(recovery.gather_files if recovery is not None else ()),
             *(
                 path
                 for row in rows
@@ -1067,6 +1285,9 @@ def run(args: argparse.Namespace) -> None:
     manifest_sha256 = file_hasher.sha256(manifest_path)
     runner_path = Path(__file__).resolve()
     runner_sha256 = file_hasher.sha256(runner_path)
+    preparation_runner_sha256 = (
+        recovery.inference_runner_sha256 if recovery is not None else runner_sha256
+    )
     checkpoint_sha256 = file_hasher.sha256(checkpoint)
     checkpoint_hparams = checkpoint_hparams_path(checkpoint)
     checkpoint_hparams_sha256 = file_hasher.sha256(checkpoint_hparams)
@@ -1092,7 +1313,7 @@ def run(args: argparse.Namespace) -> None:
             prepare_system(
                 row,
                 manifest_sha256=manifest_sha256,
-                runner_sha256=runner_sha256,
+                runner_sha256=preparation_runner_sha256,
                 checkpoint_sha256=checkpoint_sha256,
                 checkpoint_hparams_sha256=checkpoint_hparams_sha256,
                 segmenter=segmenter,
@@ -1104,23 +1325,31 @@ def run(args: argparse.Namespace) -> None:
         )
 
     total_segments = sum(len(system.segments) for system in systems)
-    print(
-        f"[MODEL] loading {model_id}@{model_revision} once from {checkpoint}",
-        flush=True,
-    )
-    model = load_xcomet(checkpoint)
-    print(
-        f"[SCORE] systems={len(systems)} segments={total_segments} devices={devices}",
-        flush=True,
-    )
-    score_prepared_systems(
-        systems,
-        model=model,
-        devices=devices,
-        batch_size=args.batch_size,
-        num_workers=args.num_workers,
-        progress_bar=not args.no_progress_bar,
-    )
+    if recovery is None:
+        print(
+            f"[MODEL] loading {model_id}@{model_revision} once from {checkpoint}",
+            flush=True,
+        )
+        model = load_xcomet(checkpoint)
+        print(
+            f"[SCORE] systems={len(systems)} segments={total_segments} devices={devices}",
+            flush=True,
+        )
+        score_prepared_systems(
+            systems,
+            model=model,
+            devices=devices,
+            batch_size=args.batch_size,
+            num_workers=args.num_workers,
+            progress_bar=not args.no_progress_bar,
+        )
+    else:
+        recover_prepared_systems(
+            systems,
+            recovery=recovery,
+            devices=devices,
+            recovery_runner_sha256=runner_sha256,
+        )
 
     summary_rows = build_summary_rows(
         systems,
