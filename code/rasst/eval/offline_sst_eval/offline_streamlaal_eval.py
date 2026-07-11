@@ -61,13 +61,14 @@ EXIT_RUNTIME_ERROR = 4
 import argparse
 import json
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Sequence, Tuple
 
 import yaml
 
@@ -159,6 +160,14 @@ class ParsedMetrics:
     neg_total: str = ""
 
 
+@dataclass(frozen=True)
+class MaskedTermsBleu:
+    bleu: str
+    hyp_terms_removed: str
+    ref_terms_removed: str
+    term_types: str
+
+
 _NUMBER_RE = r"-?(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+)"
 _METRIC_TRIPLE_RE = re.compile(rf"^\s*({_NUMBER_RE})\s+({_NUMBER_RE})\s+({_NUMBER_RE})\s*$")
 _TERM_OUTPUT_TAG_RE = re.compile(r"</?\s*term\s*>", flags=re.IGNORECASE)
@@ -181,6 +190,10 @@ def _tag_edge_space_regexes(*, include_short_t: bool) -> Tuple[re.Pattern[str], 
 
 COMPUTE_TCR_SCRIPT_REL = "eval/offline_sst_eval/compute_tcr_from_runtime_log.py"
 COMPUTE_ADOPTION_SCRIPT_REL = "eval/offline_sst_eval/compute_sentence_term_adoption.py"
+
+
+def _normalise_space(text: str) -> str:
+    return re.sub(r"\s+", " ", str(text or "")).strip()
 
 
 def _strip_term_output_tags_with_mask(
@@ -630,6 +643,270 @@ def _run_stream_laal_term(
             f"{p.stdout}"
         )
     return p.stdout
+
+
+_ALNUM_TERM_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 ._+/#&%()-]*$")
+_CJK_OR_KANA_RE = re.compile(r"[\u3040-\u30ff\u3400-\u9fff]")
+
+
+def _term_to_mask_regex(term: str) -> re.Pattern[str]:
+    term_norm = _normalise_space(term)
+    if not term_norm:
+        raise ValueError("Cannot build a mask regex for an empty term.")
+    escaped = re.escape(term_norm).replace(r"\ ", r"\s+")
+    if _ALNUM_TERM_RE.fullmatch(term_norm):
+        return re.compile(
+            r"(?<![A-Za-z0-9])" + escaped + r"(?![A-Za-z0-9])",
+            flags=re.IGNORECASE,
+        )
+    if len(term_norm) == 1 and _CJK_OR_KANA_RE.search(term_norm):
+        return re.compile(
+            r"(?<![\u3040-\u30ff\u3400-\u9fff])"
+            + escaped
+            + r"(?![\u3040-\u30ff\u3400-\u9fff])"
+        )
+    flags = 0 if _CJK_OR_KANA_RE.search(term_norm) else re.IGNORECASE
+    return re.compile(escaped, flags=flags)
+
+
+def _compile_term_mask_patterns(target_terms: Sequence[str]) -> List[re.Pattern[str]]:
+    return [_term_to_mask_regex(term) for term in target_terms]
+
+
+def _load_target_terms_for_masking(glossary_path: Path, target_lang: str) -> List[str]:
+    data = json.loads(_read_text(glossary_path))
+    if isinstance(data, dict):
+        raw_entries: Iterable[Any] = data.values()
+    elif isinstance(data, list):
+        raw_entries = data
+    else:
+        raise ValueError(f"Unsupported glossary format for masked BLEU: {glossary_path}")
+
+    terms: List[str] = []
+    seen = set()
+    for entry in raw_entries:
+        if not isinstance(entry, dict):
+            continue
+        translations = entry.get("target_translations")
+        translation = ""
+        if isinstance(translations, dict):
+            translation = _normalise_space(translations.get(target_lang) or "")
+        if not translation:
+            translation = _normalise_space(
+                entry.get("translation")
+                or entry.get("target_translation")
+                or entry.get(target_lang)
+                or ""
+            )
+        if not translation:
+            continue
+        key = translation.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        terms.append(translation)
+
+    # Longer terms must be removed before shorter overlapping terms.
+    terms.sort(key=lambda text: (len(text), text), reverse=True)
+    return terms
+
+
+def _mask_target_terms(text: str, term_patterns: Sequence[re.Pattern[str]]) -> Tuple[str, int]:
+    masked = str(text or "")
+    removed = 0
+    for pattern in term_patterns:
+        masked, count = pattern.subn(" ", masked)
+        removed += count
+    return _normalise_space(masked), removed
+
+
+def _mwer_command() -> str:
+    cmd = shutil.which("mwerSegmenter")
+    if cmd:
+        return cmd
+    root = os.environ.get("MWERSEGMENTER_ROOT", "").strip()
+    if root:
+        candidate = Path(root) / "mwerSegmenter"
+        if candidate.is_file():
+            return str(candidate)
+    raise RuntimeError("mwerSegmenter not found in PATH and MWERSEGMENTER_ROOT is not set")
+
+
+def _segment_prediction_by_references(
+    prediction: str,
+    reference_sentences: List[str],
+    latency_unit: str,
+) -> List[str]:
+    command = _mwer_command()
+    character_level = latency_unit == "char"
+    pred_text = str(prediction or "")
+    refs = [str(x or "") for x in reference_sentences]
+    if character_level:
+        pred_text = " ".join(pred_text)
+        refs = [" ".join(x) for x in refs]
+
+    tmp_dir = tempfile.mkdtemp()
+    pred_file = tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False)
+    ref_file = tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False)
+    segments_path = Path(tmp_dir) / "__segments"
+    try:
+        pred_file.write(pred_text)
+        pred_file.flush()
+        ref_file.writelines(ref + "\n" for ref in refs)
+        ref_file.flush()
+        subprocess.run(
+            [command, "-mref", ref_file.name, "-hypfile", pred_file.name, "-usecase", "1"],
+            cwd=tmp_dir,
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        segments = segments_path.read_text(encoding="utf-8", errors="replace").splitlines()
+        if character_level:
+            segments = [re.sub(r"(.)\s", r"\1", line).strip() for line in segments]
+        else:
+            segments = [line.strip() for line in segments]
+        if len(segments) != len(reference_sentences):
+            raise RuntimeError(
+                f"mwerSegmenter returned {len(segments)} segments for "
+                f"{len(reference_sentences)} references"
+            )
+        return segments
+    finally:
+        pred_file.close()
+        ref_file.close()
+        for path in (Path(pred_file.name), Path(ref_file.name), segments_path):
+            path.unlink(missing_ok=True)
+        Path(tmp_dir).rmdir()
+
+
+def _resegment_instances_for_bleu(
+    instances_path: Path,
+    ref_file: Path,
+    audio_yaml: Path,
+    latency_unit: str,
+) -> List[Tuple[str, List[str], List[str]]]:
+    refs = _read_text(ref_file).splitlines()
+    audio = yaml.safe_load(_read_text(audio_yaml))
+    if not isinstance(audio, list):
+        raise ValueError(f"Invalid audio yaml format (expect list): {audio_yaml}")
+    if len(audio) != len(refs):
+        raise ValueError(
+            f"audio yaml entries {len(audio)} != reference lines {len(refs)}. "
+            f"audio_yaml={audio_yaml} ref_file={ref_file}"
+        )
+
+    refs_by_wav: Dict[str, List[str]] = {}
+    for ref, item in zip(refs, audio):
+        if not isinstance(item, dict):
+            raise ValueError(f"Invalid audio yaml row in {audio_yaml}: {item!r}")
+        wav = _basename(item.get("wav", ""))
+        if not wav:
+            raise ValueError(f"Audio yaml row is missing wav in {audio_yaml}: {item!r}")
+        refs_by_wav.setdefault(wav, []).append(ref)
+
+    predictions_by_wav: Dict[str, str] = {}
+    for row in _iter_jsonl(instances_path):
+        src = row.get("source")
+        if not isinstance(src, list) or not src:
+            raise ValueError(f"Instance is missing source[0] in {instances_path}: {row!r}")
+        wav = _basename(src[0])
+        predictions_by_wav[wav] = str(row.get("prediction") or "")
+
+    missing = sorted(set(refs_by_wav) - set(predictions_by_wav))
+    extra = sorted(set(predictions_by_wav) - set(refs_by_wav))
+    if missing or extra:
+        raise ValueError(
+            f"Reference/prediction wav mismatch for masked BLEU. "
+            f"missing_predictions={missing} extra_predictions={extra}"
+        )
+
+    groups: List[Tuple[str, List[str], List[str]]] = []
+    for wav, wav_refs in refs_by_wav.items():
+        wav_hyps = _segment_prediction_by_references(
+            predictions_by_wav[wav],
+            wav_refs,
+            latency_unit=latency_unit,
+        )
+        if len(wav_hyps) != len(wav_refs):
+            raise ValueError(
+                f"mwerSegmenter returned {len(wav_hyps)} segments for {len(wav_refs)} refs "
+                f"for wav={wav}"
+            )
+        groups.append((wav, wav_hyps, wav_refs))
+    return groups
+
+
+def _compute_masked_terms_bleu(
+    *,
+    instances_path: Path,
+    ref_file: Path,
+    audio_yaml: Path,
+    sacrebleu_tokenizer: str,
+    latency_unit: str,
+    target_lang: str,
+    glossary_path: Optional[Path] = None,
+    glossary_by_paper: Optional[Dict[str, Path]] = None,
+) -> MaskedTermsBleu:
+    try:
+        import sacrebleu
+    except ImportError as exc:
+        raise RuntimeError(
+            "sacrebleu is required for MASKED_TERMS_BLEU. "
+            "Install requirements.txt or run from the release eval environment."
+        ) from exc
+
+    groups = _resegment_instances_for_bleu(
+        instances_path=instances_path,
+        ref_file=ref_file,
+        audio_yaml=audio_yaml,
+        latency_unit=latency_unit,
+    )
+
+    terms_cache: Dict[Path, Tuple[List[str], List[re.Pattern[str]]]] = {}
+
+    def terms_for_wav(wav: str) -> Tuple[List[str], List[re.Pattern[str]]]:
+        if glossary_by_paper is not None:
+            paper_id = _paper_id_from_wav_basename(wav)
+            if not paper_id or paper_id not in glossary_by_paper:
+                raise ValueError(f"No glossary found for wav={wav} paper_id={paper_id}")
+            selected = glossary_by_paper[paper_id]
+        else:
+            if glossary_path is None:
+                raise ValueError("glossary_path is required when glossary_by_paper is not set.")
+            selected = glossary_path
+        if selected not in terms_cache:
+            target_terms = _load_target_terms_for_masking(selected, target_lang)
+            terms_cache[selected] = (target_terms, _compile_term_mask_patterns(target_terms))
+        return terms_cache[selected]
+
+    masked_hyps: List[str] = []
+    masked_refs: List[str] = []
+    hyp_removed = 0
+    ref_removed = 0
+    term_types = set()
+    for wav, wav_hyps, wav_refs in groups:
+        target_terms, term_patterns = terms_for_wav(wav)
+        term_types.update(target_terms)
+        for hyp, ref in zip(wav_hyps, wav_refs):
+            masked_hyp, hyp_count = _mask_target_terms(hyp, term_patterns)
+            masked_ref, ref_count = _mask_target_terms(ref, term_patterns)
+            masked_hyps.append(masked_hyp)
+            masked_refs.append(masked_ref)
+            hyp_removed += hyp_count
+            ref_removed += ref_count
+
+    score = sacrebleu.corpus_bleu(
+        masked_hyps,
+        [masked_refs],
+        tokenize=sacrebleu_tokenizer,
+    ).score
+    return MaskedTermsBleu(
+        bleu=str(score),
+        hyp_terms_removed=str(hyp_removed),
+        ref_terms_removed=str(ref_removed),
+        term_types=str(len(term_types)),
+    )
 
 
 def _load_acl6060_dev(audio_yaml: Path, ref_file: Path) -> Tuple[List[Dict[str, Any]], List[str]]:
@@ -1129,6 +1406,15 @@ def main() -> int:
                 term_mismatch_examples=str(args.term_mismatch_examples),
             )
             m = _parse_stream_laal_output(eval_out)
+            masked_terms_bleu = _compute_masked_terms_bleu(
+                instances_path=instances_path,
+                ref_file=ref_file,
+                audio_yaml=audio_yaml,
+                sacrebleu_tokenizer=sacrebleu_tokenizer,
+                latency_unit=latency_unit,
+                target_lang=term_lang,
+                glossary_path=glossary_acl6060,
+            )
 
             if out_log:
                 _write_text(out_log, eval_out)
@@ -1176,6 +1462,10 @@ def main() -> int:
                 "mode",
                 "lang_code",
                 "BLEU",
+                "MASKED_TERMS_BLEU",
+                "MASKED_TERMS_HYP_REMOVED",
+                "MASKED_TERMS_REF_REMOVED",
+                "MASKED_TERMS_TYPES",
                 "StreamLAAL",
                 "StreamLAAL_CA",
                 "TERM_ACC",
@@ -1206,6 +1496,10 @@ def main() -> int:
                 args.mode,
                 args.lang_code,
                 m.bleu,
+                masked_terms_bleu.bleu,
+                masked_terms_bleu.hyp_terms_removed,
+                masked_terms_bleu.ref_terms_removed,
+                masked_terms_bleu.term_types,
                 m.stream_laal,
                 m.stream_laal_ca,
                 m.term_acc,
@@ -1256,6 +1550,15 @@ def main() -> int:
             term_mismatch_examples=str(args.term_mismatch_examples),
         )
         m_full = _parse_stream_laal_output(eval_out_full)
+        masked_terms_bleu = _compute_masked_terms_bleu(
+            instances_path=instances_path,
+            ref_file=ref_file,
+            audio_yaml=audio_yaml,
+            sacrebleu_tokenizer=sacrebleu_tokenizer,
+            latency_unit=latency_unit,
+            target_lang=term_lang,
+            glossary_by_paper=_load_glossary_manifest(extracted_glossary_manifest),
+        )
 
         # 2) TERM metrics by paper using extracted glossary.
         total_correct, total_terms, per_paper_counts = _compute_term_sums_extracted_by_paper(
@@ -1336,6 +1639,10 @@ def main() -> int:
                 "instances_log": str(instances_path),
                 "extracted_glossary_manifest": str(extracted_glossary_manifest),
                 "bleu": m_full.bleu,
+                "masked_terms_bleu": masked_terms_bleu.bleu,
+                "masked_terms_hyp_removed": masked_terms_bleu.hyp_terms_removed,
+                "masked_terms_ref_removed": masked_terms_bleu.ref_terms_removed,
+                "masked_terms_types": masked_terms_bleu.term_types,
                 "stream_laal": m_full.stream_laal,
                 "stream_laal_ca": m_full.stream_laal_ca,
                 "term_correct_sum": total_correct,
@@ -1370,6 +1677,10 @@ def main() -> int:
             "mode",
             "lang_code",
             "BLEU",
+            "MASKED_TERMS_BLEU",
+            "MASKED_TERMS_HYP_REMOVED",
+            "MASKED_TERMS_REF_REMOVED",
+            "MASKED_TERMS_TYPES",
             "StreamLAAL",
             "StreamLAAL_CA",
             "TERM_ACC",
@@ -1400,6 +1711,10 @@ def main() -> int:
             args.mode,
             args.lang_code,
             m_full.bleu,
+            masked_terms_bleu.bleu,
+            masked_terms_bleu.hyp_terms_removed,
+            masked_terms_bleu.ref_terms_removed,
+            masked_terms_bleu.term_types,
             m_full.stream_laal,
             m_full.stream_laal_ca,
             term_acc,

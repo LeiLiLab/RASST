@@ -1,0 +1,930 @@
+{
+  "bert": {
+    "term": "BERT",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "BERT",
+      "de": "BERT",
+      "ja": "BERT"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "bilstm-crf": {
+    "term": "BiLSTM-CRF",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "BiLSTM-CRF",
+      "de": "BiLSTM-CRF",
+      "ja": "BiLSTM-CRF"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "transformer-based models": {
+    "term": "Transformer-based models",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "基于Transformer的模型",
+      "de": "Transformer-basierte Modelle",
+      "ja": "Transformerベースのモデル"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "embeddings": {
+    "term": "embeddings",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "嵌入",
+      "de": "Einbettungen",
+      "ja": "埋め込み"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "subword embeddings": {
+    "term": "subword embeddings",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "子词嵌入",
+      "de": "Subwort-Einbettungen",
+      "ja": "サブワード埋め込み"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "contextualized word embeddings": {
+    "term": "contextualized word embeddings",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "语境化词嵌入",
+      "de": "Kontextualisierte Wort-Einbettungen",
+      "ja": "文脈化された単語埋め込み"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "lexical borrowing": {
+    "term": "lexical borrowing",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "词汇借用",
+      "de": "Lexikalische Entlehnung",
+      "ja": "語彙借用"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "codeswitching": {
+    "term": "codeswitching",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "代码转换",
+      "de": "Codeswitching",
+      "ja": "コードスイッチング"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "out-of-vocabulary (oov)": {
+    "term": "out-of-vocabulary (OOV)",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "词汇表外 (OOV)",
+      "de": "Out-of-Vocabulary (OOV)",
+      "ja": "語彙外 (OOV)"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "chunking": {
+    "term": "chunking",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "组块分析",
+      "de": "Chunking",
+      "ja": "チャンキング"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "bio encoding": {
+    "term": "BIO encoding",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "BIO编码",
+      "de": "BIO-Kodierung",
+      "ja": "BIOエンコーディング"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "inter-annotation agreement": {
+    "term": "inter-annotation agreement",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "标注一致性",
+      "de": "Inter-Annotation-Übereinstimmung",
+      "ja": "アノテーション間合意"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "conditional random field (crf)": {
+    "term": "conditional random field (CRF)",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "条件随机场 (CRF)",
+      "de": "Conditional Random Field (CRF)",
+      "ja": "条件付き確率場 (CRF)"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "spacy": {
+    "term": "spaCy",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "spaCy",
+      "de": "spaCy",
+      "ja": "spaCy"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "word2vec": {
+    "term": "word2vec",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "word2vec",
+      "de": "word2vec",
+      "ja": "word2vec"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "l-bfgs": {
+    "term": "L-BFGS",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "L-BFGS",
+      "de": "L-BFGS",
+      "ja": "L-BFGS"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "mbert": {
+    "term": "mBERT",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "mBERT",
+      "de": "mBERT",
+      "ja": "mBERT"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "bpe": {
+    "term": "BPE",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "BPE",
+      "de": "BPE",
+      "ja": "BPE"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "one-hot embeddings": {
+    "term": "one-hot embeddings",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "独热嵌入",
+      "de": "One-Hot-Einbettungen",
+      "ja": "one-hot埋め込み"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "bytepair embeddings": {
+    "term": "bytepair embeddings",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "字节对嵌入",
+      "de": "Bytepaar-Einbettungen",
+      "ja": "バイトペア埋め込み"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "character embeddings": {
+    "term": "character embeddings",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "字符嵌入",
+      "de": "Zeichen-Einbettungen",
+      "ja": "文字埋め込み"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "transfer learning": {
+    "term": "transfer learning",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "迁移学习",
+      "de": "Transferlernen",
+      "ja": "転移学習"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "data augmentation": {
+    "term": "data augmentation",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "数据增强",
+      "de": "Datenerweiterung",
+      "ja": "データ拡張"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "named entity recognition": {
+    "term": "named entity recognition",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "命名实体识别",
+      "de": "Erkennung benannter Entitäten",
+      "ja": "固有表現認識"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "pos tagging": {
+    "term": "POS tagging",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "词性标注",
+      "de": "POS-Tagging",
+      "ja": "品詞タグ付け"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "oov words": {
+    "term": "OOV words",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "未登录词",
+      "de": "OOV-Wörter",
+      "ja": "未知語"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "anglicisms": {
+    "term": "anglicisms",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "英语外来语",
+      "de": "Anglizismen",
+      "ja": "英語主義"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "semantic calques": {
+    "term": "semantic calques",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "语义仿造",
+      "de": "Semantische Lehnübersetzung",
+      "ja": "意味借用"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "syntactic anglicisms": {
+    "term": "syntactic anglicisms",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "句法英语外来语",
+      "de": "Syntaktische Anglizismen",
+      "ja": "構文英語主義"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "word embeddings": {
+    "term": "word embeddings",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "词嵌入",
+      "de": "Wort-Einbettungen",
+      "ja": "単語埋め込み"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "sequence labeling": {
+    "term": "sequence labeling",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "序列标注",
+      "de": "Sequenz-Labeling",
+      "ja": "系列ラベリング"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "f1 score": {
+    "term": "F1 score",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "F1 分数",
+      "de": "F1-Score",
+      "ja": "F1スコア"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "recall": {
+    "term": "recall",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "召回率",
+      "de": "Recall",
+      "ja": "再現率"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "precision": {
+    "term": "precision",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "精确率",
+      "de": "Präzision",
+      "ja": "適合率"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "data statement": {
+    "term": "data statement",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "数据声明",
+      "de": "Datenerklärung",
+      "ja": "データステートメント"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "annotation guidelines": {
+    "term": "annotation guidelines",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "标注指南",
+      "de": "Annotationsrichtlinien",
+      "ja": "アノテーションガイドライン"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "corpus": {
+    "term": "corpus",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "语料库",
+      "de": "Korpus",
+      "ja": "コーパス"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "neural models": {
+    "term": "neural models",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "神经模型",
+      "de": "Neuronale Modelle",
+      "ja": "ニューラルモデル"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "beto": {
+    "term": "BETO",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "BETO",
+      "de": "BETO",
+      "ja": "BETO"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "crf": {
+    "term": "CRF",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "条件随机场",
+      "de": "CRF",
+      "ja": "CRF"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "unassimilated lexical borrowing": {
+    "term": "unassimilated lexical borrowing",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "未同化词汇借用",
+      "de": "nicht assimilierte lexikalische Entlehnung",
+      "ja": "未同化語彙借用"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "morphological": {
+    "term": "morphological",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "形态的",
+      "de": "morphologisch",
+      "ja": "形態的"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "orthographic": {
+    "term": "orthographic",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "正字的",
+      "de": "orthographisch",
+      "ja": "正書法的な"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "diachronic": {
+    "term": "diachronic",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "历时的",
+      "de": "diachronisch",
+      "ja": "通時的"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "grapho-phonological": {
+    "term": "grapho-phonological",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "字音的",
+      "de": "graphophonologisch",
+      "ja": "書記音韻論的"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "lexemes": {
+    "term": "lexemes",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "词位",
+      "de": "Lexeme",
+      "ja": "語彙素"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "orthotactics": {
+    "term": "orthotactics",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "正字法",
+      "de": "Orthotaktik",
+      "ja": "正書法タクティクス"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "pseudoanglicisms": {
+    "term": "pseudoanglicisms",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "伪英语",
+      "de": "Pseudoanglizismen",
+      "ja": "和製英語"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "realia words": {
+    "term": "realia words",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "实物词",
+      "de": "Realia-Wörter",
+      "ja": "実物語"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "latinisms": {
+    "term": "Latinisms",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "拉丁语",
+      "de": "Latinismen",
+      "ja": "ラテン語主義"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "metonymy": {
+    "term": "metonymy",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "转喻",
+      "de": "Metonymie",
+      "ja": "換喩"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "eponymy": {
+    "term": "eponymy",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "命名",
+      "de": "Eponymie",
+      "ja": "エポニム"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "code-mixed inclusions": {
+    "term": "code-mixed inclusions",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "代码混合包含",
+      "de": "Code-Mixing-Einschlüsse",
+      "ja": "コード混合インクルージョン"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "acronym": {
+    "term": "acronym",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "首字母缩略词",
+      "de": "Akronym",
+      "ja": "頭字語"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "synchronic": {
+    "term": "synchronic",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "共时的",
+      "de": "synchronisch",
+      "ja": "共時的"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "dialects": {
+    "term": "dialects",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "方言",
+      "de": "Dialekte",
+      "ja": "方言"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "crf model": {
+    "term": "CRF model",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "CRF模型",
+      "de": "CRF-Modell",
+      "ja": "CRFモデル"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "oov": {
+    "term": "OOV",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.268.pdf",
+    "target_translations": {
+      "zh": "未登录词",
+      "de": "OOV (Out-of-Vocabulary)",
+      "ja": "語彙外"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  }
+}

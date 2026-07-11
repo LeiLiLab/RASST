@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "event_id": "20260711T215140Z__simuleval__rebuttal_acl_paper_extracted_lm2",
+  "status": "running",
+  "dataset": "acl6060_paper_extracted_realistic_glossary_v1",
+  "glossary_manifest": "data/glossaries/acl_paper_extracted/manifest.json",
+  "languages": ["zh", "ja", "de"],
+  "latency_multiplier": 2,
+  "config": {
+    "rag_top_k": 10,
+    "rag_score_threshold": 0.78,
+    "timeline_lookback_sec": 1.92,
+    "system_prompt_style": "given_chunks",
+    "term_map_format": "plain",
+    "empty_term_map_policy": "omit",
+    "strip_output_tags": "term_t",
+    "max_cache_chunks": 30,
+    "keep_cache_chunks": 30,
+    "max_new_tokens": 80,
+    "vllm_tp_size": 2,
+    "rag_device": "cuda:0"
+  },
+  "model_assets": {
+    "zh": "gavinlaw/rasst-speech-llm-zh-cap16-denoise-ttag",
+    "ja": "gavinlaw/rasst-speech-llm-ja-cap16-denoise-ttag",
+    "de": "gavinlaw/rasst-speech-llm-de-cap16-denoise-ttag",
+    "retriever": "gavinlaw/rasst-retriever-hn1024"
+  },
+  "slurm": {
+    "cluster": "aries",
+    "failed_index_only_jobs": ["47028", "47029", "47030"],
+    "active_or_queued_jobs": {
+      "zh": "47067",
+      "ja": "47068",
+      "de": "47069"
+    },
+    "runtime_output_root": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/rebuttal_acl_paper_extracted_lm2_20260711T215140Z"
+  },
+  "validation_policy": "Accept a language result only when all five per-paper eval_results.tsv and instances.log artifacts exist and aggregate successfully."
+}

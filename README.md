@@ -13,7 +13,7 @@ lm=1,2 -> max_chunks=keep_chunks=30
 lm=3,4 -> max_chunks=keep_chunks=20
 ```
 
-On the final global-cache snapshot, RASST improves terminology accuracy over InfiniSST in all 24 evaluated cells, with positive BLEU deltas in 19/24 cells.
+On the final global-cache snapshot, RASST improves terminology accuracy over InfiniSST in all 24 evaluated cells, with positive BLEU deltas in 19/24 cells. The tracked result package also includes a target-term-masked BLEU audit. The paper-extracted ACL glossaries and the rebuttal evaluation record are tracked under [`data/glossaries/acl_paper_extracted`](data/glossaries/acl_paper_extracted/) and [`docs/results/acl_paper_extracted_lm2`](docs/results/acl_paper_extracted_lm2/).
 
 | Track | Avg. BLEU delta vs. InfiniSST | Avg. TERM_ACC delta vs. InfiniSST |
 | --- | ---: | ---: |
