@@ -835,6 +835,124 @@ def _validate_sidecar_and_request(
     _sha256(sidecar["source_record_sha256"], context=f"{context}.source_record_sha256")
 
 
+def _validate_prepared_shards(
+    output_dir: Path,
+    manifest: Mapping[str, Any],
+    shard_by_id: Mapping[str, Mapping[str, Any]],
+) -> Dict[str, List[Dict[str, Any]]]:
+    sidecars_by_role: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+    system_counts: Dict[Tuple[str, str, str, str], int] = defaultdict(int)
+    system_talks: Dict[Tuple[str, str, str, str], set[str]] = defaultdict(set)
+    pair_records: Dict[
+        Tuple[str, str, str, str, int], Dict[str, Tuple[str, str]]
+    ] = defaultdict(dict)
+    all_request_keys = set()
+    all_identities = set()
+    for shard_id in sorted(shard_by_id):
+        shard = shard_by_id[shard_id]
+        state = _read_json(
+            output_dir / "states" / f"{shard_id}.json",
+            label=f"{shard_id} state",
+        )
+        for field, expected in (
+            ("schema_version", SCHEMA_VERSION),
+            ("run_id", manifest.get("run_id")),
+            ("shard_id", shard_id),
+            ("status", "PREPARED"),
+            ("model", manifest["model"]),
+            (
+                "generation_config_sha256",
+                manifest["methodology"]["generation_config_sha256"],
+            ),
+        ):
+            _assert_equal(state.get(field), expected, context=f"{shard_id} state {field}")
+        for field in ("request_path", "request_sha256", "request_bytes", "request_count"):
+            _assert_equal(state.get(field), shard.get(field), context=f"{shard_id} state {field}")
+        history = state.get("history")
+        if not isinstance(history, list) or len(history) != 1 or not isinstance(history[0], dict):
+            raise GeminiJudgeValidationError(
+                f"{shard_id} PREPARED state must contain exactly one history entry"
+            )
+        _assert_equal(
+            history[0].get("status"), "PREPARED", context=f"{shard_id} state history"
+        )
+
+        request_rows = _read_jsonl(
+            _artifact_path(output_dir, shard["request_path"], label=f"{shard_id} request"),
+            label=f"{shard_id} requests",
+        )
+        sidecar_rows = _read_jsonl(
+            _artifact_path(output_dir, shard["sidecar_path"], label=f"{shard_id} sidecar"),
+            label=f"{shard_id} sidecars",
+        )
+        expected_count = int(shard["request_count"])
+        _assert_equal(len(request_rows), expected_count, context=f"{shard_id} request row count")
+        _assert_equal(len(sidecar_rows), expected_count, context=f"{shard_id} sidecar row count")
+        requests: Dict[str, Mapping[str, Any]] = {}
+        for number, row in enumerate(request_rows, start=1):
+            key = _nonempty(row.get("key"), context=f"{shard_id} request row {number}.key")
+            if key in requests or key in all_request_keys:
+                raise GeminiJudgeValidationError(f"Duplicate prepared request key: {key}")
+            requests[key] = row
+            all_request_keys.add(key)
+        seen_sidecars = set()
+        for number, sidecar_value in enumerate(sidecar_rows, start=1):
+            sidecar = dict(sidecar_value)
+            request_key = _nonempty(
+                sidecar.get("request_key"),
+                context=f"{shard_id} sidecar row {number}.request_key",
+            )
+            if request_key in seen_sidecars or request_key not in requests:
+                raise GeminiJudgeValidationError(
+                    f"Prepared request/sidecar key mismatch in {shard_id}: {request_key}"
+                )
+            seen_sidecars.add(request_key)
+            _validate_sidecar_and_request(
+                sidecar=sidecar,
+                request_row=requests[request_key],
+                shard_id=shard_id,
+                manifest=manifest,
+            )
+            identity = (
+                str(sidecar["dataset"]),
+                str(sidecar["method"]),
+                str(sidecar["lang"]),
+                str(sidecar["lm"]),
+                str(sidecar["talk_id"]),
+                int(sidecar["talk_sentence_index"]),
+            )
+            if identity in all_identities:
+                raise GeminiJudgeValidationError(f"Duplicate prepared segment identity: {identity!r}")
+            all_identities.add(identity)
+            system_key = identity[:4]
+            system_counts[system_key] += 1
+            system_talks[system_key].add(identity[4])
+            pair_key = (identity[0], identity[2], identity[3], identity[4], identity[5])
+            pair_records[pair_key][identity[1]] = (
+                str(sidecar["source_sha256"]),
+                str(sidecar["reference_sha256"]),
+            )
+            role = _nonempty(sidecar["source_artifact_role"], context="source artifact role")
+            sidecars_by_role[role].append(sidecar)
+        if seen_sidecars != set(requests):
+            raise GeminiJudgeValidationError(f"Prepared sidecar coverage mismatch in {shard_id}")
+
+    _assert_equal(len(all_request_keys), EXPECTED_SEGMENTS, context="prepared request count")
+    _assert_equal(dict(system_counts), _expected_system_counts(), context="prepared system counts")
+    for system_key, talks in system_talks.items():
+        _assert_equal(
+            len(talks), EXPECTED_TALKS_PER_SYSTEM, context=f"prepared system {system_key!r} talks"
+        )
+    for pair_key, by_method in pair_records.items():
+        _assert_equal(set(by_method), set(METHODS), context=f"prepared pair {pair_key!r} methods")
+        _assert_equal(
+            by_method["InfiniSST"],
+            by_method["RASST"],
+            context=f"prepared pair {pair_key!r} source/reference hashes",
+        )
+    return sidecars_by_role
+
+
 def _validate_shards(
     output_dir: Path,
     manifest: Mapping[str, Any],
@@ -1480,6 +1598,40 @@ def validate_output_dir(
     }
 
 
+def validate_prepared_output_dir(*, output_dir: Path) -> Dict[str, Any]:
+    output_dir = lexical_absolute(output_dir)
+    if not output_dir.is_dir():
+        raise GeminiJudgeValidationError(f"output-dir is not a directory: {output_dir}")
+    manifest, shards = _validate_manifest(output_dir)
+    sidecars_by_role = _validate_prepared_shards(output_dir, manifest, shards)
+    _validate_source_artifacts(manifest, sidecars_by_role)
+    artifact_hashes = {"run_manifest.json": sha256_file(output_dir / "run_manifest.json")}
+    for shard_id in sorted(shards):
+        for directory in ("requests", "sidecars", "states"):
+            relative = (
+                f"{directory}/{shard_id}.jsonl"
+                if directory != "states"
+                else f"states/{shard_id}.json"
+            )
+            artifact_hashes[relative] = sha256_file(output_dir / relative)
+    return {
+        "schema_version": VALIDATION_SCHEMA_VERSION,
+        "status": "ok",
+        "validation_scope": "prepared-only",
+        "output_dir": str(output_dir),
+        "validated_counts": {
+            "systems": EXPECTED_SYSTEMS,
+            "pairs": EXPECTED_PAIRS,
+            "segments": EXPECTED_SEGMENTS,
+            "shards": len(shards),
+            "source_artifacts": len(manifest["source_artifacts"]),
+        },
+        "model": manifest["model"],
+        "run_config_sha256": manifest["run_config_sha256"],
+        "sha256": artifact_hashes,
+    }
+
+
 def _atomic_write_json(path: Path, value: Mapping[str, Any]) -> None:
     path = lexical_absolute(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -1508,6 +1660,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", required=True, type=Path)
     parser.add_argument("--absolute-tolerance", type=float, default=DEFAULT_ABSOLUTE_TOLERANCE)
+    parser.add_argument(
+        "--prepared-only",
+        action="store_true",
+        help="Validate immutable inputs, requests, sidecars, and PREPARED states before submission.",
+    )
     parser.add_argument("--report-json", type=Path)
     return parser
 
@@ -1515,10 +1672,13 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: Optional[Sequence[str]] = None) -> int:
     args = build_parser().parse_args(argv)
     try:
-        report = validate_output_dir(
-            output_dir=args.output_dir,
-            absolute_tolerance=args.absolute_tolerance,
-        )
+        if args.prepared_only:
+            report = validate_prepared_output_dir(output_dir=args.output_dir)
+        else:
+            report = validate_output_dir(
+                output_dir=args.output_dir,
+                absolute_tolerance=args.absolute_tolerance,
+            )
         if args.report_json is not None:
             _atomic_write_json(args.report_json, report)
         print(json.dumps(report, ensure_ascii=False, sort_keys=True))
