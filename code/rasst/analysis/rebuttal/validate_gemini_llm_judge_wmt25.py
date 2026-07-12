@@ -25,6 +25,7 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
 
 SCHEMA_VERSION = "rasst-gemini-llm-judge-wmt25-v1"
+REPAIR_SCHEMA_VERSION = "rasst-gemini-llm-judge-format-repairs-v1"
 VALIDATION_SCHEMA_VERSION = "rasst-gemini-llm-judge-wmt25-validation-v1"
 SOURCE_LANGUAGE_NAME = "English"
 TARGET_LANGUAGE_NAMES = {"zh": "Chinese", "de": "German", "ja": "Japanese"}
@@ -39,6 +40,7 @@ EXPECTED_PAIRS = 16
 EXPECTED_SEGMENTS = 22_728
 EXPECTED_ACL_SEGMENTS = 11_232
 EXPECTED_MEDICINE_SEGMENTS = 11_496
+MAX_FORMAT_REPAIR_ATTEMPTS = 3
 EXPECTED_TALK_PAIRS = EXPECTED_PAIRS * EXPECTED_TALKS_PER_SYSTEM
 DEFAULT_ABSOLUTE_TOLERANCE = 1e-9
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -630,6 +632,70 @@ def _parse_batch_response(response: Any, *, context: str) -> Dict[str, Any]:
     }
 
 
+def _load_accepted_repairs(
+    output_dir: Path, manifest: Mapping[str, Any]
+) -> Tuple[Dict[str, Dict[str, Any]], Optional[str]]:
+    path = output_dir / "response_repairs.json"
+    if not path.exists():
+        return {}, None
+    document = _read_json(path, label="response repairs")
+    _assert_equal(
+        document.get("schema_version"), REPAIR_SCHEMA_VERSION, context="repair schema_version"
+    )
+    _assert_equal(
+        document.get("run_config_sha256"),
+        manifest["run_config_sha256"],
+        context="repair run_config_sha256",
+    )
+    entries = document.get("entries")
+    if not isinstance(entries, dict):
+        raise GeminiJudgeValidationError("response-repair entries must be an object")
+    artifact_sha256 = sha256_file(path)
+    accepted: Dict[str, Dict[str, Any]] = {}
+    for request_key, entry in entries.items():
+        if not isinstance(request_key, str) or not request_key or not isinstance(entry, dict):
+            raise GeminiJudgeValidationError("response-repair entry is malformed")
+        attempts = entry.get("attempts")
+        if not isinstance(attempts, list) or len(attempts) > MAX_FORMAT_REPAIR_ATTEMPTS:
+            raise GeminiJudgeValidationError(
+                f"response-repair attempts are malformed: {request_key}"
+            )
+        accepted_attempt = entry.get("accepted_attempt")
+        if accepted_attempt is None:
+            continue
+        attempt_number = _canonical_nonnegative_int(
+            accepted_attempt, context=f"{request_key} accepted repair attempt"
+        )
+        if attempt_number < 1 or attempt_number > len(attempts):
+            raise GeminiJudgeValidationError(
+                f"accepted repair attempt is out of range: {request_key}"
+            )
+        attempt = attempts[attempt_number - 1]
+        if not isinstance(attempt, dict) or attempt.get("valid") is not True:
+            raise GeminiJudgeValidationError(
+                f"accepted repair attempt is not valid: {request_key}"
+            )
+        parsed = _parse_batch_response(
+            attempt.get("raw_response"), context=f"repair {request_key} attempt {attempt_number}"
+        )
+        _assert_equal(
+            attempt.get("judge_score"), parsed["judge_score"], context=f"repair {request_key} score"
+        )
+        _assert_equal(
+            attempt.get("model_version"),
+            parsed["model_version"],
+            context=f"repair {request_key} model_version",
+        )
+        accepted[request_key] = {
+            "entry": entry,
+            "attempt": attempt,
+            "attempt_number": attempt_number,
+            "parsed": parsed,
+            "artifact_sha256": artifact_sha256,
+        }
+    return accepted, artifact_sha256
+
+
 def _parse_int64_string(value: Any, *, context: str) -> int:
     if not isinstance(value, str) or not value or not value.isascii() or not value.isdigit():
         raise GeminiJudgeValidationError(
@@ -962,6 +1028,8 @@ def _validate_shards(
     sidecars_by_role: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
     all_identities = set()
     resolved_models = set()
+    repairs, repair_artifact_sha256 = _load_accepted_repairs(output_dir, manifest)
+    used_repairs = set()
     for shard_id in sorted(shard_by_id):
         shard = shard_by_id[shard_id]
         state = _read_json(output_dir / "states" / f"{shard_id}.json", label=f"{shard_id} state")
@@ -1058,9 +1126,55 @@ def _validate_shards(
                 raise GeminiJudgeValidationError(
                     f"Batch response {shard_id}/{request_key} contains a per-request error"
                 )
-            parsed = _parse_batch_response(
-                batch_row["response"], context=f"response {shard_id}/{request_key}"
-            )
+            try:
+                parsed = _parse_batch_response(
+                    batch_row["response"], context=f"response {shard_id}/{request_key}"
+                )
+            except GeminiJudgeValidationError:
+                repair = repairs.get(request_key)
+                if repair is None:
+                    raise
+                entry = repair["entry"]
+                expected_evidence = {
+                    "shard_id": shard_id,
+                    "request_key": request_key,
+                    "model": manifest["model"],
+                    "generation_config_sha256": manifest["methodology"][
+                        "generation_config_sha256"
+                    ],
+                    "request_row_sha256": canonical_json_sha256(requests[request_key]),
+                    "sidecar_row_sha256": canonical_json_sha256(sidecar),
+                    "original_response_artifact_sha256": response_hash,
+                    "original_batch_row_sha256": canonical_json_sha256(batch_row),
+                }
+                for field, expected in expected_evidence.items():
+                    _assert_equal(
+                        entry.get(field),
+                        expected,
+                        context=f"repair {request_key} evidence.{field}",
+                    )
+                _nonempty(
+                    entry.get("original_parse_error"),
+                    context=f"repair {request_key} original_parse_error",
+                )
+                _assert_equal(
+                    repair["attempt"].get("transport"),
+                    "standard_generate_content_format_retry",
+                    context=f"repair {request_key} transport",
+                )
+                parsed = repair["parsed"]
+                used_repairs.add(request_key)
+                repair_fields = {
+                    "response_repair_artifact_sha256": repair_artifact_sha256,
+                    "response_repair_attempt": repair["attempt_number"],
+                    "response_transport": repair["attempt"]["transport"],
+                }
+            else:
+                if request_key in repairs:
+                    raise GeminiJudgeValidationError(
+                        f"response repair targets a valid raw response: {request_key}"
+                    )
+                repair_fields = {}
             resolved_models.add(parsed["model_version"])
             expected_segments[request_key] = {
                 **sidecar,
@@ -1070,8 +1184,10 @@ def _validate_shards(
                     "generation_config_sha256"
                 ],
                 "response_artifact_sha256": response_hash,
+                **repair_fields,
             }
     _assert_equal(len(expected_segments), EXPECTED_SEGMENTS, context="raw response segment count")
+    _assert_equal(used_repairs, set(repairs), context="accepted repair coverage")
     if len(resolved_models) != 1:
         raise GeminiJudgeValidationError(
             f"Expected one resolved model version, got {sorted(resolved_models)!r}"
@@ -1518,6 +1634,21 @@ def _validate_collection_manifest(
             expected,
             context=f"collection usage_totals.{field}",
         )
+    repairs, repair_artifact_sha256 = _load_accepted_repairs(output_dir, run_manifest)
+    expected_repairs = (
+        None
+        if repair_artifact_sha256 is None
+        else {
+            "path": "response_repairs.json",
+            "sha256": repair_artifact_sha256,
+            "accepted": len(repairs),
+        }
+    )
+    _assert_equal(
+        collection.get("response_repairs"),
+        expected_repairs,
+        context="collection manifest response_repairs",
+    )
     artifacts = collection.get("artifacts")
     expected_names = {
         "segments.jsonl",
@@ -1568,6 +1699,17 @@ def validate_output_dir(
         resolved_model_version=resolved_model_version,
         rows=rows,
     )
+    artifact_names = [
+        "run_manifest.json",
+        "collection_manifest.json",
+        "segments.jsonl",
+        "summary.tsv",
+        "paired.tsv",
+        "talk_paired.tsv",
+        "group_summary.tsv",
+    ]
+    if (output_dir / "response_repairs.json").is_file():
+        artifact_names.append("response_repairs.json")
     return {
         "schema_version": VALIDATION_SCHEMA_VERSION,
         "status": "ok",
@@ -1583,18 +1725,7 @@ def validate_output_dir(
         "model": manifest["model"],
         "resolved_model_version": resolved_model_version,
         "run_config_sha256": manifest["run_config_sha256"],
-        "sha256": {
-            name: sha256_file(output_dir / name)
-            for name in (
-                "run_manifest.json",
-                "collection_manifest.json",
-                "segments.jsonl",
-                "summary.tsv",
-                "paired.tsv",
-                "talk_paired.tsv",
-                "group_summary.tsv",
-            )
-        },
+        "sha256": {name: sha256_file(output_dir / name) for name in artifact_names},
     }
 
 

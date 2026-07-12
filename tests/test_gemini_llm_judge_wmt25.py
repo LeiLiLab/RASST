@@ -652,6 +652,115 @@ class GeminiLlmJudgeWmt25Test(unittest.TestCase):
             "no_matching_batch_after_429_resource_exhausted",
         )
 
+    def test_format_repair_preserves_invalid_raw_response_and_accepts_retry(self) -> None:
+        output_dir = self.fixture_dir / "prepared_format_repair"
+        with contextlib.redirect_stdout(io.StringIO()):
+            manifest = MODULE.prepare_run(
+                argparse.Namespace(
+                    acl_segments=self.acl_path,
+                    acl_segments_sha256=self.acl_sha256,
+                    medicine_segments=self.medicine_path,
+                    medicine_segments_sha256=self.medicine_sha256,
+                    output_dir=output_dir,
+                    run_id="unit-format-repair",
+                    model="gemini-2.5-flash",
+                    generation_config_mode="api-default",
+                )
+            )
+        shard = manifest["shards"][0]
+        shard_id = shard["shard_id"]
+        request_row = next(
+            row
+            for _, row in MODULE.iter_jsonl(
+                output_dir / shard["request_path"], label="format-repair request"
+            )
+        )
+        request_key = request_row["key"]
+        invalid_batch_row = {
+            "key": request_key,
+            "response": {
+                "candidates": [
+                    {
+                        "finishReason": "STOP",
+                        "content": {"parts": [{"text": "Reasoning first.\n\n60"}]},
+                    }
+                ],
+                "modelVersion": "gemini-2.5-flash",
+                "usageMetadata": {
+                    "promptTokenCount": 10,
+                    "candidatesTokenCount": 5,
+                    "totalTokenCount": 15,
+                },
+            },
+        }
+        response_path = output_dir / "responses" / f"{shard_id}.jsonl"
+        MODULE.atomic_write_text(response_path, MODULE.json_line(invalid_batch_row))
+        state_path = output_dir / "states" / f"{shard_id}.json"
+        state = MODULE.read_json(state_path, label="format-repair state")
+        state.update(
+            {
+                "status": "DOWNLOADED",
+                "response_path": str(response_path.relative_to(output_dir)),
+                "response_sha256": MODULE.sha256_file(response_path),
+            }
+        )
+        MODULE.atomic_write_json(state_path, state)
+
+        valid_response = {
+            "candidates": [
+                {
+                    "finishReason": "STOP",
+                    "content": {"parts": [{"text": "60"}]},
+                }
+            ],
+            "modelVersion": "gemini-2.5-flash",
+            "usageMetadata": {
+                "promptTokenCount": 10,
+                "candidatesTokenCount": 1,
+                "totalTokenCount": 11,
+            },
+            "responseId": "repair-response",
+        }
+
+        class FakeResponse:
+            def model_dump(self, **_: Any) -> dict[str, Any]:
+                return valid_response
+
+        class FakeModels:
+            def generate_content(self, **kwargs: Any) -> FakeResponse:
+                self.kwargs = kwargs
+                return FakeResponse()
+
+        fake_models = FakeModels()
+        fake_client = type("FakeClient", (), {"models": fake_models})()
+        fake_genai = type(
+            "FakeGenAI", (), {"Client": lambda *args, **kwargs: fake_client}
+        )
+        args = argparse.Namespace(
+            output_dir=output_dir,
+            shard_id=shard_id,
+            request_key=request_key,
+            api_key_file=Path("unused-by-mock"),
+            confirm_run_config_sha256=manifest["run_config_sha256"],
+        )
+        with (
+            mock.patch.object(MODULE, "read_private_api_key", return_value="test-key"),
+            mock.patch.object(
+                MODULE,
+                "_load_google_genai",
+                return_value=(fake_genai, object(), "test-sdk"),
+            ),
+            contextlib.redirect_stdout(io.StringIO()),
+        ):
+            MODULE.repair_format_response(args)
+        self.assertEqual(fake_models.kwargs["contents"], request_row["request"]["contents"])
+        repairs, repair_hash = MODULE._accepted_repairs(output_dir, manifest)
+        self.assertIsNotNone(repair_hash)
+        self.assertEqual(repairs[request_key]["parsed"]["judge_score"], 60)
+        self.assertEqual(
+            MODULE.sha256_file(response_path), state["response_sha256"]
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
