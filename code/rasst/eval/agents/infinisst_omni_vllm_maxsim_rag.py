@@ -282,6 +282,8 @@ class InfiniSSTOmniVLLMMaxSimRAG(SpeechToTextAgent):
                 score_threshold=float(getattr(args, "rag_score_threshold", 0.0)),
                 maxsim_windows=list(getattr(args, "rag_maxsim_windows", MAXSIM_WINDOWS)),
                 maxsim_stride=int(getattr(args, "rag_maxsim_stride", MAXSIM_STRIDE)),
+                use_maxsim=bool(int(getattr(args, "rag_use_maxsim", 1))),
+                pooling_type=str(getattr(args, "rag_pooling_type", "transformer")),
             )
             if not self.rag_retriever or not self.rag_retriever.enabled:
                 logger.warning("MaxSim RAG retriever not operational")
@@ -346,6 +348,20 @@ class InfiniSSTOmniVLLMMaxSimRAG(SpeechToTextAgent):
         parser.add_argument("--rag-target-lang", type=str, default="zh")
         parser.add_argument("--rag-lora-r", type=int, default=128)
         parser.add_argument("--rag-text-lora-r", type=int, default=128)
+        parser.add_argument(
+            "--rag-use-maxsim",
+            type=int,
+            choices=[0, 1],
+            default=1,
+            help="Use 1 for MaxSim checkpoints or 0 for dense single-embedding checkpoints.",
+        )
+        parser.add_argument(
+            "--rag-pooling-type",
+            type=str,
+            choices=["attentive", "transformer"],
+            default="transformer",
+            help="Audio pooling architecture used by a dense checkpoint.",
+        )
         parser.add_argument(
             "--rag-maxsim-windows",
             type=int,

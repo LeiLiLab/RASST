@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "event_id": "20260711__simuleval__multiscale_retriever_e2e_lm2",
+  "status": "complete_verified",
+  "dataset": "acl6060_tagged_raw",
+  "language": "zh",
+  "talk_count": 5,
+  "latency_multiplier": 2,
+  "glossary": {
+    "description": "fixed raw ACL glossary",
+    "entries": 238,
+    "runtime_path": "/mnt/gemini/home/jiaxuanluo/eval_glossaries/acl6060_tagged_gt_raw_min_norm2.json",
+    "sha256": "f9f171c6475c4bb19250f5f93063a5ef034cbdcc1f8a995c593647718cf9a5b6"
+  },
+  "config": {
+    "rag_top_k": 10,
+    "rag_score_threshold": 0.78,
+    "system_prompt_style": "given_chunks",
+    "term_map_format": "plain",
+    "empty_term_map_policy": "omit",
+    "max_cache_chunks": 30,
+    "keep_cache_chunks": 30,
+    "max_new_tokens": 80,
+    "vllm_tp_size": 2
+  },
+  "model_assets": {
+    "speech_llm": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/models/speech_llm_zh_cap16_denoise_budget_ttag_r32a32_ep1_taurus4_hf",
+    "multiscale_retriever": "/mnt/gemini/home/jiaxuanluo/train_outputs/q3rag_scale_lora-r128-tr128_bs8k_t=0.07_3var_gsv2full_gsdedup_varctx576_bs8k_gc128_wr1000k_m0.0_maxsim_mfa_variantE_hn1024_tcmoff_ep6_v3_smallest_dense_normAGGR_8gpu_aries_best_eval_acl6060_recallat10.pt",
+    "multiscale_training_run": "lh1b88kw",
+    "largest_train_retriever": "/mnt/aries/data4/jiaxuanluo/train_outputs/sweep_text_pooling/sweep_tp_cls_tfpool_bs12k_best.pt",
+    "largest_train_training_run": "r5l4780c"
+  },
+  "slurm": {
+    "cluster": "aries",
+    "jobs": {
+      "multiscale": "47040",
+      "largest_infer": "47045",
+      "largest_train": "47046"
+    },
+    "job_status": "all_completed_exit_0",
+    "runtime_output_root": "/mnt/aries/data6/jiaxuanluo/rasst_multiscale_e2e_20260711"
+  },
+  "variants": {
+    "multiscale": {
+      "use_maxsim": true,
+      "maxsim_windows": [2, 3, 4, 5, 6, 7, 8, 10, 12, 16, 20, 24],
+      "timeline_lookback_sec": 1.92,
+      "tracked_eval_results": "docs/results/multiscale_retriever_e2e_lm2/artifacts/multiscale/eval_results.tsv",
+      "runtime_instances_log": "/mnt/aries/data6/jiaxuanluo/rasst_multiscale_e2e_20260711/full/multiscale/zh/dmultiscale_e2e_multiscale_full_lm2_k10_th0.78_gacl6060_tagged_gt_raw_min_norm2/instances.log",
+      "instances_log_records": 5,
+      "instances_log_bytes": 808892,
+      "instances_log_sha256": "c33260f41ee7e4f8a61031f77f60fe54e37f0c0d5f5cfaa232ae6cb451b4e59f",
+      "instances_strip_term_log_sha256": "4189edf5b40c72962dd6e527637de658bff2253fe3dd1d8a42e78f94f16a60f5",
+      "eval_results_sha256": "3b146edbd9187fb1c424f0d37a893280f305a5af0e65ab3251b1c8787ad4e67b"
+    },
+    "largest_infer": {
+      "use_maxsim": true,
+      "maxsim_windows": [24],
+      "timeline_lookback_sec": 1.92,
+      "tracked_eval_results": "docs/results/multiscale_retriever_e2e_lm2/artifacts/largest_infer/eval_results.tsv",
+      "runtime_instances_log": "/mnt/aries/data6/jiaxuanluo/rasst_multiscale_e2e_20260711/full/largest_infer/zh/dmultiscale_e2e_largest_infer_full_lm2_k10_th0.78_gacl6060_tagged_gt_raw_min_norm2/instances.log",
+      "instances_log_records": 5,
+      "instances_log_bytes": 720663,
+      "instances_log_sha256": "9a12fe49ebd279d155244a6367ec7432f8bcfdac00a040f858275e636df8246e",
+      "instances_strip_term_log_sha256": "4073f8cccb6fb87c3fd43ccaf25e58de9b52ff8fa24c8ae52b1fcb82834147e4",
+      "eval_results_sha256": "c3c31a4a7f1a5a66002caf76884edcd079663565b23ade9d354fe5ee43b47ffa"
+    },
+    "largest_train": {
+      "use_maxsim": false,
+      "pooling_type": "transformer",
+      "train_window_sec": 1.92,
+      "timeline_lookback_sec": 0.0,
+      "tracked_eval_results": "docs/results/multiscale_retriever_e2e_lm2/artifacts/largest_train/eval_results.tsv",
+      "runtime_instances_log": "/mnt/aries/data6/jiaxuanluo/rasst_multiscale_e2e_20260711/full/largest_train/zh/dmultiscale_e2e_largest_train_full_lm2_k10_th0.78_gacl6060_tagged_gt_raw_min_norm2/instances.log",
+      "instances_log_records": 5,
+      "instances_log_bytes": 604350,
+      "instances_log_sha256": "e18d31875584f61af8cc66f03e4f6fb48ac78976c22f1e6a0a06271fa8a0e32a",
+      "instances_strip_term_log_sha256": "8735681706f6cf16a16492a4be477488ac24cc4b3cb9d4dc5dd5db8e9736b234",
+      "eval_results_sha256": "4074c14e24227a6123d293e0bd23f9c38e76260e0264885b7c044ff1b463fff3"
+    }
+  },
+  "validation_policy": "Accept a variant only when its Slurm job exits 0, instances.log has five records, and eval_results.tsv is complete."
+}
