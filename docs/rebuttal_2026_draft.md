@@ -79,6 +79,31 @@ model-generated, and paper availability does not capture ASR corruption,
 last-minute topic changes, or glossary edits by human interpreters. We will
 state this limitation rather than describe the condition as fully realistic.
 
+### Sensitivity to degraded retrieval
+
+The paper-derived glossary tests incomplete non-oracle preparation, but it does
+not by itself isolate retriever errors. We therefore add a controlled
+sensitivity analysis at the fixed ACL `lm=2` operating point. For En-Zh/De/Ja,
+we replace `0% / 25% / 50%` of sentence-window-relevant correct hints with
+unique distractors from the same ACL glossary. The retriever is still executed,
+and the number, rank, and score metadata of hints, model checkpoint, generation
+settings, and latency multiplier remain fixed. Actual correct-hint replacement
+rates are `26.17/50.58%` (Zh), `28.27/52.28%` (De), and `25.54/50.56%` (Ja).
+
+As final hint precision/recall decrease, exact-form TERM_ACC drops from
+`90.00` to `88.09/85.73%` for En-Zh and from `83.10` to `79.79/75.51%` for
+En-De. BLEU nevertheless rises by `+0.259/+0.453` and `+0.208/+0.715`,
+respectively, illustrating that corpus BLEU can miss degradation concentrated
+in terminology. xCOMET (multiplied by 100) is lower than the corresponding
+`0%` control in all six degraded cells: deltas are `-0.599/-1.020` (Zh),
+`-0.752/-0.471` (De), and `-5.971/-1.071` (Ja). En-Ja TERM_ACC is also lower
+at both settings (`70.00/76.06%` versus `84.57%`), but the `25%` run enters a
+particularly poor autoregressive generation path. We therefore interpret this
+as evidence of sensitivity, not a monotonic dose-response or a significance
+result; each condition is one stochastic rerun. StreamLAAL is stable within
+23 ms of control for En-Zh/De, while En-Ja latency changes with its output
+length and generation path.
+
 ### Why terminology gains can be much larger than BLEU gains
 
 We agree that the BLEU gains are moderate and will temper the corresponding
@@ -210,6 +235,13 @@ coverage and results.]** We will report this separately from the oracle-like
 human-annotated glossary condition and describe the residual limitations of
 model-generated translations.
 
+Separately, our controlled retrieval-degradation experiment holds hint count
+and compute fixed while replacing correct hints with in-domain distractors.
+TERM_ACC and xCOMET are below the same-environment `0%` control in every
+degraded language/setting, whereas BLEU increases for En-Zh and En-De. This
+directly measures sensitivity to retrieval quality and complements, rather
+than duplicates, the non-oracle glossary condition.
+
 **Magnitude of the quality gain.** We agree that the overall translation gain
 is incremental rather than transformative. The token-share analysis and
 masked-BLEU results above explain why terminology accuracy can move much more
@@ -256,8 +288,9 @@ Before submission, the revision will:
    human-reference provenance;
 6. qualify terminology accuracy as exact-form matching and add morphology and
    paraphrase limitations;
-7. add only verified qualitative examples and failure categories; and
-8. fix the notation, `[CLS]` explanation, `<term>`-tag description, figure
+7. add only verified qualitative examples and failure categories;
+8. add the fixed-compute retrieval-degradation sensitivity analysis; and
+9. fix the notation, `[CLS]` explanation, `<term>`-tag description, figure
    separator, and typo identified by Reviewer Mzub.
 
 ## Evidence used by this draft
@@ -281,6 +314,11 @@ Before submission, the revision will:
   `docs/results/rebuttal_2026/term_failure_analysis_acl_lm2.md`,
   `docs/results/rebuttal_2026/term_failure_chain_acl_lm2.tsv`, and
   `docs/results/rebuttal_2026/retrieval_noise_audit_acl_lm2.tsv`
+- Fixed-compute retrieval degradation protocol, complete 9-cell table, and
+  independent xCOMET validation:
+  `docs/results/rebuttal_2026/retrieval_degradation_ablation.md`,
+  `docs/results/rebuttal_2026/retrieval_degradation_acl_lm2.tsv`, and
+  `docs/results/rebuttal_2026/retrieval_degradation_xcomet_validation.json`
 - Official xCOMET paper and implementation provenance:
   [TACL paper](https://aclanthology.org/2024.tacl-1.54/),
   [COMET repository](https://github.com/Unbabel/COMET)

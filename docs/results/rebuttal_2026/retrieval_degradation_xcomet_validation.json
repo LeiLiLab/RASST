@@ -1,0 +1,187 @@
+{
+  "expected_counts": {
+    "pairs": 3,
+    "segments": 4212,
+    "systems": 9
+  },
+  "pairs": [
+    {
+      "dataset": "acl_retrieval_degradation",
+      "delta_rasst_minus_infinisst": -0.007523439410660002,
+      "infinisst_method": "RASST-0",
+      "infinisst_wins": 185,
+      "infinisst_xcomet_mean": 0.8396634361109673,
+      "lang": "de",
+      "lm": "2",
+      "paired_delta_stddev": 0.13682254076791792,
+      "paired_segments": 468,
+      "paired_talks": 5,
+      "rasst_method": "RASST-25",
+      "rasst_wins": 192,
+      "rasst_xcomet_mean": 0.8321399967003072,
+      "ties": 91
+    },
+    {
+      "dataset": "acl_retrieval_degradation",
+      "delta_rasst_minus_infinisst": -0.059713693669973276,
+      "infinisst_method": "RASST-0",
+      "infinisst_wins": 224,
+      "infinisst_xcomet_mean": 0.7037905372169793,
+      "lang": "ja",
+      "lm": "2",
+      "paired_delta_stddev": 0.2873511868411912,
+      "paired_segments": 468,
+      "paired_talks": 5,
+      "rasst_method": "RASST-25",
+      "rasst_wins": 155,
+      "rasst_xcomet_mean": 0.6440768435470059,
+      "ties": 89
+    },
+    {
+      "dataset": "acl_retrieval_degradation",
+      "delta_rasst_minus_infinisst": -0.005992797673003286,
+      "infinisst_method": "RASST-0",
+      "infinisst_wins": 166,
+      "infinisst_xcomet_mean": 0.8362750296090913,
+      "lang": "zh",
+      "lm": "2",
+      "paired_delta_stddev": 0.10597771519678036,
+      "paired_segments": 468,
+      "paired_talks": 5,
+      "rasst_method": "RASST-25",
+      "rasst_wins": 143,
+      "rasst_xcomet_mean": 0.830282231936088,
+      "ties": 159
+    }
+  ],
+  "paths": {
+    "manifest": "/data/retrieval_degradation_20260712/input/xcomet_bundle/manifest.tsv",
+    "paired_tsv": "/data/retrieval_degradation_20260712/results/paired_25_vs_0.tsv",
+    "segments_jsonl": "/data/retrieval_degradation_20260712/results/segments.jsonl",
+    "summary_tsv": "/data/retrieval_degradation_20260712/results/summary.tsv"
+  },
+  "run_identity": {
+    "model_id": "Unbabel/XCOMET-XXL",
+    "model_revision": "873bac1b1c461e410c4a6e379f6790d3d1c7c214",
+    "scoring_config_sha256": "d64f05d42ec971cca84771dc0232c45681bedb13a7b89b0500867aefa917a3ae"
+  },
+  "schema_version": "rasst-xcomet-validation-v1",
+  "sha256": {
+    "manifest": "9e2b5c0e3a703c9848ef96721299b30ae9251cb8cd8abcddf6393400c79bdb8c",
+    "paired_tsv": "52a57bcc071be253a12d38d1bea3bec3bf800d0eb2370c2f9d0d0cfd6b151dcf",
+    "segments_jsonl": "eee9371ba074fdfcc6a1d6da0647433560b19f79a799d3927f100e0d09a726da",
+    "summary_tsv": "eb6d970ba9fb413969b8bc70912f1b0b2fe60f3a7c18c39c66c3a48ae49c234d"
+  },
+  "status": "ok",
+  "systems": [
+    {
+      "dataset": "acl_retrieval_degradation",
+      "lang": "de",
+      "lm": "2",
+      "method": "RASST-0",
+      "segments": 468,
+      "talks": 5,
+      "xcomet_mean": 0.8396634361109673,
+      "xcomet_mean_x100": 83.96634361109673,
+      "xcomet_talk_macro_mean": 0.8385796799864812
+    },
+    {
+      "dataset": "acl_retrieval_degradation",
+      "lang": "ja",
+      "lm": "2",
+      "method": "RASST-0",
+      "segments": 468,
+      "talks": 5,
+      "xcomet_mean": 0.7037905372169793,
+      "xcomet_mean_x100": 70.37905372169793,
+      "xcomet_talk_macro_mean": 0.6993243632434017
+    },
+    {
+      "dataset": "acl_retrieval_degradation",
+      "lang": "zh",
+      "lm": "2",
+      "method": "RASST-0",
+      "segments": 468,
+      "talks": 5,
+      "xcomet_mean": 0.8362750296090913,
+      "xcomet_mean_x100": 83.62750296090913,
+      "xcomet_talk_macro_mean": 0.8337020532971134
+    },
+    {
+      "dataset": "acl_retrieval_degradation",
+      "lang": "de",
+      "lm": "2",
+      "method": "RASST-25",
+      "segments": 468,
+      "talks": 5,
+      "xcomet_mean": 0.8321399967003072,
+      "xcomet_mean_x100": 83.21399967003073,
+      "xcomet_talk_macro_mean": 0.8309655398185798
+    },
+    {
+      "dataset": "acl_retrieval_degradation",
+      "lang": "ja",
+      "lm": "2",
+      "method": "RASST-25",
+      "segments": 468,
+      "talks": 5,
+      "xcomet_mean": 0.6440768435470059,
+      "xcomet_mean_x100": 64.40768435470059,
+      "xcomet_talk_macro_mean": 0.6299387432130704
+    },
+    {
+      "dataset": "acl_retrieval_degradation",
+      "lang": "zh",
+      "lm": "2",
+      "method": "RASST-25",
+      "segments": 468,
+      "talks": 5,
+      "xcomet_mean": 0.830282231936088,
+      "xcomet_mean_x100": 83.0282231936088,
+      "xcomet_talk_macro_mean": 0.829337494244401
+    },
+    {
+      "dataset": "acl_retrieval_degradation",
+      "lang": "de",
+      "lm": "2",
+      "method": "RASST-50",
+      "segments": 468,
+      "talks": 5,
+      "xcomet_mean": 0.8349553083953185,
+      "xcomet_mean_x100": 83.49553083953185,
+      "xcomet_talk_macro_mean": 0.8353127360388581
+    },
+    {
+      "dataset": "acl_retrieval_degradation",
+      "lang": "ja",
+      "lm": "2",
+      "method": "RASST-50",
+      "segments": 468,
+      "talks": 5,
+      "xcomet_mean": 0.6930779262025976,
+      "xcomet_mean_x100": 69.30779262025976,
+      "xcomet_talk_macro_mean": 0.6883547820997763
+    },
+    {
+      "dataset": "acl_retrieval_degradation",
+      "lang": "zh",
+      "lm": "2",
+      "method": "RASST-50",
+      "segments": 468,
+      "talks": 5,
+      "xcomet_mean": 0.8260751187992401,
+      "xcomet_mean_x100": 82.607511879924,
+      "xcomet_talk_macro_mean": 0.824480008528025
+    }
+  ],
+  "tolerances": {
+    "tie": 1e-12,
+    "tsv_absolute": 1e-09
+  },
+  "validated_counts": {
+    "manifest_systems": 9,
+    "pairs": 3,
+    "segments": 4212,
+    "summary_systems": 9
+  }
+}
