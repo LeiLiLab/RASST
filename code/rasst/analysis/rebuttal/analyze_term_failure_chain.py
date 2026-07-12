@@ -38,8 +38,8 @@ SEMANTICALLY_VALID_LABELS = MORPHOLOGY_AWARE_LABELS | {
 NOISE_AUDIT_LABELS = {
     "source_morphology_or_semantic_support",
     "alignment_boundary",
-    "true_harmful_noise",
-    "true_benign_noise",
+    "harmful_unsupported_adoption",
+    "benign_unsupported_adoption",
     "uncertain",
 }
 
@@ -688,21 +688,22 @@ def analyze(
         noise_quality_groups[label] = summarize_values(
             [sentence_by_index[index] for index in sorted(indexes)]
         )
-    confirmed_noise_indexes = {
+    unsupported_adoption_indexes = {
         key[0]
         for key, row in retrieval_noise_audit.items()
-        if row["audit_label"] in {"true_harmful_noise", "true_benign_noise"}
+        if row["audit_label"]
+        in {"harmful_unsupported_adoption", "benign_unsupported_adoption"}
     }
-    confirmed_harmful_indexes = {
+    harmful_adoption_indexes = {
         key[0]
         for key, row in retrieval_noise_audit.items()
-        if row["audit_label"] == "true_harmful_noise"
+        if row["audit_label"] == "harmful_unsupported_adoption"
     }
-    noise_quality_groups["confirmed_noise_any"] = summarize_values(
-        [sentence_by_index[index] for index in sorted(confirmed_noise_indexes)]
+    noise_quality_groups["unsupported_adoption_any"] = summarize_values(
+        [sentence_by_index[index] for index in sorted(unsupported_adoption_indexes)]
     )
-    noise_quality_groups["confirmed_harmful_noise"] = summarize_values(
-        [sentence_by_index[index] for index in sorted(confirmed_harmful_indexes)]
+    noise_quality_groups["harmful_unsupported_adoption"] = summarize_values(
+        [sentence_by_index[index] for index in sorted(harmful_adoption_indexes)]
     )
 
     timing_summary: Dict[str, Any] = {}

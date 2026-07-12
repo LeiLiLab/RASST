@@ -1,0 +1,3 @@
+lang	lm	raw_flagged_terms	source_morphology_or_semantic_support	alignment_boundary	harmful_unsupported_adoption	benign_unsupported_adoption	harmful_adoption_sentences	harmful_adoption_mean_xcomet_delta_points
+de	2	49	34	12	2	1	2	-11.3491
+zh	2	33	19	9	2	3	2	+2.7368

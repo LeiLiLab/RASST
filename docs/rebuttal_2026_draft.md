@@ -138,10 +138,17 @@ quality claim accordingly.
 accuracy undercounts valid inflected forms, especially in German, and can also
 miss legitimate paraphrases. We will rename/describe it consistently as
 *exact-form terminology accuracy*, explain that it is a strict and
-reference-dependent measure, and add this limitation to the main discussion.
-We will not claim that the current experiment resolves morphology. **[PENDING
-OPTIONAL ANALYSIS: insert a verified morphology-aware or manually audited
-German subset only if completed; otherwise leave it as a limitation.]**
+reference-dependent measure, and add this limitation to the main discussion. At
+the fixed intermediate ACL operating point (`lm=2`), exact-form En-De TERM_ACC
+is **83.32% (809/971)**. A conservative diagnostic that additionally accepts
+individually checked inflection, compounding, case, spacing, and hyphenation
+variants is **88.47% (859/971; +5.15 points)**. We will retain exact-form
+accuracy as the primary reproducible metric. The latter can only be labeled a
+non-expert author diagnostic, rather than professional German evaluation, after
+author review. **[PENDING AUTHOR SIGN-OFF: the current 162-row audit was drafted
+with Codex assistance; an author must verify all 50 added morphology/compound
+hits and state their German qualification before the 88.47% number is
+submitted.]**
 
 **ESO references.** The German references are manual, while the added Chinese
 and Japanese references are GPT-generated. We will retain only ESO En-De in
@@ -178,9 +185,16 @@ we do not have it.
 described above. We will also add a compact error analysis that separates at
 least: (i) successful rare or multiword terms, (ii) inflectional variants
 penalized by exact matching, (iii) homophone/recognition failures, (iv) correct
-retrieval but non-use, and (v) delayed-commitment errors. **[PENDING QUALITATIVE
-ANALYSIS — insert only verified examples and category counts; do not invent
-examples from memory.]**
+retrieval but non-use, and (v) delayed-commitment errors. At the fixed `lm=2`
+point, `P(exact | retrieved on time/late/never)` is
+**86.11/82.82/59.26%** for En-De and **92.74/89.80/71.56%** for En-Zh. The
+verified traces include a multiword German morphology false negative
+(`morphologische Analyse` versus the grammatical
+`mittels morphologischer Analyse`), a never-retrieved acronym/homophone error
+(`BLEU` to `Blue`), a late named-entity error (`LinCE` to `LINTEX`), and a
+delayed-commitment case where `jedem Token` is placed in the next aligned
+hypothesis. We will report the operational sentence-end timing definition and
+will not treat boundary movement as translation omission.
 
 ## Response to Reviewer gbii
 
@@ -215,8 +229,18 @@ does not replace broader matched-compute comparisons to biasing and retrieval
 variants; we will state that limitation and temper the breadth of the claim.
 
 **Failure analysis.** The revised qualitative analysis will include retrieved-
-but-unused terms, homophones, and delayed commitment, as requested. **[PENDING:
-insert verified cases/counts.]**
+but-unused terms, homophones, and delayed commitment, as requested. The fixed
+`lm=2` trace contains 33/28/101 En-De exact misses in the
+never-retrieved/retrieved-late/retrieved-on-time groups (31/20/63 for En-Zh).
+Importantly, auditing the existing raw false-copy diagnostic showed that it
+substantially confounds source morphology and streaming sentence boundaries:
+only 2 of 49 flagged En-De terms and 2 of 33 flagged En-Zh terms were labeled
+as harmful unsupported-hint adoptions. This is observational rather than a
+causal retrieval estimate. One strong En-De case is an acoustically confused
+`arXiv` retrieval that supplied `oracle -> Oracle`, leading to
+`aus dem Oracle oder PubMed`; xCOMET marks `dem Oracle` as a major error. We
+therefore will not attribute the full En-De contextual-metric decrease to term
+noise.
 
 ## Planned manuscript changes
 
@@ -253,6 +277,10 @@ Before submission, the revision will:
   `docs/results/rebuttal_2026/xcomet_paper_exact_combined_paired.tsv`,
   `docs/results/rebuttal_2026/xcomet_paper_exact_eso_de_paired.tsv`, and
   `docs/results/rebuttal_2026/xcomet_paper_exact_eso_de_validation.json`
+- Fixed-`lm=2` failure chain, German morphology draft audit, and false-copy audit:
+  `docs/results/rebuttal_2026/term_failure_analysis_acl_lm2.md`,
+  `docs/results/rebuttal_2026/term_failure_chain_acl_lm2.tsv`, and
+  `docs/results/rebuttal_2026/retrieval_noise_audit_acl_lm2.tsv`
 - Official xCOMET paper and implementation provenance:
   [TACL paper](https://aclanthology.org/2024.tacl-1.54/),
   [COMET repository](https://github.com/Unbabel/COMET)
@@ -294,8 +322,15 @@ Before submission, the revision will:
 - **Do not call the paper-derived glossary fully real-world or human-created.**
   It removes gold-term selection leakage, but its translations remain
   Gemini-generated.
-- **Do not imply morphology is solved.** Current TERM_ACC is exact-form matching;
-  a morphology-aware claim requires a separately verified analysis.
+- **Do not imply morphology is solved.** The 88.47% morphology-aware number is
+  a non-expert diagnostic, not a replacement metric. The current row-level
+  labels were drafted with Codex assistance and require author sign-off before
+  submission; the broader 96.91% semantic/paraphrase draft must not be used as
+  a rebuttal headline.
+- **Do not call raw `term_map_false_copy` true term noise.** Most flags were
+  source morphology/semantics or streaming-boundary movement. Use only the
+  audited confirmed cases, and do not claim that they explain the full xCOMET
+  delta.
 - **Check the final removal scope for ESO En-Zh/En-Ja.** BLEU, xCOMET,
   exact-reference TERM_ACC, and reference-aligned latency all depend on the
   synthetic references or their exact forms; removing only BLEU would leave the

@@ -1,0 +1,83 @@
+lang	sentence_index	term	translation	audit_label	audit_note
+de	10	monolingual	einsprachiges	source_morphology_or_semantic_support	源文 monolinguals 是复数变体，einsprachiges 并非无关注入。
+de	14	linguistic	sprachlichen	source_morphology_or_semantic_support	源文 linguistics 与 linguistic glossary 只差派生形式。
+de	44	oov	OOV	alignment_boundary	OOV 来自紧邻的上一源句并跨 mWER 边界输出。
+de	75	models	Modelle	source_morphology_or_semantic_support	源文 model 与 glossary models 只差单复数。
+de	91	pretraining	Vortraining	source_morphology_or_semantic_support	源文 pretrained 与 pretraining 同词族且语义支持。
+de	99	previous	früheren	alignment_boundary	Compared to previous resources 从上一源句延迟到当前输出。
+de	99	resources	Ressourcen	alignment_boundary	previous resources 从上一源句延迟到当前输出。
+de	120	low resource	ressourcenarmen	source_morphology_or_semantic_support	源文 low resources 是数形变化。
+de	130	word	Wort	source_morphology_or_semantic_support	源文 words 与 word 只差单复数。
+de	141	morphological analysis	morphologische Analyse	harmful_unsupported_adoption	源文是 morphological analyzer，unsupported analysis hint 被采用并改变实体；但 InfiniSST 也犯同一错误，不能从观察日志单独归因于 retrieval。
+de	151	positional encoding	Positionskodierung	source_morphology_or_semantic_support	源文 positional embeddings 与 positional encoding 在此语境同指。
+de	152	positional encoding	Positionskodierung	source_morphology_or_semantic_support	源文 positional embeddings 与 positional encoding 在此语境同指。
+de	154	word	Wort	source_morphology_or_semantic_support	源文 words 与 word 只差单复数。
+de	160	pretrained	vortrainiert	source_morphology_or_semantic_support	源文 pre-train 与 pretrained 同词族。
+de	182	language model	Sprachmodell	alignment_boundary	pretrained language models 从上一源句跨边界进入当前输出。
+de	182	language models	Sprachmodelle	alignment_boundary	pretrained language models 从上一源句跨边界进入当前输出。
+de	189	representations	Repräsentationen	source_morphology_or_semantic_support	源文 Representation 与 representations 数形变化。
+de	230	representations	Repräsentationen	source_morphology_or_semantic_support	源文 representation 与 representations 数形变化。
+de	232	encoder	Encoder	alignment_boundary	Encoder-Schicht 是上一源句尚未完成的尾部。
+de	245	input	Eingabe	alignment_boundary	Eingaben getestet 属于上一源句的延迟输出。
+de	248	oracle	Oracle	harmful_unsupported_adoption	源文为 arXiv，声学混淆检索到 Oracle 并被模型采用，改变了专名；InfiniSST 未生成 Oracle。
+de	249	baselines	Baselines	source_morphology_or_semantic_support	源文 baseline 与 baselines 只差单复数。
+de	265	utterances	Äußerungen	source_morphology_or_semantic_support	源文 utterance 与 utterances 只差单复数。
+de	266	system	System	alignment_boundary	System 是上一源句主句的延迟完成，不是当前句无关注入。
+de	304	token	Token	alignment_boundary	jedem Token 是上一源句的延迟完成。
+de	307	utterances	Äußerungen	source_morphology_or_semantic_support	源文 full utterance 语义直接支持。
+de	308	finetuning	Feinabstimmung	source_morphology_or_semantic_support	源文 finetuned 与 finetuning 同词族。
+de	308	graph	Graph	alignment_boundary	Graph-Parser 完成上一源句 graph parsing 的尾部。
+de	321	generated	generiert	source_morphology_or_semantic_support	源文 generate 与 generated 同词族。
+de	322	transformers	Transformer	source_morphology_or_semantic_support	源文 transformer 与 transformers 只差单复数。
+de	328	flr	FLR	alignment_boundary	FLR 属于下一源句定义的开头，分到当前输出末尾。
+de	331	online	Online	alignment_boundary	Online-Modell 是下一源句 LM complete model 的提前/跨界主语。
+de	334	graphs	Graphen	source_morphology_or_semantic_support	源文 graph 与 graphs 只差单复数。
+de	343	token	Token	source_morphology_or_semantic_support	源文 tokens 与 token 只差单复数。
+de	357	dependencies	Abhängigkeiten	source_morphology_or_semantic_support	源文 dependency 与 dependencies 只差单复数。
+de	369	word	Wort	source_morphology_or_semantic_support	源文 words 与 word 只差单复数。
+de	384	counterfactual	kontrafaktisch	source_morphology_or_semantic_support	源文 counterfactuals 与 counterfactual 同词族。
+de	384	questions	Fragen	source_morphology_or_semantic_support	源文 question answering 语义支持 Fragen。
+de	389	questions	Fragen	source_morphology_or_semantic_support	源文 question perturbations 语义直接支持。
+de	391	generating	Generierung	source_morphology_or_semantic_support	源文 generate 与 generating 同词族。
+de	391	retrieval	Retrieval	source_morphology_or_semantic_support	源文 retrieve-generate-filter 与 retrieval 同技术概念。
+de	405	contexts	Kontexte	source_morphology_or_semantic_support	源文 context 与 contexts 只差单复数。
+de	407	finetuning	Feinabstimmung	source_morphology_or_semantic_support	源文 fine-tuned 与 finetuning 同词族。
+de	442	counterfactual	kontrafaktisch	source_morphology_or_semantic_support	源文 counterfactuals 与 counterfactual 同词族。
+de	445	domains	Domänen	source_morphology_or_semantic_support	源文 domain 与 domains 只差单复数。
+de	454	counterfactual	kontrafaktisch	source_morphology_or_semantic_support	源文 counterfactuals 与 counterfactual 同词族。
+de	459	counterfactual	kontrafaktisch	source_morphology_or_semantic_support	源文 counterfactuals 与 counterfactual 同词族。
+de	461	rgf	RGF	benign_unsupported_adoption	当前句未显式出现 RGF，但语境确指 RGF perturbations；限定有帮助且未改变含义。
+de	466	biases	Bias	source_morphology_or_semantic_support	源文 bias 与 biases 只差单复数。
+zh	22	newswire	新闻专线	harmful_unsupported_adoption	源文说 newspapers，unsupported newswire hint 被采用并生成不自然的 新闻专线；InfiniSST 保留 newspapers。
+zh	35	task	任务	alignment_boundary	在该任务中 是上一源句的延迟收尾。
+zh	77	linguistics	语言学	source_morphology_or_semantic_support	源文 linguistic 与 linguistics 同词族。
+zh	80	context	上下文	source_morphology_or_semantic_support	源文 non-contextualized 直接支持上下文概念。
+zh	115	representations	表示	source_morphology_or_semantic_support	源文 representation 与 representations 同词族。
+zh	124	sentence	句子	benign_unsupported_adoption	模型增加 句子 作为引语提示，源文未显式说 sentence，但语义未变。
+zh	149	morphology	形态学	source_morphology_or_semantic_support	源文 morphological 与 morphology 同词族。
+zh	151	positional encoding	位置编码	source_morphology_or_semantic_support	源文 positional embeddings 与 encoding 在此语境同指。
+zh	152	positional encoding	位置编码	source_morphology_or_semantic_support	源文 positional embeddings 与 encoding 在此语境同指。
+zh	160	compared	相比	source_morphology_or_semantic_support	源文 compare 与 compared 同词族。
+zh	191	problem	问题	source_morphology_or_semantic_support	源文 problems 与 problem 只差单复数。
+zh	266	system	系统	alignment_boundary	系统 是上一源句的延迟完成。
+zh	279	graphs	图形	source_morphology_or_semantic_support	源文 graph 与 graphs 只差单复数。
+zh	293	parallel	并行	alignment_boundary	并行执行 属于上一源句尾部。
+zh	308	utterance	话语	alignment_boundary	话语 延续上一源句 full utterance 的上下文并跨边界。
+zh	324	graph	图形	source_morphology_or_semantic_support	源文 subgraphs 语义直接支持图形。
+zh	332	data	数据	alignment_boundary	在两个数据集上 属于上一源句对 datasets 的延迟输出。
+zh	332	dataset	数据集	alignment_boundary	在两个数据集上 属于上一源句对 datasets 的延迟输出。
+zh	335	representation	表示	source_morphology_or_semantic_support	源文 represents 与 representation 同词族。
+zh	336	training	训练	source_morphology_or_semantic_support	源文 transition the model 的上下文中训练是合理动作，不构成无关注入。
+zh	365	task	任务	alignment_boundary	任务的工作 延续上一源句 question-answering tasks。
+zh	376	generated	生成	source_morphology_or_semantic_support	源文 generate 与 generated 同词族。
+zh	384	task	任务	source_morphology_or_semantic_support	源文 question answering specifically 语义支持任务。
+zh	392	generated	生成	source_morphology_or_semantic_support	源文 generate 与 generated 同词族。
+zh	407	pre-training	预训练	source_morphology_or_semantic_support	源文 pre-trained 与 pre-training 同词族。
+zh	424	question	问题	source_morphology_or_semantic_support	源文 query 与 question 在此语境同指。
+zh	434	question	问题	harmful_unsupported_adoption	源文是 passages and answers，unsupported question hint 被采用后实体类别改变；InfiniSST 保留 passages。
+zh	437	method	方法	benign_unsupported_adoption	模型增加 在此方法中 作为篇章连接，含义未改变。
+zh	439	context	上下文	alignment_boundary	问题和上下文 是上一源句模型输入说明的延迟输出。
+zh	439	question	问题	alignment_boundary	问题和上下文 是上一源句模型输入说明的延迟输出。
+zh	443	training data	训练数据	source_morphology_or_semantic_support	源文 data from training distribution 直接支持训练数据。
+zh	461	rgf	RGF	benign_unsupported_adoption	当前句省略 RGF，但语境明确讨论 RGF perturbations，限定未改变含义。
+zh	466	biases	偏见	source_morphology_or_semantic_support	源文 bias 与 biases 只差单复数。
