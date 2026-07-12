@@ -255,7 +255,9 @@ ESO/Medicine.
 
 ## Evidence source of truth
 
-- `origin/main@f0e4ba4`: corrected paper-derived glossary denominator and comparison.
+- `origin/main:docs/results/acl_paper_extracted_lm2/author_reported_lm2_update.tsv`:
+  author-confirmed default-`lm=2` paper-derived TERM_ACC/BLEU, with
+  reported-vs-pooled aggregation kept separate.
 - `origin/main@4446ad8`: compact retrieval-degradation rebuttal table.
 - `origin/main@ae24301`: En-Zh target-tag ablation.
 - `origin/main@06afe4d`: validated ACL xCOMET paired results.
