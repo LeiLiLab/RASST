@@ -69,6 +69,7 @@ from agents.streaming_maxsim_retriever import (
     MAXSIM_WINDOWS,
     StreamingMaxSimRetriever,
 )
+from agents.retrieval_degradation import RetrievalDegrader
 
 
 @contextlib.contextmanager
@@ -126,6 +127,7 @@ class S2TAgentStates(AgentStates):
     rag_blocking_call_count: int
     rag_last_retrieve_src_len: int
     accumulated_rag_results: list
+    retrieval_degradation_instance_index: int
     MAX_SRC_LEN = 16000 * 3600
 
     def reset(self):
@@ -143,6 +145,7 @@ class S2TAgentStates(AgentStates):
         self.rag_blocking_call_count = 0
         self.rag_last_retrieve_src_len = 0
         self.accumulated_rag_results = []
+        self.retrieval_degradation_instance_index = -1
 
 
 @entrypoint
@@ -243,6 +246,21 @@ class InfiniSSTOmniVLLMMaxSimRAG(SpeechToTextAgent):
         self._vllm_call_count = 0
         self.oracle_term_map_path = (getattr(args, "oracle_term_map_path", "") or "").strip()
         self.oracle_term_map = self._load_oracle_term_map(self.oracle_term_map_path)
+        self.retrieval_degradation_plan_path = (
+            getattr(args, "retrieval_degradation_plan", "") or ""
+        ).strip()
+        self.retrieval_degrader = None
+        self._next_retrieval_degradation_instance_index = 0
+        if self.retrieval_degradation_plan_path:
+            if not getattr(args, "rag_enabled", False) or self.oracle_term_map_path:
+                raise ValueError(
+                    "--retrieval-degradation-plan requires the learned retriever"
+                )
+            self.retrieval_degrader = RetrievalDegrader(
+                self.retrieval_degradation_plan_path,
+                float(getattr(args, "retrieval_degradation_rate", 0.0)),
+                int(getattr(args, "retrieval_degradation_seed", 0)),
+            )
 
         if self.oracle_term_map_path and getattr(args, "rag_enabled", False):
             logger.warning(
@@ -403,6 +421,24 @@ class InfiniSSTOmniVLLMMaxSimRAG(SpeechToTextAgent):
             ),
         )
         parser.add_argument(
+            "--retrieval-degradation-plan",
+            type=str,
+            default="",
+            help="Sentence-aligned plan used to replace relevant retrieved hints.",
+        )
+        parser.add_argument(
+            "--retrieval-degradation-rate",
+            type=float,
+            default=0.0,
+            help="Probability of replacing each relevant retrieved hint.",
+        )
+        parser.add_argument(
+            "--retrieval-degradation-seed",
+            type=int,
+            default=0,
+            help="Deterministic seed for relevant-hint replacement.",
+        )
+        parser.add_argument(
             "--term-map-format",
             type=str,
             default="plain",
@@ -455,6 +491,7 @@ class InfiniSSTOmniVLLMMaxSimRAG(SpeechToTextAgent):
             rag_blocking_call_count=0,
             rag_last_retrieve_src_len=0,
             accumulated_rag_results=[],
+            retrieval_degradation_instance_index=-1,
         )
 
     def load_model(self, args):
@@ -713,6 +750,30 @@ class InfiniSSTOmniVLLMMaxSimRAG(SpeechToTextAgent):
         except Exception:
             pass
 
+    def _apply_retrieval_degradation(
+        self,
+        states: S2TAgentStates,
+        references: List[Dict],
+        *,
+        current_start_sec: float,
+        current_end_sec: float,
+    ) -> tuple[List[Dict], Optional[Dict[str, object]]]:
+        if self.retrieval_degrader is None:
+            return references, None
+        if states.retrieval_degradation_instance_index < 0:
+            states.retrieval_degradation_instance_index = (
+                self._next_retrieval_degradation_instance_index
+            )
+            self._next_retrieval_degradation_instance_index += 1
+        return self.retrieval_degrader.degrade(
+            references,
+            instance_index=states.retrieval_degradation_instance_index,
+            segment_idx=int(getattr(states, "segment_idx", -1)),
+            current_start_sec=current_start_sec,
+            current_end_sec=current_end_sec,
+            lookback_sec=self.rag_timeline_lookback_sec,
+        )
+
     @staticmethod
     def _load_oracle_term_map(path: str) -> List[Dict]:
         if not path:
@@ -952,6 +1013,8 @@ class InfiniSSTOmniVLLMMaxSimRAG(SpeechToTextAgent):
                 self._vllm_call_count += 1
 
             references = []
+            original_references = []
+            retrieval_degradation_audit = None
             rag_blocking_sec = 0.0
             if self.oracle_term_map_path:
                 current_start_sec = float(states.last_vllm_src_len) / float(sr)
@@ -1016,9 +1079,20 @@ class InfiniSSTOmniVLLMMaxSimRAG(SpeechToTextAgent):
                     else:
                         references = final_results
 
+                original_references = [dict(ref) for ref in references]
+                current_start_sec = float(states.last_vllm_src_len) / float(sr)
+                current_end_sec = float(len(states.source)) / float(sr)
+                references, retrieval_degradation_audit = (
+                    self._apply_retrieval_degradation(
+                        states,
+                        references,
+                        current_start_sec=current_start_sec,
+                        current_end_sec=current_end_sec,
+                    )
+                )
                 states.references = references
                 rag_duration = self.rag_retriever.get_audio_duration()
-                if references:
+                if references or retrieval_degradation_audit is not None:
                     self._append_runtime_jsonl({
                         "type": "rag",
                         "segment_idx": int(getattr(states, "segment_idx", -1)),
@@ -1034,6 +1108,8 @@ class InfiniSSTOmniVLLMMaxSimRAG(SpeechToTextAgent):
                         "rag_call_count": int(getattr(states, "rag_call_count", 0)),
                         "rag_streaming_mode": self.rag_streaming_mode,
                         "references": references,
+                        "original_references": original_references,
+                        "retrieval_degradation": retrieval_degradation_audit,
                     })
 
             states.last_vllm_src_len = len(states.source)
@@ -1054,6 +1130,8 @@ class InfiniSSTOmniVLLMMaxSimRAG(SpeechToTextAgent):
                 if isinstance(inputs, dict)
                 else "",
                 "references": references,
+                "original_references": original_references,
+                "retrieval_degradation": retrieval_degradation_audit,
             })
 
             if self.use_vllm:

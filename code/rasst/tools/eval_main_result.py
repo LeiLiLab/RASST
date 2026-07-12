@@ -1389,6 +1389,9 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     p.add_argument("--cache-chunks-by-lm", default=None, help="Set MAX/KEEP cache chunks by lm, e.g. 1:30,2:15,3:10,4:8 or 1:30/30.")
     p.add_argument("--cache-seconds-rounding", default="floor", choices=("floor", "ceil"), help="Rounding policy for --cache-seconds conversion to chunks.")
     p.add_argument("--max-new-tokens-per-lm", type=int, default=None, help="Set MAX_NEW_TOKENS_OVERRIDE per cell as this value times lm.")
+    p.add_argument("--retrieval-degradation-plan", default=None, help="Sentence-aligned relevance plan for controlled hint corruption.")
+    p.add_argument("--retrieval-degradation-rate", type=float, default=0.0, help="Relevant-hint replacement probability in [0, 1].")
+    p.add_argument("--retrieval-degradation-seed", type=int, default=0, help="Deterministic corruption seed.")
     return p.parse_args(argv)
 
 
@@ -1403,6 +1406,27 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     validate_manifest_shape(manifest, root)
     validate_assets(manifest, root)
     cell_overrides = parse_cell_overrides(args.cell_override)
+    if args.retrieval_degradation_plan:
+        plan_path = rel_or_abs(root, args.retrieval_degradation_plan)
+        if not plan_path.is_file():
+            raise RasstError(f"Retrieval degradation plan not found: {plan_path}")
+        if not 0.0 <= args.retrieval_degradation_rate <= 1.0:
+            raise RasstError("--retrieval-degradation-rate must be in [0, 1]")
+        cell_overrides.update(
+            {
+                "RETRIEVAL_DEGRADATION_PLAN_OVERRIDE": str(plan_path),
+                "RETRIEVAL_DEGRADATION_RATE_OVERRIDE": str(
+                    args.retrieval_degradation_rate
+                ),
+                "RETRIEVAL_DEGRADATION_SEED_OVERRIDE": str(
+                    args.retrieval_degradation_seed
+                ),
+            }
+        )
+    elif args.retrieval_degradation_rate != 0.0:
+        raise RasstError(
+            "--retrieval-degradation-rate requires --retrieval-degradation-plan"
+        )
     cache_seconds = parse_cache_seconds(args.cache_seconds)
     cache_chunks_by_lm = parse_cache_chunks_by_lm(args.cache_chunks_by_lm)
     lm_list = parse_lm_list(args.lm_list)
