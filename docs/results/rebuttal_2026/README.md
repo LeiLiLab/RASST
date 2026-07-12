@@ -48,6 +48,13 @@ glossary 原始响应不进入 Git。
   `0%`。En-Ja 出现明显 autoregressive path sensitivity，不能把单次 run 解读为
   单调 dose response。完整表和限制见
   [`retrieval_degradation_ablation.md`](retrieval_degradation_ablation.md)。
+- **LLM-as-a-judge cost pilot 已完成。** 100 个 paired system outputs 上，当前可用的
+  `gemini-3.1-pro-preview` 与 `gemini-2.5-flash` 使用 WMT25 Appendix A prompt 的
+  score Pearson 为 `0.9241`。完整 22,728-request Batch（已经包含 InfiniSST
+  baseline）分别预计 `$109.06`（bootstrap `$101.95–$116.08`）和 `$48.19`
+  （`$43.72–$52.93`）。`gemini-2.5-pro` 对当前账号返回“不再向 new users 开放”，
+  因此 Pro 3.1 只能称为 current proxy。完整协议与 provenance 见
+  [`llm_judge_pilot_100.md`](llm_judge_pilot_100.md)。
 
 ## xCOMET
 
@@ -92,6 +99,24 @@ glossary 原始响应不进入 Git。
 Hugging Face 目标为
 `gavinlaw/rasst-main-result-data` 下的 versioned rebuttal artifact。目前没有可用的
 Hugging Face 写入凭据，上传状态为 **pending**，本地 staging 不能视为 canonical。
+
+## LLM-as-a-judge
+
+状态：**100-request cost pilot 已完成；full run pending model decision**。
+
+- 与 xCOMET 使用同一 paper-exact scope：32 systems / 16 strict pairs / 22,728
+  sentence outputs。该数量已经包含 RASST 和 InfiniSST，不需要再乘以 2。
+- Pilot 按 16 cells 的真实大小分层抽取 50 个 paired segments，共 100 个 system
+  outputs；两个模型均为 100/100 valid responses。
+- `gemini-3.1-pro-preview` 默认 thinking 为 `771.14 tokens/request`，完整 Batch
+  点估计 `$109.06`；`gemini-2.5-flash` 为 `1,680.43 tokens/request`，点估计
+  `$48.19`。详细区间、模型 agreement、输入 hash 和限制见
+  [`llm_judge_pilot_100.md`](llm_judge_pilot_100.md)。
+- Raw requests、responses、machine-readable report 和 manifest 当前位于 Taurus
+  staging
+  `/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/rebuttal_2026/llm_judge_wmt25/pilot_100`，
+  预定 Hugging Face 目标为 `gavinlaw/rasst-main-result-data` 下的 versioned rebuttal
+  artifact，上传状态为 **pending**。
 
 ## Paper-derived realistic glossary
 
