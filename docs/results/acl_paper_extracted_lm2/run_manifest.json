@@ -1,68 +1,113 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "event_id": "20260711T215140Z__simuleval__rebuttal_acl_paper_extracted_lm2",
-  "status": "partial_zh_complete_ja_and_de_running",
+  "status": "complete_verified_rasst_and_infinisst",
   "dataset": "acl6060_paper_extracted_realistic_glossary_v1",
   "glossary_manifest": "data/glossaries/acl_paper_extracted/manifest.json",
   "languages": ["zh", "ja", "de"],
   "latency_multiplier": 2,
-  "config": {
-    "rag_top_k": 10,
-    "rag_score_threshold": 0.78,
-    "timeline_lookback_sec": 1.92,
-    "system_prompt_style": "given_chunks",
-    "term_map_format": "plain",
-    "empty_term_map_policy": "omit",
-    "strip_output_tags": "term_t",
-    "max_cache_chunks": 30,
-    "keep_cache_chunks": 30,
-    "max_new_tokens": 80,
-    "vllm_tp_size": 2,
-    "rag_device": "cuda:0"
+  "metric_scope": {
+    "term_acc_denominator": "matching per-paper extracted glossary occurrences",
+    "raw_gold_coverage_metric": false,
+    "note": "TERM_ACC is directly comparable between RASST and InfiniSST within each language, but it does not measure coverage of the complete tagged ACL glossary."
   },
-  "model_assets": {
-    "zh": "gavinlaw/rasst-speech-llm-zh-cap16-denoise-ttag",
-    "ja": "gavinlaw/rasst-speech-llm-ja-cap16-denoise-ttag",
-    "de": "gavinlaw/rasst-speech-llm-de-cap16-denoise-ttag",
-    "retriever": "gavinlaw/rasst-retriever-hn1024"
-  },
-  "slurm": {
-    "cluster": "aries",
-    "failed_index_only_jobs": ["47028", "47029", "47030"],
-    "active_or_queued_jobs": {
-      "zh": "47067",
-      "ja": "47068",
-      "de": "47072"
+  "rasst": {
+    "config": {
+      "rag_top_k": 10,
+      "rag_score_threshold": 0.78,
+      "timeline_lookback_sec": 1.92,
+      "system_prompt_style": "given_chunks",
+      "term_map_format": "plain",
+      "empty_term_map_policy": "omit",
+      "strip_output_tags": "term_t",
+      "max_cache_chunks": 30,
+      "keep_cache_chunks": 30,
+      "max_new_tokens": 80,
+      "vllm_tp_size": 2,
+      "rag_device": "cuda:0"
     },
-    "cancelled_jobs": {
-      "de_dependency_job": "47069"
+    "model_assets": {
+      "zh": "gavinlaw/rasst-speech-llm-zh-cap16-denoise-ttag",
+      "ja": "gavinlaw/rasst-speech-llm-ja-cap16-denoise-ttag",
+      "de": "gavinlaw/rasst-speech-llm-de-cap16-denoise-ttag",
+      "retriever": "gavinlaw/rasst-retriever-hn1024"
     },
-    "runtime_output_root": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/rebuttal_acl_paper_extracted_lm2_20260711T215140Z"
-  },
-  "language_status": {
-    "zh": {
-      "status": "complete_verified",
-      "aggregate_path": "docs/results/acl_paper_extracted_lm2/zh/aggregate.tsv",
-      "aggregate_sha256": "08a7ad130607c5a80ef7685b1311e032bb3da1126c98c75d26f528ecd2b72337",
-      "per_paper_result_count": 5,
-      "bleu_macro": 46.17163298883631,
-      "masked_terms_bleu_macro": 43.238224277546124,
-      "streamlaal_macro": 1827.824736880009,
-      "term_correct": 223,
-      "term_total": 235,
-      "term_acc_micro": 0.948936170212766
+    "slurm": {
+      "cluster": "aries",
+      "failed_index_only_jobs": ["47028", "47029", "47030"],
+      "completed_jobs": {"zh": "47067", "ja": "47068", "de": "47072"},
+      "cancelled_jobs": {"de_dependency_job": "47069"},
+      "runtime_output_root": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/rebuttal_acl_paper_extracted_lm2_20260711T215140Z"
     },
-    "ja": {
-      "status": "running",
-      "slurm_job_id": "47068"
-    },
-    "de": {
-      "status": "running",
-      "slurm_job_id": "47072",
-      "gpu_pair": "0,1",
-      "replaces_cancelled_job": "47069"
+    "results": {
+      "zh": {
+        "aggregate_path": "docs/results/acl_paper_extracted_lm2/zh/aggregate.tsv",
+        "aggregate_sha256": "08a7ad130607c5a80ef7685b1311e032bb3da1126c98c75d26f528ecd2b72337",
+        "bleu_macro": 46.17163298883631,
+        "masked_terms_bleu_macro": 43.238224277546124,
+        "streamlaal_macro": 1827.824736880009,
+        "term_correct": 223,
+        "term_total": 235
+      },
+      "ja": {
+        "aggregate_path": "docs/results/acl_paper_extracted_lm2/ja/aggregate.tsv",
+        "aggregate_sha256": "a6e64ebfa5920897978a0806ce47d3c83dadee506ee2afc9fb43d56b97e55ee8",
+        "bleu_macro": 27.694446331900952,
+        "masked_terms_bleu_macro": 27.481061543781312,
+        "streamlaal_macro": 2104.5234274510613,
+        "term_correct": 159,
+        "term_total": 185
+      },
+      "de": {
+        "aggregate_path": "docs/results/acl_paper_extracted_lm2/de/aggregate.tsv",
+        "aggregate_sha256": "099e6dbc2af47a3395869af7eccc637fc7063c23898bf86c3bad105fc05dda33",
+        "bleu_macro": 27.800108020291606,
+        "masked_terms_bleu_macro": 27.773503052424445,
+        "streamlaal_macro": 1642.450503653544,
+        "term_correct": 210,
+        "term_total": 236
+      }
     }
   },
-  "naming_note": "The inherited output density label contains tau073, but RAG_SCORE_THRESHOLD was overridden to 0.78 and per-paper output paths record th0.78. The actual threshold is 0.78.",
-  "validation_policy": "Accept a language result only when all five per-paper eval_results.tsv and instances.log artifacts exist and aggregate successfully."
+  "infinisst_posteval": {
+    "inference_rerun": false,
+    "mode": "extracted_by_paper",
+    "term_fcr_policy": "source_ref_negative_sentence",
+    "real_term_adopt_available": false,
+    "results": {
+      "zh": {
+        "path": "docs/results/acl_paper_extracted_lm2/infinisst/zh/eval_results.tsv",
+        "sha256": "1fc78381a2d4d0d1b7e59a180388816af2b31fed41d0a027bd9155d4790c5779",
+        "source_instances_sha256": "9d3f95e59d2de02ef719056baed94142231cb288e5c693d14dd540b33505a04a",
+        "bleu": 45.8267991845899,
+        "masked_terms_bleu": 43.772489065558425,
+        "streamlaal": 1765.719569988509,
+        "term_correct": 188,
+        "term_total": 235
+      },
+      "ja": {
+        "path": "docs/results/acl_paper_extracted_lm2/infinisst/ja/eval_results.tsv",
+        "sha256": "d41500de4f14d5ddc55e6677f769c7401d1083c38a7edb87a13311530110288d",
+        "source_instances_sha256": "492a1e6d09320d727e382ad187e04527f7717cd9326bf87a8c890c529be906a3",
+        "bleu": 27.72015145966617,
+        "masked_terms_bleu": 27.185211267681108,
+        "streamlaal": 2291.164886174681,
+        "term_correct": 126,
+        "term_total": 185
+      },
+      "de": {
+        "path": "docs/results/acl_paper_extracted_lm2/infinisst/de/eval_results.tsv",
+        "sha256": "d44cee3524d91d8880ebae5aa86585b430475fee1846339640f6a5369d2ca2e4",
+        "source_instances_sha256": "f1ab08fd6f4f9cbe47605db9de5a433eea1da6e5bf25a67aa4e67c9805bf4084",
+        "bleu": 30.25162199976884,
+        "masked_terms_bleu": 30.321839677844412,
+        "streamlaal": 1759.061116162327,
+        "term_correct": 151,
+        "term_total": 236
+      }
+    },
+    "validation": "BLEU and StreamLAAL reproduce the registered InfiniSST lm=2 baseline values to full precision."
+  },
+  "naming_note": "The inherited RASST output density label contains tau073, but RAG_SCORE_THRESHOLD was overridden to 0.78 and per-paper output paths record th0.78. The actual threshold is 0.78.",
+  "glossary_provenance_note": "The exact historical Gemini model identifier is unverified; do not label this legacy v1 artifact as a newly reproduced Gemini 2.5 Flash extraction."
 }
