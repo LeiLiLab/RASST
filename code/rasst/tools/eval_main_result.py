@@ -950,14 +950,15 @@ def launch_detached(
     cache_chunks_by_lm_text: Optional[str],
     cache_seconds_rounding: str,
     max_new_tokens_per_lm: Optional[int],
+    allow_launch: bool,
 ) -> None:
-    if os.environ.get("RASST_ALLOW_LAUNCH", "0") != "1":
-        raise RasstError("Set RASST_ALLOW_LAUNCH=1 to launch. Use --dry-run first.")
+    if not allow_launch and os.environ.get("RASST_ALLOW_LAUNCH", "0") != "1":
+        raise RasstError("Pass --allow-launch to launch. Use --dry-run first.")
     log_dir = log_root(root) / "curated"
     run_root.mkdir(parents=True, exist_ok=True)
     log_dir.mkdir(parents=True, exist_ok=True)
     write_config_report(manifest, root, cells, run_root)
-    stamp = run_root.name
+    stamp = f"{run_root.parent.name}__{run_root.name}"
     script_path = log_dir / f"{stamp}__eval_main_result.sh"
     out_log = log_dir / f"{stamp}__eval_main_result.out"
     err_log = log_dir / f"{stamp}__eval_main_result.err"
@@ -1087,17 +1088,26 @@ def launch_sbatch(
     cache_chunks_by_lm_text: Optional[str],
     cache_seconds_rounding: str,
     max_new_tokens_per_lm: Optional[int],
+    allow_launch: bool = False,
+    sbatch_partition: Optional[str] = None,
+    sbatch_gres: Optional[str] = None,
+    sbatch_cpus: Optional[str] = None,
+    sbatch_mem: Optional[str] = None,
+    sbatch_time: Optional[str] = None,
+    sbatch_job_name: Optional[str] = None,
+    sbatch_array_limit: Optional[str] = None,
+    physical_gpu_pair: Optional[str] = None,
     prepare_only: bool = False,
 ) -> None:
-    if os.environ.get("RASST_ALLOW_LAUNCH", "0") != "1":
-        raise RasstError("Set RASST_ALLOW_LAUNCH=1 to launch. Use --dry-run first.")
+    if not allow_launch and os.environ.get("RASST_ALLOW_LAUNCH", "0") != "1":
+        raise RasstError("Pass --allow-launch to launch. Use --dry-run first.")
     if not shutil_which("sbatch"):
         raise RasstError("sbatch is not available on PATH.")
     log_dir = log_root(root) / "curated"
     run_root.mkdir(parents=True, exist_ok=True)
     log_dir.mkdir(parents=True, exist_ok=True)
 
-    stamp = run_root.name
+    stamp = f"{run_root.parent.name}__{run_root.name}"
     script_path = log_dir / f"{stamp}__eval_main_result_sbatch_array.sh"
     post_script_path = log_dir / f"{stamp}__eval_main_result_sbatch_post.sh"
     submit_stdout = log_dir / f"{stamp}__eval_main_result_sbatch_submit.out"
@@ -1108,13 +1118,16 @@ def launch_sbatch(
     task_status_dir = run_root / "task_status"
     cell_scripts_dir.mkdir(parents=True, exist_ok=True)
     task_status_dir.mkdir(parents=True, exist_ok=True)
-    partition = os.environ.get("RASST_SBATCH_PARTITION", "taurus")
-    gres = os.environ.get("RASST_SBATCH_GRES", "gpu:2")
-    cpus = os.environ.get("RASST_SBATCH_CPUS", "16")
-    mem = os.environ.get("RASST_SBATCH_MEM", "128G")
-    time_limit = os.environ.get("RASST_SBATCH_TIME", "08:00:00")
-    job_name = os.environ.get("RASST_SBATCH_JOB_NAME", "rasst24_eval")[:64]
-    array_limit = os.environ.get("RASST_SBATCH_ARRAY_LIMIT")
+    partition = sbatch_partition or os.environ.get("RASST_SBATCH_PARTITION", "taurus")
+    gres = sbatch_gres or os.environ.get("RASST_SBATCH_GRES", "gpu:2")
+    omit_gres = gres.lower() in {"none", "off", "omit"}
+    cpus = sbatch_cpus or os.environ.get("RASST_SBATCH_CPUS", "16")
+    mem = sbatch_mem or os.environ.get("RASST_SBATCH_MEM", "128G")
+    time_limit = sbatch_time or os.environ.get("RASST_SBATCH_TIME", "08:00:00")
+    job_name = (sbatch_job_name or os.environ.get("RASST_SBATCH_JOB_NAME", "rasst24_eval"))[:64]
+    array_limit = sbatch_array_limit
+    if array_limit is None:
+        array_limit = os.environ.get("RASST_SBATCH_ARRAY_LIMIT")
     if array_limit is None:
         array_limit = "4" if partition == "taurus" else "3" if partition == "aries" else "1"
     if len(cells) == 1:
@@ -1125,7 +1138,11 @@ def launch_sbatch(
         array_spec = f"0-{len(cells) - 1}"
 
     old_gpu_pair = os.environ.get("RASST_GPU_PAIR")
-    os.environ["RASST_GPU_PAIR"] = RAW_SHELL_PREFIX + "${CUDA_VISIBLE_DEVICES:-0,1}"
+    os.environ["RASST_GPU_PAIR"] = (
+        physical_gpu_pair
+        if physical_gpu_pair is not None
+        else RAW_SHELL_PREFIX + "${CUDA_VISIBLE_DEVICES:-0,1}"
+    )
     try:
         write_config_report(manifest, root, cells, run_root)
         commands = command_list(manifest, root, cells, run_root)
@@ -1190,6 +1207,7 @@ def launch_sbatch(
             "job_name": job_name,
             "array": array_spec,
             "array_limit": array_limit,
+            "physical_gpu_pair": physical_gpu_pair or "slurm-visible",
         },
         "runtime_overrides": {
             "force_runner": force_runner or "",
@@ -1213,7 +1231,6 @@ def launch_sbatch(
         "#!/usr/bin/env bash",
         f"#SBATCH --job-name={job_name}",
         f"#SBATCH --partition={partition}",
-        f"#SBATCH --gres={gres}",
         f"#SBATCH --cpus-per-task={cpus}",
         f"#SBATCH --mem={mem}",
         f"#SBATCH --time={time_limit}",
@@ -1247,6 +1264,8 @@ def launch_sbatch(
         "echo '[CELL_DONE] '$cid' status='$cell_status' '$(date -u +%Y-%m-%dT%H:%M:%SZ)",
         "exit \"$cell_status\"",
     ]
+    if not omit_gres:
+        body.insert(3, f"#SBATCH --gres={gres}")
     script_path.write_text("\n".join(body) + "\n", encoding="utf-8")
     script_path.chmod(0o755)
 
@@ -1354,6 +1373,16 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     p.add_argument("--launch-backend", default="local", choices=("local", "sbatch"), help="Launch backend for real runs.")
     p.add_argument("--sbatch", action="store_true", help="Shortcut for --launch-backend sbatch.")
     p.add_argument("--prepare-only", action="store_true", help="Prepare generated launch scripts and metadata without submitting.")
+    p.add_argument("--allow-launch", action="store_true", help="Explicitly authorize a detached or sbatch run after a dry run.")
+    p.add_argument("--sbatch-partition", default=None, help="Slurm partition for --sbatch.")
+    p.add_argument("--sbatch-gres", default=None, help="Slurm GRES request for --sbatch, e.g. gpu:2.")
+    p.add_argument("--sbatch-cpus", default=None, help="Slurm CPUs per task for --sbatch.")
+    p.add_argument("--sbatch-mem", default=None, help="Slurm memory request for --sbatch.")
+    p.add_argument("--sbatch-time", default=None, help="Slurm time limit for --sbatch.")
+    p.add_argument("--sbatch-job-name", default=None, help="Slurm job name for --sbatch.")
+    p.add_argument("--sbatch-array-limit", default=None, help="Maximum concurrent Slurm array tasks; use 1 for serial cells.")
+    p.add_argument("--physical-gpu-pair", default=None, help="Explicit physical GPU ids passed to each cell, e.g. 2,3; otherwise use Slurm-visible ids.")
+    p.add_argument("--physical-gpu-ids", default=None, help="Explicit comma-separated physical GPU ids for local cells, e.g. 2,3,4 for TP=2 plus retriever.")
     p.add_argument("--run-root", default=None, help="Exact output root. Relative paths are resolved under RASST_ROOT.")
     p.add_argument("--force-runner", default=None, choices=("serial_simuleval", "batch_vllm"), help="Temporarily override selected cell runner without editing the manifest.")
     p.add_argument("--cell-override", action="append", default=[], help="Temporarily override selected cell config, as KEY=VALUE. Repeatable.")
@@ -1362,6 +1391,9 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     p.add_argument("--cache-chunks-by-lm", default=None, help="Set MAX/KEEP cache chunks by lm, e.g. 1:30,2:15,3:10,4:8 or 1:30/30.")
     p.add_argument("--cache-seconds-rounding", default="floor", choices=("floor", "ceil"), help="Rounding policy for --cache-seconds conversion to chunks.")
     p.add_argument("--max-new-tokens-per-lm", type=int, default=None, help="Set MAX_NEW_TOKENS_OVERRIDE per cell as this value times lm.")
+    p.add_argument("--retrieval-degradation-plan", default=None, help="Sentence-aligned relevance plan for controlled hint corruption.")
+    p.add_argument("--retrieval-degradation-rate", type=float, default=0.0, help="Relevant-hint replacement probability in [0, 1].")
+    p.add_argument("--retrieval-degradation-seed", type=int, default=0, help="Deterministic corruption seed.")
     return p.parse_args(argv)
 
 
@@ -1376,6 +1408,42 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     validate_manifest_shape(manifest, root)
     validate_assets(manifest, root)
     cell_overrides = parse_cell_overrides(args.cell_override)
+    if args.physical_gpu_ids:
+        gpu_ids = [item.strip() for item in args.physical_gpu_ids.split(",")]
+        if len(gpu_ids) < 3 or any(not item.isdigit() for item in gpu_ids):
+            raise RasstError(
+                "--physical-gpu-ids requires at least three numeric ids "
+                "(two for vLLM TP and one for retrieval)"
+            )
+        cell_overrides.update(
+            {
+                "CUDA_VISIBLE_DEVICES_PHYSICAL_OVERRIDE": ",".join(gpu_ids),
+                "VLLM_TP_SIZE_OVERRIDE": "2",
+                "RAG_GPU_OVERRIDE": "cuda:2",
+                "RAG_DEVICE_OVERRIDE": "cuda:2",
+            }
+        )
+    if args.retrieval_degradation_plan:
+        plan_path = rel_or_abs(root, args.retrieval_degradation_plan)
+        if not plan_path.is_file():
+            raise RasstError(f"Retrieval degradation plan not found: {plan_path}")
+        if not 0.0 <= args.retrieval_degradation_rate <= 1.0:
+            raise RasstError("--retrieval-degradation-rate must be in [0, 1]")
+        cell_overrides.update(
+            {
+                "RETRIEVAL_DEGRADATION_PLAN_OVERRIDE": str(plan_path),
+                "RETRIEVAL_DEGRADATION_RATE_OVERRIDE": str(
+                    args.retrieval_degradation_rate
+                ),
+                "RETRIEVAL_DEGRADATION_SEED_OVERRIDE": str(
+                    args.retrieval_degradation_seed
+                ),
+            }
+        )
+    elif args.retrieval_degradation_rate != 0.0:
+        raise RasstError(
+            "--retrieval-degradation-rate requires --retrieval-degradation-plan"
+        )
     cache_seconds = parse_cache_seconds(args.cache_seconds)
     cache_chunks_by_lm = parse_cache_chunks_by_lm(args.cache_chunks_by_lm)
     lm_list = parse_lm_list(args.lm_list)
@@ -1432,6 +1500,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             cache_chunks_by_lm_text=args.cache_chunks_by_lm,
             cache_seconds_rounding=args.cache_seconds_rounding,
             max_new_tokens_per_lm=args.max_new_tokens_per_lm,
+            allow_launch=args.allow_launch,
+            sbatch_partition=args.sbatch_partition,
+            sbatch_gres=args.sbatch_gres,
+            sbatch_cpus=args.sbatch_cpus,
+            sbatch_mem=args.sbatch_mem,
+            sbatch_time=args.sbatch_time,
+            sbatch_job_name=args.sbatch_job_name,
+            sbatch_array_limit=args.sbatch_array_limit,
+            physical_gpu_pair=args.physical_gpu_pair,
             prepare_only=args.prepare_only,
         )
     else:
@@ -1452,6 +1529,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             cache_chunks_by_lm_text=args.cache_chunks_by_lm,
             cache_seconds_rounding=args.cache_seconds_rounding,
             max_new_tokens_per_lm=args.max_new_tokens_per_lm,
+            allow_launch=args.allow_launch,
         )
     return 0
 
