@@ -958,7 +958,7 @@ def launch_detached(
     run_root.mkdir(parents=True, exist_ok=True)
     log_dir.mkdir(parents=True, exist_ok=True)
     write_config_report(manifest, root, cells, run_root)
-    stamp = run_root.name
+    stamp = f"{run_root.parent.name}__{run_root.name}"
     script_path = log_dir / f"{stamp}__eval_main_result.sh"
     out_log = log_dir / f"{stamp}__eval_main_result.out"
     err_log = log_dir / f"{stamp}__eval_main_result.err"
@@ -1107,7 +1107,7 @@ def launch_sbatch(
     run_root.mkdir(parents=True, exist_ok=True)
     log_dir.mkdir(parents=True, exist_ok=True)
 
-    stamp = run_root.name
+    stamp = f"{run_root.parent.name}__{run_root.name}"
     script_path = log_dir / f"{stamp}__eval_main_result_sbatch_array.sh"
     post_script_path = log_dir / f"{stamp}__eval_main_result_sbatch_post.sh"
     submit_stdout = log_dir / f"{stamp}__eval_main_result_sbatch_submit.out"
