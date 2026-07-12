@@ -27,6 +27,10 @@ On the final global-cache snapshot, RASST improves terminology accuracy over Inf
 
 The tracked result tables and figure sources are in [docs/results/main_result_global_cache30_30_20_20](docs/results/main_result_global_cache30_30_20_20/).
 
+The reviewer-facing En-Zh target-tag training ablation, including both sides'
+evaluation artifacts and provenance, is tracked in
+[docs/results/term_tag_ablation_en_zh_20260711](docs/results/term_tag_ablation_en_zh_20260711/).
+
 ## Release Assets
 
 | Asset | Link |
