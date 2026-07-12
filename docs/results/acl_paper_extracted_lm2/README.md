@@ -31,7 +31,7 @@ retriever with vLLM on `cuda:0`:
 | --- | ---: | --- | --- |
 | zh | `47067` | none | complete and verified |
 | ja | `47068` | after `47067` | running |
-| de | `47069` | after `47068` | queued |
+| de | `47072` | none; replaces cancelled `47069` | running on GPU 0-1 |
 
 ## Verified En-Zh result
 
