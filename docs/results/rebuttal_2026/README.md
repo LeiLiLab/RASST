@@ -25,9 +25,23 @@ glossary 原始响应不进入 Git。
   输入哈希见 [`term_prevalence.tsv`](term_prevalence.tsv)。
 - **ESO 结果口径已确定。** 原始 ESO German reference 是人工翻译；本项目新增的
   Chinese/Japanese reference 是 GPT-5.4 生成。Revision 保留 ESO En-De，移除依赖
-  synthetic reference 的 ESO En-Zh/En-Ja BLEU/xCOMET、exact-form TERM_ACC 和
-  reference-aligned latency。Hard glossary 实际为 215 rows、212 unique terms，
-  不是论文中的 217。
+  synthetic sentence reference 的 ESO En-Zh/En-Ja BLEU、xCOMET 等
+  translation-quality claims。若保留 term-only readout，必须与 reference-based
+  metrics 分表，并标为 GPT-5.4-assisted、manually checked glossary，不能称为
+  fully human-authored 或 domain-expert annotation。Hard glossary 实际为 215
+  rows、212 unique terms，不是论文中的 217。
+- **ESO hard-term pipeline provenance 已补齐。** Stage 1/2/5 使用 GPT-5.4：
+  Stage 1 以 10 sentences/batch 生成 Zh/Ja sentence translations 与 candidate
+  terms，Stage 2 统一 exact-span/abbreviation decisions，Stage 5 以
+  3 sentences/batch 对照 no-RAG baseline 确定 hard terms；Stage 3/4 做非 LLM
+  consistency/source exact-match 处理，Stage 6 manual check glossary，Stage 7
+  生成 final output。三个 exact prompts、hash 与允许的论文口径见
+  [`eso_hard_term_pipeline/`](eso_hard_term_pipeline/)。
+- **ACL terminology qualification 已由官方论文核实。** 60/60 terminology lists
+  non-exhaustive；source spans 自动标记；英文技术词经 domain expert 复核；target
+  translation 由目标语言母语 professional post-editor 处理并经第二位 annotator
+  复核。不能据此声称 target translations 也由 domain experts 完成。来源为
+  [Salesky et al. (2023), Secs. 3.4--3.7 and App. A.5](https://aclanthology.org/2023.iwslt-1.2/)。
 - **ACL `lm=2` failure analysis 已完成。** 本分析只使用 5 个 ACL talks，明确排除
   Medicine/ESO。De/Zh/Ja 的
   `P(exact | retrieved on time/late/never)` 分别为
@@ -244,11 +258,12 @@ canonical artifact。
 
 按 Reviewer Mzub、oktu、gbii 顺序整理的精简 OpenReview 单评论稿位于
 [`../../rebuttal_2026_openreview_responses.md`](../../rebuttal_2026_openreview_responses.md)。
-三段正文分别为 `3192 / 3367 / 3813` characters，均低于 5000-character 上限；该稿
+三段正文分别为 `3622 / 4414 / 3651` characters，均低于 5000-character 上限；该稿
 只使用已验证的 main/rebuttal-experiments 结果，并明确排除 LLM-as-a-judge 与宽语义
 audit。文末的内部取舍和 evidence SoT 不应提交到 OpenReview。
 
-英文工作稿位于 [`../../rebuttal_2026_draft.md`](../../rebuttal_2026_draft.md)。其中
+较长的英文历史工作稿位于 [`../../rebuttal_2026_draft.md`](../../rebuttal_2026_draft.md)，
+不应直接提交；以 concise response 文件为准。其中
 所有 `PENDING` 都是提交保护标记：只有生成、复核并写入本索引的数字才可替换。
 Masked BLEU 是 diagnostic，不是因果分解；TERM_ACC 必须称为 exact-form metric。
 German morphology-aware 结果只能称为 non-expert author diagnostic，并且必须在

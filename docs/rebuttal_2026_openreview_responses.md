@@ -19,24 +19,32 @@ aggregate contextual-quality loss on ACL. We also add a target-term-masked
 BLEU diagnostic: after removing every annotated target-term string from both
 hypothesis and reference, RASST remains higher in **10/12** ACL cells by
 **+0.992 BLEU on average** (regular-BLEU delta: +1.911). The average BLEU
-advantage therefore persists after direct target-term matches are removed. We will add
-both metrics and their protocols.
+advantage therefore persists after direct target-term matches are removed. We
+will add both metrics and their protocols.
 
 **German morphology.** We agree that the current metric is a strict
 surface-form test. We will rename it **exact-form terminology accuracy**, state
 this limitation prominently, and retain it as the primary reproducible metric.
 At the fixed intermediate operating point (`lm=2`), exact matching gives
-**83.32% (809/971)**. A conservative form-aware diagnostic that additionally
-accepts only valid inflection, compounding, case, spacing, and hyphenation
-variants gives **88.47% (859/971, +5.15 points)**. This quantifies the undercount
-you identified without conflating it with unrestricted paraphrase matching.
+**83.32% (809/971)**. A conservative form-aware author diagnostic that
+additionally accepts only checked inflection, compounding, case, spacing, and
+hyphenation variants gives **88.47% (859/971, +5.15 points)**. This quantifies
+the undercount you identified without conflating it with unrestricted
+paraphrase matching.
 
-**ESO reference provenance.** Your reading is correct: the original ESO
-**German references are human-produced**, whereas our added Chinese and
-Japanese references are GPT-generated. We agree that this distinction was not
-sufficiently prominent. We will retain ESO En-De, remove ESO En-Zh/En-Ja from
-the main results and all reference-dependent claims, and explicitly label
-reference provenance in the evaluation table and text.
+**ESO reference provenance.** We confirm the distinction:
+
+| ESO slice | Sentence-reference provenance | Revision treatment |
+| --- | --- | --- |
+| En-De | Original manual translation in the [released ESO dataset](https://github.com/mllpresearch/ESO-dataset) | Retain as the ESO reference-based evaluation |
+| En-Zh/En-Ja | Added by us with GPT-5.4 | Remove BLEU, xCOMET, and other synthetic-reference-dependent claims from the main results |
+
+We will also separate **reference provenance** from **glossary provenance**.
+The ESO hard-term inventory was produced with GPT-5.4 in Stages 1/2/5 and then
+manually checked; it will be labeled **GPT-assisted and manually checked**, not
+presented as fully human-authored or domain-expert annotation. Any retained
+term-only readout will be clearly separated from reference-based
+translation-quality metrics.
 
 **Are target tags necessary?** We ran the suggested controlled ablation. We
 retrained the En-Zh Speech LLM from the same base after deleting only the
@@ -61,31 +69,43 @@ pooling; use a clearer source-to-target separator in Fig. 1; and correct
 
 <!-- RESPONSE:OKTU:START -->
 Thank you for the constructive questions. We agree that the paper should define
-the evaluation target more explicitly and complement aggregate scores with
+the evaluation target explicitly and complement aggregate scores with
 contextual and case-level evidence.
 
-**What we mean by terminology, and who selects it.** RASST does not require or
-infer a universal boundary between "terms" and ordinary vocabulary. Its input
-is a user-supplied bilingual glossary; operationally, a *term* is an entry
-designated for controlled translation in that glossary. Such entries typically
-include technical expressions, named methods/datasets/metrics, specialized
-proper names, and acronyms. Selection is therefore external to RASST; the
-system's task is to retrieve the relevant entry from partial speech and decide
-whether and when to use it. For ACL 60/60, we use the dataset's released human
-term annotations rather than selecting terms from our systems' outputs. We
-will add a glossary-provenance table and will not claim professional-translator
-or domain-expert verification beyond what the dataset documentation supports.
+**Definition and provenance.** RASST does not need to infer a universal
+boundary between "terminology" and ordinary vocabulary. Its input is a
+user-supplied bilingual glossary; operationally, a *term* is an entry designated
+for controlled translation in that glossary. Typical entries are technical
+expressions, named methods/datasets/metrics, specialized proper names, and
+acronyms. Selection is external to RASST: the system retrieves relevant entries
+from partial speech and decides whether and when to use them.
+
+We will add this provenance distinction:
+
+| Glossary | Selection and verification | Qualification we claim |
+| --- | --- | --- |
+| **ACL 60/60** | Non-exhaustive lists created by the 60/60 initiative; source spans were automatically tagged. Professional post-editors corrected and tagged the target spans. | The English transcript's technical terms were checked by a domain expert; target translations were professionally post-edited by a target-language-native annotator and second-reviewed. |
+| **ESO hard terms** | Seven-stage hybrid pipeline; final glossary manually checked. | GPT-5.4-assisted and manually checked; **not** claimed as fully human-authored, professional-translator-verified, or domain-expert annotation. |
+
+For ESO, GPT-5.4 generated Zh/Ja translations and candidate terms in Stage 1
+(10 sentences/batch), enforced exact-span and abbreviation consistency in
+Stage 2, and compared the no-RAG baseline in Stage 5 (3 sentences/batch) to
+identify hard terms. Non-LLM Stages 3/4 restored sample-level consistency and
+filtered source-unmatched terms; Stage 6 manually checked the glossary and
+Stage 7 emitted the final output. The ACL qualifications above follow
+[Salesky et al. (2023), Secs. 3.4-3.7](https://aclanthology.org/2023.iwslt-1.2/);
+we do not conflate source-term expertise with target-translation review.
 
 **Contextual translation quality.** Following your suggestion, we evaluated
 all 12 paired ACL cells (En-Zh/De/Ja x four latency settings) with xCOMET-XXL.
 RASST scores **78.704**, versus **78.588** for the same-backbone InfiniSST
 baseline (**+0.116**, higher in **8/12** cells), while exact-form terminology
 accuracy improves by **12.4-21.4 points in every cell**. Thus, xCOMET does not
-show an aggregate contextual-quality cost on ACL. As a complementary
-diagnostic, after masking raw-gold target terms in both hypotheses and
-references, RASST remains higher in **10/12** ACL cells by **+0.992 BLEU** on
-average (regular-BLEU delta: **+1.911**). We will present masking as a
-diagnostic rather than a causal decomposition.
+show an aggregate contextual-quality cost on ACL, although we will not claim a
+large universal gain in general quality. As a complementary diagnostic, after
+masking raw-gold target terms in both hypotheses and references, RASST remains
+higher in **10/12** ACL cells by **+0.992 BLEU** on average (regular-BLEU delta:
+**+1.911**). We present masking as a diagnostic, not a causal decomposition.
 
 **Which cases benefit, and which remain difficult.** We traced every gold
 occurrence at the fixed intermediate operating point (`lm=2`) over the five ACL
@@ -109,9 +129,8 @@ for example `morphologische Analyse` versus grammatical `mittels
 morphologischer Analyse`; we will distinguish such metric false negatives from
 genuine translation errors.
 
-We will add the operational definition, annotation provenance,
-xCOMET/masked-BLEU results, and a compact success/failure table with these
-verified examples.
+We will add the operational definition, provenance table, xCOMET/masked-BLEU
+results, and a compact success/failure table with these verified examples.
 <!-- RESPONSE:OKTU:END -->
 
 ## 3. Reviewer gbii
@@ -126,45 +145,42 @@ streaming-speech problems: retrieving terms from *partial speech* before
 commitment, and training the Speech LLM to decide *whether and when* to use
 noisy, time-varying hints. InfiniSST is the most controlled primary baseline:
 it uses the same evaluation inputs, cache/decode policy, latency settings, and
-scoring pipeline, with retrieval disabled. We also add matched end-to-end
-controls. At En-Zh `lm=2`, multi-scale retrieval gives **90.00% TERM_ACC**;
-using only the largest inference window with the same checkpoint gives
-**84.72%**, with nearly unchanged BLEU (47.88/47.83). A fixed-window
-training/inference variant reaches 73.93%. Separately, deleting only target-term
-tags from otherwise row-matched training data reduces mean TERM_ACC by
-**4.11 points** and real-term adoption by **5.36 points** over four latency
-settings. These controls locate the gains in the streaming-specific retrieval
-and training design. We will clarify this scope rather than claim dominance
-over all biasing architectures with different backbones or budgets.
+scoring pipeline, with retrieval disabled. Our new controlled evidence is:
 
-**Less-curated terminology.** We add a five-talk ACL condition where each RASST
-run retrieves only from a glossary automatically extracted from that talk's
-paper; gold term annotations and references are unavailable when building the
-index. Evaluation retains the complete original gold glossary, so unextracted
-terms remain errors. At `lm=2`, RASST exceeds no-RAG InfiniSST by **+2.70
-TERM_ACC points** in En-Zh and **+2.14** in En-De, and is near parity in En-Ja
-(-0.64; six occurrences): **+1.40 points macro-average and +38 correct
-occurrences pooled**. The terminology advantage therefore largely survives
-without oracle test-term selection or an easier denominator.
+| ACL evidence | Matched comparison | Result |
+| --- | --- | --- |
+| Multi-scale, Zh `lm=2` | Largest-infer / fixed-window train+infer | TERM_ACC **90.00 vs. 84.72/73.93**; BLEU 47.88 vs. 47.83/45.80 |
+| Target-tag SFT, Zh `lm=1-4` | Target tags removed only | **+4.11 pp** TERM_ACC; **+5.36 pp** correct-term adoption |
+| Paper-derived glossary v1, `lm=2` | No-RAG InfiniSST; unchanged ACL denominator | Delta TERM_ACC Zh/Ja/De: **+2.70/-0.64/+2.14 pp** (macro **+1.40 pp**) |
+| 25%/50% hint corruption, `lm=2` | 0%; same hint count/retrieval compute | Delta TERM_ACC Zh: -1.91/-4.27; De: -3.31/-7.59; Ja: -1.80/-6.17 pp; xCOMET lower in all six |
+| Target-masked BLEU, 12 cells | InfiniSST | **+0.99** average; **10/12** wins (regular BLEU: +1.91) |
 
-We additionally stress retrieval quality while holding retrieval calls, hint
-count, rank/score metadata, Speech LLM, and generation settings fixed.
-Replacing about 25%/50% of relevant correct hints with in-domain distractors
-lowers TERM_ACC from **90.00 to 88.09/85.73** (Zh), **83.10 to 79.79/75.51**
-(De), and, with an independent mask, **84.57 to 82.77/78.40** (Ja). xCOMET is
-below the matched 0% control in every degraded condition. This directly
-establishes sensitivity to retrieval quality without conflating it with
+The first two rows locate the gains in the streaming-specific retrieval and
+training design, not merely appending glossary entries to a prompt. We will
+clarify this scope rather than claim dominance over all biasing architectures
+with different backbones or budgets.
+
+**Less-curated terminology.** In the five-talk paper-derived condition, each
+RASST run retrieves only from a glossary built from that talk's paper; neither
+the ACL tagged-raw glossary nor references are used to build the index. Both
+systems are scored against the unchanged ACL tagged-raw glossary, so terms
+absent from the paper-derived index remain errors. The table shows that the
+advantage largely survives without oracle test-term selection or an easier
+denominator; En-Ja is within six correct occurrences of InfiniSST.
+
+**Sensitivity to retrieval quality.** The corruption test holds retrieval
+calls, hint count, rank/score metadata, Speech LLM, and generation settings
+fixed. TERM_ACC and xCOMET are below the matched 0% control in every degraded
+language/level, directly establishing sensitivity without conflating it with
 compute.
 
-**Magnitude of translation-quality gains.** We agree that the BLEU gain is
-incremental and that terminology is the main result. Gold terms account for
-only **10.66-18.06%** of ACL target tokens, although they occur in
-**83.76-86.54%** of sentences; TERM_ACC changes are therefore diluted in corpus
-BLEU. Across 12 ACL language/latency cells, BLEU improves by **1.91** on
-average. After masking gold target strings in both hypotheses and references,
-the mean gain remains **+0.99 BLEU**, with RASST higher in **10/12** cells. We
-will describe the result as substantial terminology improvement with modest
-overall-quality gains.
+**Magnitude of quality gains.** We agree that BLEU improves incrementally and
+terminology is the main result. Gold terms account for only **10.66-18.06%** of
+ACL target tokens, although they occur in **83.76-86.54%** of sentences; gains
+are therefore diluted in corpus BLEU. The masked-BLEU result shows that direct
+gold-term strings do not explain the entire difference. We will describe the
+result as substantial terminology improvement with modest overall-quality
+gains.
 
 **Failure analysis.** At fixed ACL `lm=2`, `P(exact | on-time / late / never
 retrieved)` is **86.1/82.8/59.3%** for De, **92.7/89.8/71.6%** for Zh, and
@@ -182,11 +198,13 @@ ESO/Medicine.
 
 ### 明显 win，建议正式写
 
-- **Mzub:** ACL xCOMET、masked BLEU、ESO Zh/Ja removal、target-tag ablation、所有
-  notation/typo 修正。
+- **Mzub:** ACL xCOMET、masked BLEU、ESO Zh/Ja reference-based quality metric
+  removal、target-tag ablation、所有 notation/typo 修正。
 - **oktu:** glossary-entry operational definition；ACL dataset-provided human
-  annotations；12/12 TERM_ACC win；xCOMET/masked BLEU；三语 timing conditionals；
-  `LinCE`、`BiLSTM-CRF`、`masked language model` 成功例与三类困难例。
+  annotations 的官方 qualification（source technical terms 经 domain expert
+  check；target 由母语 professional post-editor + second reviewer）；12/12
+  TERM_ACC win；xCOMET/masked BLEU；三语 timing conditionals；`LinCE`、
+  `BiLSTM-CRF`、`masked language model` 成功例与三类困难例。
 - **gbii:** same-checkpoint largest-window end-to-end control；no-tag control；固定 hint
   count/compute 的 degradation；术语 token share 与 masked BLEU；定量 failure chain。
 
@@ -200,8 +218,14 @@ ESO/Medicine.
   Gemini model ID，必须只称 `paper-derived glossary v1` 或 `automatically extracted
   from each paper`，不能称 fresh Gemini 2.5 Flash。该条件 BLEU mixed，不把它包装成
   overall-quality win。
-- **Annotation qualification:** 只说 ACL release 提供 human term annotations。原数据
-  文档没有充分证据时，不声称 professional translator/domain expert。
+- **ESO 七阶段 provenance:** oktu 直接问术语由谁选择/验证，因此建议用一行表格和
+  一段流程透明披露。Stage 5 虽然是 GPT 对 baseline 的判断，但它只用于定义
+  hard-term subset，不是本次 rebuttal 的通用 translation-quality evaluation。
+  若字符紧张，可缩短各 Stage 描述，不能删掉 “GPT-5.4-assisted and manually
+  checked” 的总口径。
+- **ACL qualification 边界:** 可以且应该写 source technical terms 经 domain
+  expert check、target translation 由目标语言母语 professional post-editor 完成并
+  second-reviewed；不能合并成 “all target terms were domain-expert translated”。
 
 ### 不建议写
 
@@ -213,6 +237,8 @@ ESO/Medicine.
   的 general-quality 指标；当前回复明确只把它当 terminology robustness test。
 - 声称 xCOMET 显著提升、三语 paper-derived glossary 都提升，或已加入新的外部
   matched-compute biasing baseline。
+- 把 ESO hard-term inventory 称为 fully human-authored、professional-translator
+  verified 或 domain-expert annotation。
 
 ## Evidence source of truth
 
@@ -224,3 +250,7 @@ ESO/Medicine.
 - `origin/main`: multi-scale end-to-end ablation under
   `docs/results/multiscale_retriever_e2e_lm2/`.
 - `luojiaxuan/rebuttal-experiments@e77a5e6`: three-language ACL-only failure audit.
+- `docs/results/rebuttal_2026/eso_hard_term_pipeline/`: 七阶段 ESO hard-term
+  protocol、Stage 1/2/5 exact prompts 与 SHA-256。
+- [Salesky et al. (2023), Secs. 3.4--3.7 and App. A.5](https://aclanthology.org/2023.iwslt-1.2/):
+  ACL 60/60 annotation and professional post-editing qualifications.
