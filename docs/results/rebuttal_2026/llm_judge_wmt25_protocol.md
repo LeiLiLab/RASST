@@ -2,8 +2,16 @@
 
 ## 当前状态
 
-状态：**full Flash request bundle 已准备，16/16 shards 均为 `PREPARED`、0/16 已提交；
-等待作者确认约 50 USD 预算并轮换 Gemini key**。
+状态（2026-07-12 01:27 PDT）：**full Flash run 已提交；13/16 shards 已完成并下载，
+Medicine En-De `lm=2/3/4` 已创建但 8,622 requests 仍全部 pending。当前 Gemini project
+同时对单条标准请求返回 `429 prepayment credits depleted`，因此剩余 Batch 是否继续取决于
+补充预付余额。**
+
+已下载的 14,106 个原始回答中，14,105 个严格满足“只返回一个整数”；ACL En-Zh
+`lm=4` 有 1 个回答给出解释并在末行写出分数。该末行数字没有被事后截取。一次使用完全
+相同 prompt、model 与 API-default config 的 format-only retry 已尝试，但同样被余额 429
+拒绝且未产生新评分；原始违例与失败尝试均保留。完整汇总仍 blocked，不能用不完整或
+后验解析的数字替代。
 
 100-request paired pilot 已完成。当前建议用 `gemini-2.5-flash` 和 API defaults
 完成全量评分：在本账号上，`gemini-2.5-pro` 的 smoke request 返回 404，说明该
@@ -11,10 +19,10 @@
 模型，而且 pilot 预计全量 Batch 费用更高。作者确认模型/预算和轮换后的私有 key
 之前，不提交任何 full Batch，也不产生可用于 rebuttal 的全量结果。
 
-正式候选 bundle 已在看见任何 full-run score 之前冻结为
+正式 bundle 已在看见任何 full-run score 之前冻结为
 `gemini-2.5-flash`、`generation_config={}` 和 model-default thinking。Preparation
-只生成 request/sidecar/state artifacts，不调用 Gemini API，也不产生费用；作者仍可
-拒绝该配置，此时不得提交这个 bundle。
+只生成 request/sidecar/state artifacts，不调用 Gemini API，也不产生费用；随后提交与
+收集严格使用该冻结配置。
 
 ## Prompt
 
@@ -81,16 +89,20 @@ reference-free，但 segment construction / evaluation unit 仍间接依赖 huma
 reference。逐句记录中的 reference hash 只用于 alignment provenance 和配对核验，
 绝不进入 prompt。
 
-只允许以下两个已验证 artifact：
+只允许以下四个已验证 artifact，并按 method/lm 显式选择：
 
 | Scope | Taurus staging input | Full-file SHA-256 | 选择规则 | 选中 rows |
 | --- | --- | --- | --- | ---: |
 | ACL 5 talks，En-Zh/De/Ja | `/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/rebuttal_2026/llm_judge_wmt25/input/xcomet_release_cache_segments.jsonl` | `43b5581bc79e8c389383e6fb84b684f4f7207334c114a0cc0b8b19d47d2a459b` | 仅 `dataset=acl_tagged_raw`；不能使用该文件中的旧 medicine rows | 11,232 |
-| ESO/Medicine 5 talks，En-De | `/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/rebuttal_2026/llm_judge_wmt25/input/xcomet_paper_exact_eso_de_segments.jsonl` | `40454563ea39d20f04970b8a733dc0a370d8ab0e0a4cb25c0f7720bf5491e997` | 仅 `dataset=medicine_hardraw`，使用 submitted-paper exact 四档 `30/30` replacement | 11,496 |
+| ESO new InfiniSST，lm1--3 | `/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/rebuttal_2026/llm_judge_wmt25/input/xcomet_new_infinisst_lm123_segments.jsonl` | `244a8fb4d5e3538ff4bb0bdbf6860a95ca4f88306ff96d7259f89dccb99fcca3` | `dataset=medicine_hardraw, method=InfiniSST, lm in {1,2,3}` | 4,311 / 8,622 |
+| ESO new InfiniSST，lm4 | `/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/rebuttal_2026/llm_judge_wmt25/input/xcomet_new_infinisst_lm4_segments.jsonl` | `50708b41855173ba2231c23f567de824342da687c87a840c89320bc5f3615df9` | `dataset=medicine_hardraw, method=InfiniSST, lm=4` | 1,437 / 2,874 |
+| ESO paper-exact RASST，lm1--4 | `/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/rebuttal_2026/llm_judge_wmt25/input/xcomet_paper_exact_eso_de_segments.jsonl` | `40454563ea39d20f04970b8a733dc0a370d8ab0e0a4cb25c0f7720bf5491e997` | `dataset=medicine_hardraw, method=RASST, lm in {1,2,3,4}` | 5,748 / 11,496 |
 
 第一个文件全量有 22,728 rows，但其中 Medicine/ESO 是旧 release-cache 口径；它
-只能提供 ACL 的 11,232 rows。ESO/Medicine 必须从第二个 paper-exact artifact
-取 11,496 rows。直接对第一个文件全量评分会让 ESO lm3/lm4 回到错误输入。
+只能提供 ACL 的 11,232 rows。两个 new-InfiniSST artifacts 内部还包含配对评分时使用的
+release-cache RASST rows，必须按 `method=InfiniSST` 过滤。paper-exact artifact 内的旧
+InfiniSST rows 也必须排除，只选 submitted-paper exact RASST。这样组成的新 ESO 矩阵
+恰为 11,496 rows；任何整文件直读都会混入口径错误的 system outputs。
 
 ## 评分矩阵与 Batch 分片
 
@@ -114,19 +126,19 @@ win/tie/loss；缺任一 shard、重复 request key 或非整数 response 时禁
   tokens 和 `1,680.43` thinking tokens；默认 thinking 是主要成本来源。提交前必须
   由作者明确接受约 50 USD 预算。
 - Pilot 对全量 input 的 cell-weighted 投影约为 3.60M tokens，高于官方当前
-  Tier 1 `gemini-2.5-flash` 的 3.00M active enqueued-token 上限。实际账号 quota 需在
-  AI Studio 再核对；若仍是 Tier 1，应分两波提交（先 ACL 12 shards 加 Medicine
-  `lm=1/2`，完成并释放 quota 后再提交 Medicine `lm=3/4`），不能一次 enqueue 全部
-  16 shards。见 [Gemini Batch rate limits](https://ai.google.dev/gemini-api/docs/rate-limits#batch-api-rate-limits)。
+  Tier 1 `gemini-2.5-flash` 的 3.00M active enqueued-token 上限。实际提交 ACL 12
+  shards + Medicine lm1 后，再创建 Medicine lm2 得到 429；远端 list audit 确认该次
+  429 没有生成 Batch job。ACL 与 lm1 完成释放 quota 后，lm2--4 才安全提交。见
+  [Gemini Batch rate limits](https://ai.google.dev/gemini-api/docs/rate-limits#batch-api-rate-limits)。
 - Batch create 不是幂等操作。每个 shard 只允许在持久 state ledger 中从
   `PREPARED` 提交一次；网络超时后不能盲目重提，否则可能重复计费。
 - API key 只能通过显式 `--api-key-file` 读取 owner-only regular file（mode
   `0600`）；不能使用环境变量，也不能把 key 值写入 Git、命令行、manifest、request
   JSONL、response、日志或文档。聊天中出现过的 key 一律视为已暴露，必须轮换。
-- Taurus 当前 candidate path 为
-  `/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/rebuttal_2026/llm_judge_wmt25/.secrets/gemini_key.txt`；
-  文件存在和权限正确不等于 key 已安全轮换或获准用于付费 full run。作者确认前保持
-  blocked，本文不记录也不校验 key 值。
+- 本次 full run 从本机 owner-only 文件安全复制到 Taurus owner-only path
+  `/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/rebuttal_2026/llm_judge_wmt25/.secrets/gemini_key_mac_20260712.txt`；
+  两端均为 mode `0600`。本文只记录路径、owner/mode 与 40-byte 文件大小，不记录、
+  打印、hash 或校验 key 值。
 
 ## Runtime 与 Source of Truth
 
@@ -139,16 +151,21 @@ win/tie/loss；缺任一 shard、重复 request key 或非整数 response 时禁
 - 100-request pilot manifest：`pilot_100/manifest.json`，SHA-256
   `417c4866239279d68dc2371c2353fc8842cecd15d7ec53a0899ab88487f1ce47`；其 request
   sample 为确定性的 proportional paired stratification，不能当作全量质量结果。
-- Prepared full Flash bundle：
-  `/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/rebuttal_2026/llm_judge_wmt25/full_flash_api_default`。
-  它由 Git commit `afa104606968a30d440ed493cfa009ff57b8c580` 的 runner 生成，
+- 当前 full Flash bundle：
+  `/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/rebuttal_2026/llm_judge_wmt25/full_flash_api_default_corrected_eso`。
+  它由 Git commit `e229a4257ef1099e97b5f33d2eab17e89b9da84f` 的 runner 生成，
   `run_config_sha256` 为
-  `2d997a3f8c151dec9e2e108da41a60a32451a8a753878d9beb9e0bc474afeb35`，
+  `5d01d8c2790be654272dc848aba265239a4c34838c91490b850148a76232628a`，
   `run_manifest.json` SHA-256 为
-  `37053c87fb926338bce3323443b6017622f55c8a18b127c682faaffe3ee81a88`。
-  16 request files 共 20,033,439 bytes，16 sidecars 共 30,563,947 bytes；22,728
-  opaque keys 全部唯一，79 个真实空 hypothesis 保留，request payload 的
-  `reference/method/glossary` 字段检查为 0。当前 16 个 state 全为 `PREPARED`。
+  `67d01bde0d93f748312ccdc2308d9056bfcef490c543a3f27f761769543ddad3`。
+  16 request files 共 20,039,532 bytes，16 sidecars 共 30,646,531 bytes；22,728
+  opaque keys 全部唯一，83 个真实空 hypothesis 保留，request payload 的
+  `reference/method/glossary` 字段检查为 0。独立 pre-submit validator 核对 32 systems /
+  16 pairs / 22,728 segments / 4 source artifacts，报告 SHA-256 为
+  `844e1d85d49b8e55aed374ce21650430e570ffd795c9cbd09b2dfc22125ed38e`。
+- 旧 bundle 使用了过时 ESO InfiniSST baseline，且 16 states 均停留在 `PREPARED`、
+  没有任何 remote job name；它已重命名为
+  `superseded_old_infinisst_full_flash_api_default/`，不得提交或用于结果。
 - Full request/response JSONL、逐句 score、usage/cost、state ledger 与验证 manifest
   的预定 Hugging Face dataset 目标是
   [`gavinlaw/rasst-main-result-data`](https://huggingface.co/datasets/gavinlaw/rasst-main-result-data)
