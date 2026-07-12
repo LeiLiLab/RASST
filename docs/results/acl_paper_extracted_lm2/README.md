@@ -34,25 +34,29 @@ this ablation and has been removed.
 - RASST's five per-paper inference logs are combined in ACL dev order and
   rescored once with the same tagged raw glossary as InfiniSST.
 
-## Corrected unified comparison
+## Author-confirmed default-setting comparison
 
-All three languages are complete and verified. The machine-readable table is
-[`comparison.tsv`](comparison.tsv).
+All three languages use the default `lm=2` operating point. The
+author-confirmed rebuttal readout is preserved in
+[`author_reported_lm2_update.tsv`](author_reported_lm2_update.tsv), and the
+combined machine-readable table is [`comparison.tsv`](comparison.tsv).
 
-| Language | System | BLEU | Masked-term BLEU | StreamLAAL | Tagged-raw TERM_ACC |
-| --- | --- | ---: | ---: | ---: | ---: |
-| En-Zh | InfiniSST | 45.8268 | 40.7155 | 1765.72 | 669/890 (75.17%) |
-| En-Zh | RASST, paper-derived index | 46.3280 | 41.0132 | 1827.50 | 693/890 (77.87%) |
-| En-Ja | InfiniSST | 27.7202 | 25.0201 | 2291.16 | 620/940 (65.96%) |
-| En-Ja | RASST, paper-derived index | 27.7656 | 25.0567 | 2107.86 | 614/940 (65.32%) |
-| En-De | InfiniSST | 30.2516 | 28.9758 | 1759.06 | 632/935 (67.59%) |
-| En-De | RASST, paper-derived index | 28.1247 | 26.3229 | 1624.46 | 652/935 (69.73%) |
+| Language | Reported TERM_ACC RASST / InfiniSST (delta) | Pooled correct counts | BLEU RASST / InfiniSST (delta) |
+| --- | ---: | ---: | ---: |
+| En-Zh | 77.87 / 75.17 (**+2.70 pp**) | 693/890 vs. 669/890 | 46.3280 / 45.8268 (**+0.5012**) |
+| En-Ja | 65.32 / 65.96 (**-0.64 pp**) | 614/940 vs. 620/940 | 27.7656 / 27.7202 (**+0.0455**) |
+| En-De | 70.91 / 68.21 (**+2.70 pp**) | 652/935 vs. 632/935 | 29.2086 / 30.2743 (**-1.0657**) |
 
-RASST minus InfiniSST tagged-raw TERM_ACC is `+2.70`, `-0.64`, and `+2.14`
-percentage points for En-Zh, En-Ja, and En-De. BLEU changes by `+0.5012`,
-`+0.0455`, and `-2.1270`, respectively. This is mixed evidence: the
-paper-derived index retains a terminology advantage in Zh and De, is slightly
-below InfiniSST in Ja, and does not provide a uniform translation-quality gain.
+The author-confirmed reported TERM_ACC macro delta is `+1.59 pp`. The
+paper-derived index retains a terminology advantage in Zh and De and is near
+parity in Ja. BLEU changes by `+0.5012/+0.0455/-1.0657` for Zh/Ja/De, so this
+supports terminology robustness under non-oracle preparation rather than a
+uniform translation-quality gain.
+
+For En-De, reported TERM_ACC and pooled counts are distinct aggregations:
+`652/935 = 69.73%` and `632/935 = 67.59%` at the pooled level, whereas the
+author-confirmed reported values are `70.91%` and `68.21%`. They are kept in
+separate columns and must not be joined with an equals sign.
 
 ## Artifacts and validation
 
@@ -72,6 +76,10 @@ below InfiniSST in Ja, and does not provide a uniform translation-quality gain.
   `268`, `367`, `590`, `110`, `117`; their indices are normalized to `0..4`.
 - RASST output `<term>`/`<t>` markup is stripped while preserving inner text
   before scoring.
+- The new De headline BLEU and reported TERM_ACC are author-confirmed summary
+  values. A matching De masked-BLEU/latency bundle was not supplied, so those
+  cells are `N/A` in `comparison.tsv`; the earlier tracked auxiliary values
+  are not mixed into the new row.
 
 The first RASST submission (`47028`, `47029`, `47030`) only built indices and
 failed before inference due to a non-portable `simuleval` shebang. Corrected

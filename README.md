@@ -34,9 +34,11 @@ evaluation artifacts and provenance, is tracked in
 ## Rebuttal 2026
 
 Rebuttal 补实验的当前结论、provenance、artifact 状态和阻塞项统一记录在
-[docs/results/rebuttal_2026](docs/results/rebuttal_2026/)；英文回复工作稿位于
-[docs/rebuttal_2026_draft.md](docs/rebuttal_2026_draft.md)。所有标记为 `PENDING`
-的数字都不能在生成并复核对应 artifact 前提交。
+[docs/results/rebuttal_2026](docs/results/rebuttal_2026/)；三位 reviewer 的
+submission-ready Markdown 回复稿位于
+[docs/rebuttal_2026_openreview_responses.md](docs/rebuttal_2026_openreview_responses.md)。
+较长的历史工作稿位于 [docs/rebuttal_2026_draft.md](docs/rebuttal_2026_draft.md)，
+其中所有标记为 `PENDING` 的数字都不能在生成并复核对应 artifact 前提交。
 
 ## Release Assets
 

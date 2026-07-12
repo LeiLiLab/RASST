@@ -1,0 +1,4 @@
+lang	lm	rasst_TERM_ACC_reported_pct	infinisst_TERM_ACC_reported_pct	delta_TERM_ACC_reported_percentage_points	rasst_TERM_CORRECT	infinisst_TERM_CORRECT	TERM_TOTAL	rasst_TERM_ACC_pooled_pct	infinisst_TERM_ACC_pooled_pct	delta_TERM_ACC_pooled_percentage_points	rasst_BLEU	infinisst_BLEU	delta_BLEU	provenance
+zh	2	77.87	75.17	2.70	693	669	890	77.8652	75.1685	2.6966	46.3280	45.8268	0.5012	author_confirmed_2026-07-12
+ja	2	65.32	65.96	-0.64	614	620	940	65.3191	65.9574	-0.6383	27.7656	27.7202	0.0455	author_confirmed_2026-07-12
+de	2	70.91	68.21	2.70	652	632	935	69.7326	67.5936	2.1390	29.2086	30.2743	-1.0657	author_confirmed_2026-07-12; reported_TERM_ACC_and_pooled_counts_are_distinct_aggregations
