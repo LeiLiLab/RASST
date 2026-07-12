@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "event_id": "20260711__speech_llm_train_eval__zh_cap16_denoise_target_tag_ablation",
+  "status": "complete",
+  "task": "En-Zh assistant target-tag training ablation",
+  "intervention": {
+    "tag_template": "<t>{translation}</t>",
+    "change": "remove tag delimiters from assistant training targets only",
+    "train_rows": 12500,
+    "dev_rows": 355,
+    "train_removed_tag_pairs": 90086,
+    "dev_removed_tag_pairs": 2490,
+    "validation": "row-wise equality outside assistant tag delimiters"
+  },
+  "training": {
+    "common": {
+      "base_model": "/mnt/gemini/data2/jiaxuanluo/Qwen3-Omni-30B-A3B-Instruct-v2",
+      "lora_rank": 32,
+      "lora_alpha": 32,
+      "global_batch_size": 4,
+      "micro_batch_size": 1,
+      "max_length": 3072,
+      "max_epochs": 1,
+      "tensor_model_parallel_size": 2,
+      "expert_model_parallel_size": 2,
+      "sequence_parallel": true
+    },
+    "tagged": {
+      "wandb_run_id": "ccgjhu4r",
+      "gpu_count": 4,
+      "optimizer_steps": 628,
+      "model_url": "https://huggingface.co/gavinlaw/rasst-speech-llm-zh-cap16-denoise-ttag",
+      "checkpoint_source": "/mnt/taurus/data1/jiaxuanluo/slm/speech_llm_zh_cap16_denoise_budget_ttag_r32a32_ep1_taurus4/keep1.0_r32/v0-20260526-142452"
+    },
+    "notag": {
+      "wandb_run_id": "60n5gmzs",
+      "gpu_count": 2,
+      "gpu_devices": "aries:0,1",
+      "optimizer_steps": 591,
+      "checkpoint_source": "/mnt/aries/data6/jiaxuanluo/slm/speech_llm_zh_cap16_denoise_budget_notag_r32a32_ep1_aries2/keep1.0_r32/v0-20260712-040434",
+      "hf_export": "/mnt/aries/data6/jiaxuanluo/slm_cache/speech_llm_zh_cap16_denoise_budget_notag_r32a32_ep1_aries2/keep1.0_r32/v0-20260712-040434-hf",
+      "hf_safetensor_shards": 15
+    }
+  },
+  "data": {
+    "tagged_root": "/mnt/taurus/data1/jiaxuanluo/speech_llm_zh_cap16_denoise_budget_20260526/zh/hn1024_tau078_cap16_denoise_budget_ttag_v1",
+    "notag_root": "/mnt/aries/data6/jiaxuanluo/rasst_ablation_20260711/zh_cap16_denoise_budget_notag_v1"
+  },
+  "evaluation": {
+    "dataset": "ACL6060 tagged raw En-Zh",
+    "latency_multipliers": [1, 2, 3, 4],
+    "retriever": "HN1024",
+    "retrieval_top_k": 10,
+    "retrieval_score_threshold": 0.78,
+    "timeline_lookback_seconds": 1.92,
+    "prompt_policy": "given_chunks",
+    "empty_term_map_policy": "omit",
+    "cache_chunks_by_lm": {
+      "1": "30/30",
+      "2": "30/30",
+      "3": "20/20",
+      "4": "20/20"
+    },
+    "max_new_tokens_by_lm": {
+      "1": 40,
+      "2": 80,
+      "3": 120,
+      "4": 160
+    },
+    "notag_runtime_source": "/mnt/aries/data6/jiaxuanluo/rasst_term_tag_ablation_eval_20260711/notag",
+    "tagged_runtime_source": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/zh_cap16_denoise_2domain_serial_cache30_20_givenchunks_fix_aries_cpus8_20260528T114706Z/zh_new_model_2domain_serial_cache30_20_givenchunks_fix_aries_cpus8/cells"
+  },
+  "aggregate_delta_notag_minus_tagged": {
+    "BLEU": -0.080736,
+    "StreamLAAL_ms": 25.019984,
+    "StreamLAAL_CA_ms": -253.214577,
+    "TERM_ACC": -0.041050,
+    "REAL_TERM_ADOPT": -0.053601,
+    "TERM_FCR": -0.025277
+  },
+  "completed_at_utc": "2026-07-12T00:42:33Z"
+}
