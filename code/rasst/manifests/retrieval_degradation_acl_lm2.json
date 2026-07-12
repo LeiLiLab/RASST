@@ -36,15 +36,35 @@
   ],
   "compute": {
     "inference_host": "aries.cs.ucsb.edu",
-    "physical_gpu_groups": ["2,3,4", "5,6,7"],
+    "physical_gpu_groups": ["2,3,4", "6,7,5", "0,1,4"],
     "vllm_tensor_parallel_size": 2,
     "retriever_logical_device": "cuda:2",
-    "container_prefix": "sglang-omni-jaxan"
+    "container_prefix": "sglang-omni-jaxan",
+    "topology_note": "The first two ids are an NVLink vLLM TP pair; the third id is the retriever. GPU 4 is shared by two lightweight retrievers."
+  },
+  "control_validation": {
+    "status": "zh_complete_de_ja_running",
+    "zh": {
+      "retrieval_events": 1795,
+      "references_exact_to_canonical": true,
+      "hint_count": 2637,
+      "hint_count_preserved": true,
+      "retrieval_precision": 0.6492226014410315,
+      "retrieval_recall": 0.23407164342357123,
+      "achieved_replacement_rate": 0.0,
+      "bleu": 47.8779678425533,
+      "term_acc": 0.9,
+      "stream_laal_ms": 1814.3394195624276,
+      "canonical_bleu": 48.79208422620407,
+      "canonical_term_acc": 0.8899,
+      "canonical_stream_laal_ms": 1821.5283510443905
+    },
+    "analysis_baseline": "Compare 25% and 50% against the same-environment 0% rerun because generation uses stochastic sampling."
   },
   "staging": {
     "root": "/mnt/aries/data4/jiaxuanluo/rasst-retrieval-degradation",
     "git_branch": "luojiaxuan/rebuttal-experiments",
-    "git_implementation_commit": "257ff8b",
+    "git_implementation_commit": "6f5610e",
     "hf_dataset_destination": "gavinlaw/rasst-rebuttal-retrieval-degradation-acl",
     "hf_upload_status": "pending"
   }
