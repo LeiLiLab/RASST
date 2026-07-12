@@ -1,0 +1,78 @@
+{
+  "expected_counts": {
+    "pairs": 1,
+    "segments": 2874,
+    "systems": 2
+  },
+  "pairs": [
+    {
+      "dataset": "medicine_hardraw",
+      "delta_rasst_minus_infinisst": -0.04300554798204366,
+      "infinisst_method": "InfiniSST",
+      "infinisst_wins": 807,
+      "infinisst_xcomet_mean": 0.786149787903869,
+      "lang": "de",
+      "lm": "4",
+      "paired_delta_stddev": 0.20318733624207228,
+      "paired_segments": 1437,
+      "paired_talks": 5,
+      "rasst_method": "RASST",
+      "rasst_wins": 535,
+      "rasst_xcomet_mean": 0.7431442399218253,
+      "ties": 95
+    }
+  ],
+  "paths": {
+    "manifest": "/data/xcomet_rerun_lm4_input/manifest.tsv",
+    "paired_tsv": "/data/results/xcomet_eso_de_infinisst_rerun_lm4_20260712/paired.tsv",
+    "segments_jsonl": "/data/results/xcomet_eso_de_infinisst_rerun_lm4_20260712/segments.jsonl",
+    "summary_tsv": "/data/results/xcomet_eso_de_infinisst_rerun_lm4_20260712/summary.tsv"
+  },
+  "run_identity": {
+    "model_id": "Unbabel/XCOMET-XXL",
+    "model_revision": "873bac1b1c461e410c4a6e379f6790d3d1c7c214",
+    "scoring_config_sha256": "a6c000a72eca59f832a3ae15e6fbbdc9135a0207edc43acf80ba15b74e5ad0cb"
+  },
+  "schema_version": "rasst-xcomet-validation-v1",
+  "sha256": {
+    "manifest": "59cb5e26eda0b5c74838cd1a52b5e00db4352dabe8e7f10db379f2d28e8b701c",
+    "paired_tsv": "635f981ad8c971ea9a29c7b0d7c0300a7dcc9289df34e463d1d8982e61133c50",
+    "segments_jsonl": "50708b41855173ba2231c23f567de824342da687c87a840c89320bc5f3615df9",
+    "summary_tsv": "42f57b77feb658c81747fdc874f9986ae76a2e1c01f0399b4f580db3a0c90087"
+  },
+  "status": "ok",
+  "systems": [
+    {
+      "dataset": "medicine_hardraw",
+      "lang": "de",
+      "lm": "4",
+      "method": "InfiniSST",
+      "segments": 1437,
+      "talks": 5,
+      "xcomet_mean": 0.786149787903869,
+      "xcomet_mean_x100": 78.6149787903869,
+      "xcomet_talk_macro_mean": 0.7880545059601711
+    },
+    {
+      "dataset": "medicine_hardraw",
+      "lang": "de",
+      "lm": "4",
+      "method": "RASST",
+      "segments": 1437,
+      "talks": 5,
+      "xcomet_mean": 0.7431442399218253,
+      "xcomet_mean_x100": 74.31442399218253,
+      "xcomet_talk_macro_mean": 0.7490181619336769
+    }
+  ],
+  "tolerances": {
+    "tie": 1e-12,
+    "tsv_absolute": 1e-09
+  },
+  "validated_counts": {
+    "manifest_systems": 2,
+    "pairs": 1,
+    "segments": 2874,
+    "summary_systems": 2
+  }
+}
