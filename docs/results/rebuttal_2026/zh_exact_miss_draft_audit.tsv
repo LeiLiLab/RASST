@@ -1,0 +1,115 @@
+sentence_index	term	translation	audit_label	audit_note
+16	language	语言	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+17	words	单词	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+18	speech	语音	wrong_translation	text-to-speech 被译为“文本摘要”，speech 概念发生实质错译。
+21	newswire	新闻专线	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+26	spans	跨度	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+28	word	单词	valid_paraphrase	源文转写的 previous word 很可能是 previous work；hypothesis 的“研究”符合真实语义。
+29	model	模型	valid_alignment_boundary	流式分句出现截断或跨句延迟，当前对齐 hypothesis 不能作为独立术语错误归因。
+33	generalize	概括	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+34	task	任务	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+36	annotated	注释	valid_morphology	hypothesis 使用了符合中文表达的派生或词形变体，属于 exact-match 假阴性。
+46	annotated	注释	valid_morphology	hypothesis 使用了符合中文表达的派生或词形变体，属于 exact-match 假阴性。
+48	machine learning	machine learning	valid_compound_or_orthography	hypothesis 以连写、大小写或专名形式表达目标，属于 exact-match 假阴性。
+53	word	单词	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+74	metrics	指标	valid_alignment_boundary	流式分句出现截断或跨句延迟，当前对齐 hypothesis 不能作为独立术语错误归因。
+75	CRF	CRF	valid_alignment_boundary	流式分句出现截断或跨句延迟，当前对齐 hypothesis 不能作为独立术语错误归因。
+75	model	模型	valid_alignment_boundary	流式分句出现截断或跨句延迟，当前对齐 hypothesis 不能作为独立术语错误归因。
+77	encode	编码	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+79	text	文本	valid_compound_or_orthography	FastText 是专名而不是独立的 text→文本 术语命中，固定 glossary 对齐产生假阴性。
+80	BETO	BETO	wrong_translation	BETO 被替换为 BERT，属于专名错误。
+80	contextualized	情境化	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+87	compared	相比	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+88	lexical	词汇	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+91	language	语言	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+91	language identification	语言识别	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+91	LinCE	LinCE	wrong_translation	hypothesis 将该术语替换为不同概念或错误专名，保守判为错译。
+92	LinCE	LinCE	wrong_translation	hypothesis 将该术语替换为不同概念或错误专名，保守判为错译。
+97	annotated	注释	valid_morphology	hypothesis 使用了符合中文表达的派生或词形变体，属于 exact-match 假阴性。
+97	newswire	新闻专线	valid_paraphrase	Spanish newswire 被译为“西班牙语新闻数据集”，比固定“新闻专线”更符合此处语义。
+98	OOV	OOV	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+101	words	单词	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+114	number	许多	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+115	lexical	词汇	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+118	oracle	甲骨文	omitted_term	oracle 在这里是“理想/神谕式分析器”，固定译法“甲骨文”本身不合语境；hypothesis 又省略了该限定。
+121	morphologically	形态上	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+122	morphologically	形态上	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+123	input	输入	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+129	aspect	方面	valid_paraphrase	语言学 aspect 被正确译为“体”，固定译法“方面”不适用于此处。
+130	speech	语音	valid_paraphrase	part of speech 应整体译为“词性”，不应要求 speech 单独出现为“语音”。
+131	speech	语音	valid_paraphrase	part of speech 应整体译为“词性”，不应要求 speech 单独出现为“语音”。
+137	speech	语音	valid_paraphrase	part of speech 应整体译为“词性”，不应要求 speech 单独出现为“语音”。
+141	language	语言	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+143	speech	语音	valid_paraphrase	part of speech 被正确整体译为“词性”，固定 speech→语音 会制造假阴性。
+145	speech	语音	valid_paraphrase	part of speech 被正确整体译为“词性”，固定 speech→语音 会制造假阴性。
+146	speech	语音	valid_paraphrase	part of speech 被正确整体译为“词性”，固定 speech→语音 会制造假阴性。
+149	morphological	形态化	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+151	embeddings	嵌入	valid_paraphrase	positional embeddings 被译为“位置编码”；本次 draft 按语境意译计入，建议作者最终复核技术等价性。
+152	embeddings	嵌入	valid_paraphrase	positional embeddings 被译为“位置编码”；本次 draft 按语境意译计入，建议作者最终复核技术等价性。
+162	baselines	基线	valid_alignment_boundary	流式分句出现截断或跨句延迟，当前对齐 hypothesis 不能作为独立术语错误归因。
+167	GLUE	GLUE	omitted_term	GLUE 专名被完全省略。
+168	annotated	注释	valid_morphology	hypothesis 使用了符合中文表达的派生或词形变体，属于 exact-match 假阴性。
+177	regression	回归	wrong_translation	regression variant 被泛化成“模型”，丢失回归含义。
+190	AI	AI	omitted_term	Applica AI 机构名被省略。
+198	attention	注意力	wrong_translation	attention 被替换为“转换器”，术语概念改变。
+222	weights	权重	valid_alignment_boundary	流式分句出现截断或跨句延迟，当前对齐 hypothesis 不能作为独立术语错误归因。
+223	softmax	softmax	wrong_translation	softmax 被写成不规范的“软max”，未保留通用术语。
+248	qualitative	定性	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+248	quality	质量	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+248	summarization	总结	valid_paraphrase	summarization 被译为“摘要”，是上下文合理的名词化表达。
+256	parsing	解析	valid_alignment_boundary	流式分句出现截断或跨句延迟，当前对齐 hypothesis 不能作为独立术语错误归因。
+256	Semantic	语义	valid_alignment_boundary	流式分句出现截断或跨句延迟，当前对齐 hypothesis 不能作为独立术语错误归因。
+256	Semantic Parsing	语义解析	valid_alignment_boundary	流式分句出现截断或跨句延迟，当前对齐 hypothesis 不能作为独立术语错误归因。
+262	graph	图形	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+265	system	系统	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+271	parsing	解析	wrong_translation	semantic parsing 被译为“语法分析”，丢失 semantic 含义。
+271	Semantic	语义	wrong_translation	hypothesis 将该术语替换为不同概念或错误专名，保守判为错译。
+271	Semantic Parsing	语义解析	wrong_translation	semantic parsing 被译为“语法分析”，丢失 semantic 含义。
+275	graph	图形	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+292	parallel	并行	valid_alignment_boundary	流式分句出现截断或跨句延迟，当前对齐 hypothesis 不能作为独立术语错误归因。
+297	utterance	话语	wrong_translation	hypothesis 将该术语替换为不同概念或错误专名，保守判为错译。
+307	graph	图形	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+330	Semantic	语义	wrong_translation	hypothesis 将该术语替换为不同概念或错误专名，保守判为错译。
+330	Semantic Parsing	语义解析	wrong_translation	hypothesis 将该术语替换为不同概念或错误专名，保守判为错译。
+330	SMCalFlow	SMCalFlow	wrong_translation	SMCalFlow 被替换为 SM-COPULA，属于数据集专名错误。
+331	datasets	数据集	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+334	graph	图形	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+337	utterance	话语	wrong_translation	hypothesis 将该术语替换为不同概念或错误专名，保守判为错译。
+341	utterance	话语	wrong_translation	hypothesis 将该术语替换为不同概念或错误专名，保守判为错译。
+344	FLR	FLR	wrong_translation	FLR 被替换为 FLOP，属于指标专名错误。
+357	dependency	依赖关系	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+358	parsing	解析	wrong_translation	semantic parsing 被译为“语法分析”，丢失 semantic 含义。
+358	Semantic	语义	wrong_translation	semantic parsing 被译为“语法分析”，丢失 semantic 含义。
+358	Semantic Parsing	语义解析	wrong_translation	semantic parsing 被译为“语法分析”，丢失 semantic 含义。
+359	graph	图形	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+364	tasks	任务	valid_alignment_boundary	流式分句出现截断或跨句延迟，当前对齐 hypothesis 不能作为独立术语错误归因。
+370	answer	回答	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+371	compared	相比	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+373	biases	偏见	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+391	RGF	RGF	valid_paraphrase	RGF 未保留缩写，但完整展开了 Retrieval-Generation-Filtering；按语义诊断计为有效意译。
+394	answer	回答	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+397	answer	回答	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+402	question	问题	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+403	answer	回答	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+407	answer	回答	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+408	answer	回答	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+409	query	询问	valid_paraphrase	query 被译为“查询”，比固定译法“询问”更符合检索语境。
+411	queries	询问	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+413	queries	询问	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+417	question	问题	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+420	query	询问	valid_paraphrase	query 被译为“问题”，是问答语境中的自然表达。
+424	query	询问	valid_paraphrase	query 被译为“问题”，是问答语境中的自然表达。
+425	annotations	注释	valid_morphology	hypothesis 使用了符合中文表达的派生或词形变体，属于 exact-match 假阴性。
+433	answer	回答	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+433	relation	关系	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+436	answer	回答	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+438	context	上下文	valid_alignment_boundary	流式分句出现截断或跨句延迟，当前对齐 hypothesis 不能作为独立术语错误归因。
+438	model	模型	valid_alignment_boundary	流式分句出现截断或跨句延迟，当前对齐 hypothesis 不能作为独立术语错误归因。
+438	question	问题	valid_alignment_boundary	流式分句出现截断或跨句延迟，当前对齐 hypothesis 不能作为独立术语错误归因。
+449	queries	询问	valid_paraphrase	queries 被译为“问题/查询”，是问答语境中的自然表达。
+449	query	询问	valid_paraphrase	query 被译为“问题/查询”，是问答语境中的自然表达。
+451	query	询问	valid_paraphrase	query 被译为“问题”，是问答语境中的自然表达。
+453	semantically	语义上	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+455	annotated	注释	valid_morphology	hypothesis 使用了符合中文表达的派生或词形变体，属于 exact-match 假阴性。
+463	queries	询问	valid_paraphrase	hypothesis 用上下文合适的同义或意译表达了该概念，固定字符串未命中。
+465	augmentation	增强	valid_alignment_boundary	hypothesis 从“升了”开始，明显是跨分句截断，不能归因成 augmentation 单独遗漏。

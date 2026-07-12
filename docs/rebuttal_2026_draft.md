@@ -212,7 +212,9 @@ least: (i) successful rare or multiword terms, (ii) inflectional variants
 penalized by exact matching, (iii) homophone/recognition failures, (iv) correct
 retrieval but non-use, and (v) delayed-commitment errors. At the fixed `lm=2`
 point, `P(exact | retrieved on time/late/never)` is
-**86.11/82.82/59.26%** for En-De and **92.74/89.80/71.56%** for En-Zh. The
+**86.11/82.82/59.26%** for En-De, **92.74/89.80/71.56%** for En-Zh, and
+**89.21/83.59/60.78%** for En-Ja. This failure analysis uses only the five ACL
+talks and excludes all Medicine/ESO examples. The
 verified traces include a multiword German morphology false negative
 (`morphologische Analyse` versus the grammatical
 `mittels morphologischer Analyse`), a never-retrieved acronym/homophone error
@@ -263,16 +265,26 @@ variants; we will state that limitation and temper the breadth of the claim.
 **Failure analysis.** The revised qualitative analysis will include retrieved-
 but-unused terms, homophones, and delayed commitment, as requested. The fixed
 `lm=2` trace contains 33/28/101 En-De exact misses in the
-never-retrieved/retrieved-late/retrieved-on-time groups (31/20/63 for En-Zh).
+never-retrieved/retrieved-late/retrieved-on-time groups (31/20/63 for En-Zh
+and 40/32/89 for En-Ja).
 Importantly, auditing the existing raw false-copy diagnostic showed that it
 substantially confounds source morphology and streaming sentence boundaries:
-only 2 of 49 flagged En-De terms and 2 of 33 flagged En-Zh terms were labeled
-as harmful unsupported-hint adoptions. This is observational rather than a
+only 2 of 49 flagged En-De terms, 2 of 33 flagged En-Zh terms, and 4 of 53
+flagged En-Ja terms were labeled as harmful unsupported-hint adoptions. This is
+observational rather than a
 causal retrieval estimate. One strong En-De case is an acoustically confused
 `arXiv` retrieval that supplied `oracle -> Oracle`, leading to
 `aus dem Oracle oder PubMed`; xCOMET marks `dem Oracle` as a major error. We
 therefore will not attribute the full En-De contextual-metric decrease to term
 noise.
+
+En-Ja provides the clearest BLEU/xCOMET disagreement at this operating point:
+BLEU and target-term-masked BLEU improve by **2.17** and **1.01**, respectively,
+while xCOMET decreases by **2.28** points. Net exact-term-gain sentences improve
+by **3.94** xCOMET points on average, whereas exact ties and losses decrease by
+**3.96** and **22.14** points. The four harmful unsupported-adoption candidates
+average **-9.50** points, but the broad degradation among exact-tie sentences
+shows that term noise cannot explain the full contextual-quality decrease.
 
 ## Planned manuscript changes
 
@@ -310,10 +322,13 @@ Before submission, the revision will:
   `docs/results/rebuttal_2026/xcomet_paper_exact_combined_paired.tsv`,
   `docs/results/rebuttal_2026/xcomet_paper_exact_eso_de_paired.tsv`, and
   `docs/results/rebuttal_2026/xcomet_paper_exact_eso_de_validation.json`
-- Fixed-`lm=2` failure chain, German morphology draft audit, and false-copy audit:
+- Fixed-`lm=2` ACL-talk-only failure chain, three-language exact-miss draft
+  audits, and false-copy audit:
   `docs/results/rebuttal_2026/term_failure_analysis_acl_lm2.md`,
   `docs/results/rebuttal_2026/term_failure_chain_acl_lm2.tsv`, and
-  `docs/results/rebuttal_2026/retrieval_noise_audit_acl_lm2.tsv`
+  `docs/results/rebuttal_2026/retrieval_noise_audit_acl_lm2.tsv`,
+  `docs/results/rebuttal_2026/zh_exact_miss_draft_audit.tsv`, and
+  `docs/results/rebuttal_2026/ja_exact_miss_draft_audit.tsv`
 - Fixed-compute retrieval degradation protocol, complete 9-cell table, and
   independent xCOMET validation:
   `docs/results/rebuttal_2026/retrieval_degradation_ablation.md`,
@@ -369,6 +384,9 @@ Before submission, the revision will:
   source morphology/semantics or streaming-boundary movement. Use only the
   audited confirmed cases, and do not claim that they explain the full xCOMET
   delta.
+- **Do not mix Medicine/ESO into the Zh/Ja failure analysis.** The reported
+  114/161 exact misses and all quoted cases are from the five ACL talks only;
+  the analyzer must be run with `--require-acl-talks`.
 - **Check the final removal scope for ESO En-Zh/En-Ja.** BLEU, xCOMET,
   exact-reference TERM_ACC, and reference-aligned latency all depend on the
   synthetic references or their exact forms; removing only BLEU would leave the

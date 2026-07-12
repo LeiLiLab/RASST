@@ -13,3 +13,10 @@ zh	2	net_exact_term_loss	18	-14.0675	-13.5726	14	77.78	RASST exact gold-term cou
 zh	2	raw_false_copy_flag	31	-5.1178	-1.2132	16	51.61	unverified exact diagnostic; heavily confounded
 zh	2	audited_alignment_boundary_flag	7	-23.7002	-25.8420	7	100.00	streaming/mWER boundary, not confirmed term noise
 zh	2	audited_harmful_unsupported_adoption	2	+2.7368	+2.7368	1	50.00	newspapers→新闻专线; passages→问题; xCOMET blind spot
+ja	2	all	468	-2.2762	-0.2937	245	52.35	paper-exact paired sentence xCOMET; ACL talks only
+ja	2	net_exact_term_gain	155	+3.9419	+1.1141	67	43.23	RASST exact gold-term count exceeds InfiniSST
+ja	2	exact_term_tie	289	-3.9618	-0.4898	158	54.67	equal exact gold-term count; broad non-term generation loss
+ja	2	net_exact_term_loss	24	-22.1377	-10.3735	20	83.33	RASST exact gold-term count below InfiniSST
+ja	2	raw_false_copy_flag	45	-9.0456	-3.0315	25	55.56	unverified exact diagnostic; heavily confounded
+ja	2	audited_alignment_boundary_flag	12	-21.8536	-13.6951	9	75.00	streaming/mWER boundary, not confirmed term noise
+ja	2	audited_harmful_unsupported_adoption	4	-9.4974	-16.8994	3	75.00	words/context/embeddings/resources insertions; observational, not causal
