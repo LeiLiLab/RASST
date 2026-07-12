@@ -130,7 +130,9 @@ def _score(sidecar: Dict[str, Any]) -> int:
     return base
 
 
-def _build_fixture(root: Path, *, split_medicine: bool = True) -> Dict[str, Any]:
+def _build_fixture(
+    root: Path, *, split_medicine: bool = True, complete: bool = True
+) -> Dict[str, Any]:
     acl_source = root / "acl_source.jsonl"
     medicine_source = root / "medicine_source.jsonl"
     _write_jsonl(
@@ -182,6 +184,12 @@ def _build_fixture(root: Path, *, split_medicine: bool = True) -> Dict[str, Any]
     prepare_args = argparse.Namespace(**prepare_kwargs)
     with contextlib.redirect_stdout(io.StringIO()):
         SCORER.prepare_run(prepare_args)
+    if not complete:
+        return {
+            "output_dir": output_dir,
+            "acl_source": acl_source,
+            "medicine_source": medicine_source,
+        }
     manifest = _read_json(output_dir / "run_manifest.json")
     for shard in manifest["shards"]:
         shard_id = shard["shard_id"]
@@ -272,6 +280,17 @@ def _mutate_first_tsv_value(path: Path, column: str, replacement: str) -> None:
 
 
 class ValidateGeminiLlmJudgeWmt25Test(unittest.TestCase):
+    def test_validates_prepared_split_source_layout(self) -> None:
+        with _small_matrix(), tempfile.TemporaryDirectory() as raw_temp:
+            fixture = _build_fixture(Path(raw_temp), complete=False)
+            report = VALIDATOR.validate_prepared_output_dir(
+                output_dir=fixture["output_dir"]
+            )
+            self.assertEqual(report["status"], "ok")
+            self.assertEqual(report["validation_scope"], "prepared-only")
+            self.assertEqual(report["validated_counts"]["segments"], SMALL_SEGMENTS)
+            self.assertEqual(report["validated_counts"]["source_artifacts"], 4)
+
     def test_validates_all_artifacts_and_writes_report(self) -> None:
         with _small_matrix(), tempfile.TemporaryDirectory() as raw_temp:
             fixture = _build_fixture(Path(raw_temp))
