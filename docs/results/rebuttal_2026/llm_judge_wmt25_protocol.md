@@ -2,13 +2,19 @@
 
 ## 当前状态
 
-状态：**full Batch 尚未提交，等待作者确认约 50 USD 预算并轮换 Gemini key**。
+状态：**full Flash request bundle 已准备，16/16 shards 均为 `PREPARED`、0/16 已提交；
+等待作者确认约 50 USD 预算并轮换 Gemini key**。
 
 100-request paired pilot 已完成。当前建议用 `gemini-2.5-flash` 和 API defaults
 完成全量评分：在本账号上，`gemini-2.5-pro` 的 smoke request 返回 404，说明该
 模型已不再向 new users 开放；可用的 `gemini-3.1-pro-preview` 不是 WMT25 论文所用
 模型，而且 pilot 预计全量 Batch 费用更高。作者确认模型/预算和轮换后的私有 key
 之前，不提交任何 full Batch，也不产生可用于 rebuttal 的全量结果。
+
+正式候选 bundle 已在看见任何 full-run score 之前冻结为
+`gemini-2.5-flash`、`generation_config={}` 和 model-default thinking。Preparation
+只生成 request/sidecar/state artifacts，不调用 Gemini API，也不产生费用；作者仍可
+拒绝该配置，此时不得提交这个 bundle。
 
 ## Prompt
 
@@ -133,6 +139,16 @@ win/tie/loss；缺任一 shard、重复 request key 或非整数 response 时禁
 - 100-request pilot manifest：`pilot_100/manifest.json`，SHA-256
   `417c4866239279d68dc2371c2353fc8842cecd15d7ec53a0899ab88487f1ce47`；其 request
   sample 为确定性的 proportional paired stratification，不能当作全量质量结果。
+- Prepared full Flash bundle：
+  `/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/rebuttal_2026/llm_judge_wmt25/full_flash_api_default`。
+  它由 Git commit `afa104606968a30d440ed493cfa009ff57b8c580` 的 runner 生成，
+  `run_config_sha256` 为
+  `2d997a3f8c151dec9e2e108da41a60a32451a8a753878d9beb9e0bc474afeb35`，
+  `run_manifest.json` SHA-256 为
+  `37053c87fb926338bce3323443b6017622f55c8a18b127c682faaffe3ee81a88`。
+  16 request files 共 20,033,439 bytes，16 sidecars 共 30,563,947 bytes；22,728
+  opaque keys 全部唯一，79 个真实空 hypothesis 保留，request payload 的
+  `reference/method/glossary` 字段检查为 0。当前 16 个 state 全为 `PREPARED`。
 - Full request/response JSONL、逐句 score、usage/cost、state ledger 与验证 manifest
   的预定 Hugging Face dataset 目标是
   [`gavinlaw/rasst-main-result-data`](https://huggingface.co/datasets/gavinlaw/rasst-main-result-data)
