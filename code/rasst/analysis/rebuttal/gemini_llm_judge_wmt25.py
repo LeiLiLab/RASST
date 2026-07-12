@@ -44,6 +44,7 @@ from typing import Any, Dict, Iterable, Iterator, List, Mapping, Optional, Seque
 
 
 SCHEMA_VERSION = "rasst-gemini-llm-judge-wmt25-v1"
+REPAIR_SCHEMA_VERSION = "rasst-gemini-llm-judge-format-repairs-v1"
 WMT_PAPER_URL = "https://aclanthology.org/2025.wmt-1.24.pdf"
 SOURCE_LANGUAGE_NAME = "English"
 TARGET_LANGUAGE_NAMES = {"zh": "Chinese", "de": "German", "ja": "Japanese"}
@@ -58,6 +59,7 @@ EXPECTED_PAIRS = 16
 EXPECTED_SEGMENTS = 22_728
 EXPECTED_ACL_SEGMENTS = 11_232
 EXPECTED_MEDICINE_SEGMENTS = 11_496
+MAX_FORMAT_REPAIR_ATTEMPTS = 3
 TERMINAL_STATES = {
     "BATCH_STATE_SUCCEEDED",
     "BATCH_STATE_FAILED",
@@ -1474,11 +1476,211 @@ def _load_response(path: Path, expected_sha256: str) -> Dict[str, Dict[str, Any]
     return indexed
 
 
+def _response_dict(response: Any) -> Dict[str, Any]:
+    if hasattr(response, "model_dump"):
+        value = response.model_dump(mode="json", by_alias=True, exclude_none=True)
+        if isinstance(value, dict):
+            return value
+    raise LLMJudgeError("Gemini SDK response cannot be serialized as a JSON object")
+
+
+def _load_repair_document(
+    output_dir: Path, manifest: Mapping[str, Any]
+) -> Tuple[Path, Dict[str, Any]]:
+    path = output_dir / "response_repairs.json"
+    if not path.exists():
+        return path, {
+            "schema_version": REPAIR_SCHEMA_VERSION,
+            "run_config_sha256": manifest["run_config_sha256"],
+            "entries": {},
+        }
+    document = read_json(path, label="response repairs")
+    if document.get("schema_version") != REPAIR_SCHEMA_VERSION:
+        raise LLMJudgeError("Unsupported response-repair schema")
+    if document.get("run_config_sha256") != manifest["run_config_sha256"]:
+        raise LLMJudgeError("Response repairs belong to a different run configuration")
+    if not isinstance(document.get("entries"), dict):
+        raise LLMJudgeError("Response-repair entries must be an object")
+    return path, document
+
+
+def _accepted_repairs(
+    output_dir: Path, manifest: Mapping[str, Any]
+) -> Tuple[Dict[str, Dict[str, Any]], Optional[str]]:
+    path, document = _load_repair_document(output_dir, manifest)
+    if not path.exists():
+        return {}, None
+    artifact_sha256 = sha256_file(path)
+    accepted: Dict[str, Dict[str, Any]] = {}
+    for request_key, entry_value in document["entries"].items():
+        if not isinstance(request_key, str) or not request_key:
+            raise LLMJudgeError("Response-repair request key is invalid")
+        if not isinstance(entry_value, dict):
+            raise LLMJudgeError(f"Response-repair entry is malformed: {request_key}")
+        attempts = entry_value.get("attempts")
+        if not isinstance(attempts, list) or len(attempts) > MAX_FORMAT_REPAIR_ATTEMPTS:
+            raise LLMJudgeError(f"Response-repair attempts are malformed: {request_key}")
+        accepted_attempt = entry_value.get("accepted_attempt")
+        if accepted_attempt is None:
+            continue
+        attempt_number = require_canonical_nonnegative_int(
+            accepted_attempt, label=f"{request_key} accepted repair attempt"
+        )
+        if attempt_number < 1 or attempt_number > len(attempts):
+            raise LLMJudgeError(f"Accepted repair attempt is out of range: {request_key}")
+        attempt = attempts[attempt_number - 1]
+        if not isinstance(attempt, dict) or attempt.get("valid") is not True:
+            raise LLMJudgeError(f"Accepted repair attempt is not valid: {request_key}")
+        raw_response = attempt.get("raw_response")
+        if not isinstance(raw_response, dict):
+            raise LLMJudgeError(f"Accepted repair response is malformed: {request_key}")
+        parsed = _parse_success_response(raw_response)
+        accepted[request_key] = {
+            "entry": entry_value,
+            "attempt": attempt,
+            "attempt_number": attempt_number,
+            "parsed": parsed,
+            "artifact_sha256": artifact_sha256,
+        }
+    return accepted, artifact_sha256
+
+
+def repair_format_response(args: argparse.Namespace) -> None:
+    output_dir = args.output_dir.resolve()
+    manifest = load_run_manifest(output_dir)
+    if args.confirm_run_config_sha256 != manifest.get("run_config_sha256"):
+        raise LLMJudgeError(
+            "--confirm-run-config-sha256 must exactly match the prepared run manifest"
+        )
+    shard = _manifest_shard(manifest, args.shard_id)
+    state = read_json(
+        output_dir / "states" / f"{args.shard_id}.json",
+        label=f"state for {args.shard_id}",
+    )
+    if state.get("status") != "DOWNLOADED":
+        raise LLMJudgeError(f"Shard {args.shard_id} is not DOWNLOADED")
+    sidecars = _load_sidecar(output_dir / shard["sidecar_path"], shard["sidecar_sha256"])
+    responses = _load_response(
+        output_dir / state["response_path"],
+        require_sha256(state["response_sha256"], label="response SHA-256"),
+    )
+    requests: Dict[str, Dict[str, Any]] = {}
+    for line_number, row in iter_jsonl(
+        output_dir / shard["request_path"], label=f"{args.shard_id} requests"
+    ):
+        key = require_text(row.get("key"), label=f"request row {line_number} key")
+        if key in requests:
+            raise LLMJudgeError(f"Duplicate request key in repair source: {key}")
+        requests[key] = row
+    if args.request_key not in sidecars or args.request_key not in responses:
+        raise LLMJudgeError("Repair request key is not present in the selected shard")
+    request_row = requests.get(args.request_key)
+    if request_row is None:
+        raise LLMJudgeError("Repair request key is missing from the immutable request file")
+    batch_row = responses[args.request_key]
+    if not isinstance(batch_row.get("response"), dict) or "error" in batch_row:
+        raise LLMJudgeError("Format repair requires one original response object")
+    try:
+        _parse_success_response(batch_row["response"])
+    except LLMJudgeError as original_error:
+        original_parse_error = str(original_error)
+    else:
+        raise LLMJudgeError("Original response is already valid and must not be repaired")
+
+    repair_path, document = _load_repair_document(output_dir, manifest)
+    entries = document["entries"]
+    entry = entries.get(args.request_key)
+    fixed_evidence = {
+        "shard_id": args.shard_id,
+        "request_key": args.request_key,
+        "model": manifest["model"],
+        "generation_config_sha256": manifest["methodology"]["generation_config_sha256"],
+        "request_row_sha256": canonical_json_sha256(request_row),
+        "sidecar_row_sha256": canonical_json_sha256(sidecars[args.request_key]),
+        "original_response_artifact_sha256": state["response_sha256"],
+        "original_batch_row_sha256": canonical_json_sha256(batch_row),
+        "original_parse_error": original_parse_error,
+    }
+    if entry is None:
+        entry = {**fixed_evidence, "attempts": [], "accepted_attempt": None}
+        entries[args.request_key] = entry
+    elif not isinstance(entry, dict):
+        raise LLMJudgeError("Existing response-repair entry is malformed")
+    else:
+        for field, expected in fixed_evidence.items():
+            if entry.get(field) != expected:
+                raise LLMJudgeError(f"Response-repair provenance changed for {field}")
+    if entry.get("accepted_attempt") is not None:
+        raise LLMJudgeError("A valid format-repair attempt already exists")
+    attempts = entry.get("attempts")
+    if not isinstance(attempts, list) or len(attempts) >= MAX_FORMAT_REPAIR_ATTEMPTS:
+        raise LLMJudgeError("Format-repair attempt limit has been reached")
+
+    api_key = read_private_api_key(args.api_key_file)
+    genai, _, sdk_version = _load_google_genai()
+    client = genai.Client(vertexai=False, api_key=api_key)
+    api_request = request_row.get("request")
+    if not isinstance(api_request, dict) or not isinstance(api_request.get("contents"), list):
+        raise LLMJudgeError("Immutable repair request payload is malformed")
+    kwargs: Dict[str, Any] = {
+        "model": manifest["model"],
+        "contents": api_request["contents"],
+    }
+    if "generation_config" in api_request:
+        kwargs["config"] = api_request["generation_config"]
+    attempt: Dict[str, Any] = {
+        "attempt": len(attempts) + 1,
+        "at_utc": utc_now(),
+        "transport": "standard_generate_content_format_retry",
+        "sdk": "google-genai",
+        "sdk_version": sdk_version,
+    }
+    try:
+        response = client.models.generate_content(**kwargs)
+        raw_response = _response_dict(response)
+        attempt["raw_response"] = raw_response
+        try:
+            parsed = _parse_success_response(raw_response)
+        except LLMJudgeError as exc:
+            attempt.update({"valid": False, "parse_error": str(exc)})
+        else:
+            attempt.update(
+                {
+                    "valid": True,
+                    "judge_score": parsed["judge_score"],
+                    "model_version": parsed["model_version"],
+                }
+            )
+            entry["accepted_attempt"] = attempt["attempt"]
+    except Exception as exc:
+        attempt.update({"valid": False, "api_error": _safe_exception(exc)})
+    attempts.append(attempt)
+    atomic_write_json(repair_path, document)
+    if attempt["valid"] is not True:
+        raise LLMJudgeError(
+            f"Format-repair attempt {attempt['attempt']} was saved but is not valid"
+        )
+    print(
+        json.dumps(
+            {
+                "request_key": args.request_key,
+                "attempt": attempt["attempt"],
+                "judge_score": attempt["judge_score"],
+                "repair_artifact": str(repair_path),
+                "repair_artifact_sha256": sha256_file(repair_path),
+            },
+            sort_keys=True,
+        )
+    )
+
+
 def collect_segments(output_dir: Path, manifest: Mapping[str, Any]) -> List[Dict[str, Any]]:
     collected: List[Dict[str, Any]] = []
     errors: List[Dict[str, Any]] = []
     seen_keys = set()
     model_versions = set()
+    repairs, repair_artifact_sha256 = _accepted_repairs(output_dir, manifest)
+    used_repairs = set()
     for shard in manifest["shards"]:
         shard_id = shard["shard_id"]
         state_path = output_dir / "states" / f"{shard_id}.json"
@@ -1489,13 +1691,17 @@ def collect_segments(output_dir: Path, manifest: Mapping[str, Any]) -> List[Dict
             output_dir / shard["sidecar_path"],
             shard["sidecar_sha256"],
         )
+        requests = _load_response(
+            output_dir / shard["request_path"],
+            shard["request_sha256"],
+        )
         responses = _load_response(
             output_dir / state["response_path"],
             require_sha256(state["response_sha256"], label=f"{shard_id} response SHA-256"),
         )
-        if set(sidecars) != set(responses):
+        if set(sidecars) != set(responses) or set(sidecars) != set(requests):
             raise LLMJudgeError(
-                f"Response key coverage mismatch for {shard_id}; "
+                f"Request/response key coverage mismatch for {shard_id}; "
                 f"missing={sorted(set(sidecars) - set(responses))[:10]!r}, "
                 f"unknown={sorted(set(responses) - set(sidecars))[:10]!r}"
             )
@@ -1541,15 +1747,49 @@ def collect_segments(output_dir: Path, manifest: Mapping[str, Any]) -> List[Dict
             try:
                 parsed = _parse_success_response(response)
             except LLMJudgeError as exc:
-                errors.append(
-                    {
-                        "shard_id": shard_id,
-                        "request_key": request_key,
-                        "error": str(exc),
-                        "raw_batch_row": batch_row,
-                    }
-                )
-                continue
+                repair = repairs.get(request_key)
+                if repair is None:
+                    errors.append(
+                        {
+                            "shard_id": shard_id,
+                            "request_key": request_key,
+                            "error": str(exc),
+                            "raw_batch_row": batch_row,
+                        }
+                    )
+                    continue
+                entry = repair["entry"]
+                expected_evidence = {
+                    "shard_id": shard_id,
+                    "request_key": request_key,
+                    "model": manifest["model"],
+                    "generation_config_sha256": manifest["methodology"][
+                        "generation_config_sha256"
+                    ],
+                    "request_row_sha256": canonical_json_sha256(requests[request_key]),
+                    "sidecar_row_sha256": canonical_json_sha256(sidecar),
+                    "original_response_artifact_sha256": state["response_sha256"],
+                    "original_batch_row_sha256": canonical_json_sha256(batch_row),
+                    "original_parse_error": str(exc),
+                }
+                for field, expected in expected_evidence.items():
+                    if entry.get(field) != expected:
+                        raise LLMJudgeError(
+                            f"Response-repair evidence mismatch for {request_key}/{field}"
+                        )
+                parsed = repair["parsed"]
+                used_repairs.add(request_key)
+                repair_fields = {
+                    "response_repair_artifact_sha256": repair_artifact_sha256,
+                    "response_repair_attempt": repair["attempt_number"],
+                    "response_transport": repair["attempt"]["transport"],
+                }
+            else:
+                if request_key in repairs:
+                    raise LLMJudgeError(
+                        f"Response repair unexpectedly targets a valid raw response: {request_key}"
+                    )
+                repair_fields = {}
             model_versions.add(parsed["model_version"])
             collected.append(
                 {
@@ -1560,6 +1800,7 @@ def collect_segments(output_dir: Path, manifest: Mapping[str, Any]) -> List[Dict
                         "generation_config_sha256"
                     ],
                     "response_artifact_sha256": state["response_sha256"],
+                    **repair_fields,
                 }
             )
     errors_path = output_dir / "collection_errors.jsonl"
@@ -1569,6 +1810,10 @@ def collect_segments(output_dir: Path, manifest: Mapping[str, Any]) -> List[Dict
             f"Collection found {len(errors)} invalid/error responses; see {errors_path}"
         )
     errors_path.unlink(missing_ok=True)
+    if used_repairs != set(repairs):
+        raise LLMJudgeError(
+            f"Accepted response repairs were not consumed: {sorted(set(repairs) - used_repairs)!r}"
+        )
     if len(collected) != EXPECTED_SEGMENTS:
         raise LLMJudgeError(f"Expected {EXPECTED_SEGMENTS} collected segments, got {len(collected)}")
     if len(model_versions) != 1:
@@ -1784,6 +2029,7 @@ def collect_command(args: argparse.Namespace) -> None:
     output_dir = args.output_dir.resolve()
     manifest = load_run_manifest(output_dir)
     segments = collect_segments(output_dir, manifest)
+    accepted_repairs, repair_artifact_sha256 = _accepted_repairs(output_dir, manifest)
     summary_rows = build_summary_rows(segments, manifest)
     paired_rows = build_paired_rows(segments)
     talk_rows = build_talk_paired_rows(segments)
@@ -1877,6 +2123,15 @@ def collect_command(args: argparse.Namespace) -> None:
         "talk_pairs": len(talk_rows),
         "resolved_model_version": segments[0]["model_version"],
         "usage_totals": usage_totals,
+        "response_repairs": (
+            None
+            if repair_artifact_sha256 is None
+            else {
+                "path": "response_repairs.json",
+                "sha256": repair_artifact_sha256,
+                "accepted": len(accepted_repairs),
+            }
+        ),
         "artifacts": artifacts,
     }
     atomic_write_json(output_dir / "collection_manifest.json", collection_manifest)
@@ -1933,6 +2188,17 @@ def build_parser() -> argparse.ArgumentParser:
     audit_rejection.add_argument("--confirm-run-config-sha256", required=True)
     audit_rejection.add_argument("--confirm-batch-display-name", required=True)
     audit_rejection.set_defaults(handler=audit_quota_rejection)
+
+    repair_format = subparsers.add_parser(
+        "repair-format",
+        help="Retry one malformed visible answer with the identical request and preserve evidence.",
+    )
+    repair_format.add_argument("--output-dir", required=True, type=Path)
+    repair_format.add_argument("--shard-id", required=True)
+    repair_format.add_argument("--request-key", required=True)
+    repair_format.add_argument("--api-key-file", required=True, type=Path)
+    repair_format.add_argument("--confirm-run-config-sha256", required=True)
+    repair_format.set_defaults(handler=repair_format_response)
 
     status = subparsers.add_parser("status", help="Poll one or all submitted shards.")
     status.add_argument("--output-dir", required=True, type=Path)

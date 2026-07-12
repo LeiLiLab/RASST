@@ -131,7 +131,11 @@ def _score(sidecar: Dict[str, Any]) -> int:
 
 
 def _build_fixture(
-    root: Path, *, split_medicine: bool = True, complete: bool = True
+    root: Path,
+    *,
+    split_medicine: bool = True,
+    complete: bool = True,
+    format_repair: bool = False,
 ) -> Dict[str, Any]:
     acl_source = root / "acl_source.jsonl"
     medicine_source = root / "medicine_source.jsonl"
@@ -191,6 +195,7 @@ def _build_fixture(
             "medicine_source": medicine_source,
         }
     manifest = _read_json(output_dir / "run_manifest.json")
+    repair_written = False
     for shard in manifest["shards"]:
         shard_id = shard["shard_id"]
         sidecars = [
@@ -222,6 +227,10 @@ def _build_fixture(
                     },
                 }
             )
+        if format_repair and not repair_written:
+            response_rows[0]["response"]["candidates"][0]["content"]["parts"][0][
+                "text"
+            ] = "Reasoning first.\n\n60"
         response_path = output_dir / "responses" / f"{shard_id}.jsonl"
         response_path.parent.mkdir(parents=True, exist_ok=True)
         SCORER.atomic_write_text(
@@ -261,6 +270,74 @@ def _build_fixture(
             }
         )
         SCORER.atomic_write_json(state_path, state)
+        if format_repair and not repair_written:
+            request_row = next(
+                row
+                for _, row in SCORER.iter_jsonl(
+                    output_dir / shard["request_path"], label="repair test request"
+                )
+            )
+            sidecar = sidecars[0]
+            original_batch_row = response_rows[0]
+            try:
+                SCORER._parse_success_response(original_batch_row["response"])
+            except SCORER.LLMJudgeError as exc:
+                original_parse_error = str(exc)
+            else:
+                raise AssertionError("synthetic repair response must be invalid")
+            score = _score(sidecar)
+            repaired_response = {
+                "candidates": [
+                    {
+                        "finishReason": "STOP",
+                        "content": {"parts": [{"text": str(score)}]},
+                    }
+                ],
+                "modelVersion": "gemini-2.5-pro-001",
+                "usageMetadata": {
+                    "promptTokenCount": 10,
+                    "candidatesTokenCount": 1,
+                    "totalTokenCount": 11,
+                },
+                "responseId": "format-repair-response",
+            }
+            repair_document = {
+                "schema_version": SCORER.REPAIR_SCHEMA_VERSION,
+                "run_config_sha256": manifest["run_config_sha256"],
+                "entries": {
+                    sidecar["request_key"]: {
+                        "shard_id": shard_id,
+                        "request_key": sidecar["request_key"],
+                        "model": manifest["model"],
+                        "generation_config_sha256": manifest["methodology"][
+                            "generation_config_sha256"
+                        ],
+                        "request_row_sha256": SCORER.canonical_json_sha256(request_row),
+                        "sidecar_row_sha256": SCORER.canonical_json_sha256(sidecar),
+                        "original_response_artifact_sha256": state["response_sha256"],
+                        "original_batch_row_sha256": SCORER.canonical_json_sha256(
+                            original_batch_row
+                        ),
+                        "original_parse_error": original_parse_error,
+                        "attempts": [
+                            {
+                                "attempt": 1,
+                                "at_utc": "2026-07-12T00:00:00+00:00",
+                                "transport": "standard_generate_content_format_retry",
+                                "sdk": "google-genai",
+                                "sdk_version": "test-sdk",
+                                "raw_response": repaired_response,
+                                "valid": True,
+                                "judge_score": score,
+                                "model_version": "gemini-2.5-pro-001",
+                            }
+                        ],
+                        "accepted_attempt": 1,
+                    }
+                },
+            }
+            SCORER.atomic_write_json(output_dir / "response_repairs.json", repair_document)
+            repair_written = True
     with contextlib.redirect_stdout(io.StringIO()):
         SCORER.collect_command(argparse.Namespace(output_dir=output_dir))
     return {
@@ -280,6 +357,15 @@ def _mutate_first_tsv_value(path: Path, column: str, replacement: str) -> None:
 
 
 class ValidateGeminiLlmJudgeWmt25Test(unittest.TestCase):
+    def test_validates_format_repair_evidence(self) -> None:
+        with _small_matrix(), tempfile.TemporaryDirectory() as raw_temp:
+            fixture = _build_fixture(Path(raw_temp), format_repair=True)
+            report = VALIDATOR.validate_output_dir(output_dir=fixture["output_dir"])
+            self.assertEqual(report["status"], "ok")
+            self.assertIn("response_repairs.json", report["sha256"])
+            collection = _read_json(fixture["output_dir"] / "collection_manifest.json")
+            self.assertEqual(collection["response_repairs"]["accepted"], 1)
+
     def test_validates_prepared_split_source_layout(self) -> None:
         with _small_matrix(), tempfile.TemporaryDirectory() as raw_temp:
             fixture = _build_fixture(Path(raw_temp), complete=False)
