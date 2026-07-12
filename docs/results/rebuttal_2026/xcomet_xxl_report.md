@@ -1,9 +1,10 @@
 # xCOMET-XXL rebuttal 评测报告
 
-> 口径说明（2026-07-11）：本报告中的 ESO En-De RASST 四行使用
+> 口径说明（2026-07-12）：本报告中的 ESO En-De RASST 四行使用
 > release-canonical `30/30, 30/30, 20/20, 20/20` cache 输出，不是
-> submitted-paper exact 四档 `30/30` 输出。paper-exact 复算将 ESO 平均差值从
-> `-3.1716` 修正为 `-2.1012`；rebuttal 应引用
+> submitted-paper exact 四档 `30/30` 输出，InfiniSST 也已被新重跑替代。推荐的
+> new InfiniSST × paper-exact RASST 差值为 `-1.3848`；`-3.1716` 与
+> `-2.1012` 仅保留为历史口径。Rebuttal 应引用
 > [`xcomet_paper_exact_eso_de_report.md`](xcomet_paper_exact_eso_de_report.md)。
 > 本报告保留为 release-cache 诊断与首次全矩阵运行 provenance。
 

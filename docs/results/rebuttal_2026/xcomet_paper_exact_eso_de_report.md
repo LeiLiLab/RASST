@@ -2,33 +2,40 @@
 
 ## 结论
 
-此前 rebuttal xCOMET 汇总对 ESO En-De 使用了 release-canonical
-`30/30, 30/30, 20/20, 20/20` cache 输出，而不是 submitted-paper exact 输出。
-本次从 Taurus 的 InfiniSST provenance 与历史运行目录恢复论文四个 RASST
-`instances.log`，并对实际 BLEU 使用的 `instances.strip_term.log` 重新评分。
+最初 rebuttal xCOMET 汇总同时使用了旧 InfiniSST baseline 和 release-canonical
+`30/30, 30/30, 20/20, 20/20` RASST cache 输出。后续先恢复了 submitted-paper
+exact RASST 四档 `30/30` 输出，又重新生成并独立验证了 InfiniSST baseline。
 
-paper-exact ESO En-De 的 RASST cell-macro xCOMET 为 **75.9398**，InfiniSST 为
-**78.0410**，平均差值为 **-2.1012**，四个 cells 均为负。旧 release-cache
-口径的差值为 `-3.1716`。修正使平均差值改善 `+1.0703`，主要来自 lm4；负向
-结论仍然成立，但不应继续把 `-3.1716` 写成 submitted-paper exact 结果。
+当前推荐口径是 **new InfiniSST 对比 paper-exact RASST**：RASST cell-macro
+xCOMET 为 **75.9398**，InfiniSST 为 **77.3245**，平均差值为 **-1.3848**，
+四个 cells 均为负。lm4 基本持平（`-0.2287`）；主要负差来自 lm1（`-2.5040`）
+与 lm3（`-1.8294`）。
 
-| lm | InfiniSST | RASST paper exact | Paper-exact delta | 旧 release-cache delta | Delta 修正量 |
-| ---: | ---: | ---: | ---: | ---: | ---: |
-| 1 | 76.4411 | 70.8779 | -5.5631 | -5.5631 | +0.0000 |
-| 2 | 78.7102 | 77.5068 | -1.2034 | -1.2034 | +0.0000 |
-| 3 | 78.3695 | 76.9881 | -1.3814 | -1.5909 | +0.2095 |
-| 4 | 78.6433 | 78.3863 | -0.2571 | -4.3289 | +4.0718 |
-| **平均** | **78.0410** | **75.9398** | **-2.1012** | **-3.1716** | **+1.0703** |
+| lm | New InfiniSST | RASST paper exact | RASST - InfiniSST |
+| ---: | ---: | ---: | ---: |
+| 1 | 73.3819 | 70.8779 | -2.5040 |
+| 2 | 78.4838 | 77.5068 | -0.9770 |
+| 3 | 78.8175 | 76.9881 | -1.8294 |
+| 4 | 78.6150 | 78.3863 | -0.2287 |
+| **平均** | **77.3245** | **75.9398** | **-1.3848** |
 
-ACL 12 cells 不变。将其与 paper-exact ESO En-De 合并后，保留的 16-cell macro
-为 RASST `78.0131`、InfiniSST `78.4515`、差值 `-0.4385`，8/16 cells 为正；旧
-release-cache 合并差值为 `-0.7060`。
+三次口径修正应明确区分：
 
-`xcomet_paper_exact_combined_{summary,paired}.tsv` 是将原运行中独立验证的 ACL
-24 systems 与本次独立验证的 ESO 8 systems 合并得到的轻量视图。两个运行使用
-同一模型、checkpoint、segmenter 和评分代码，但物理 GPU ids 不同，因此保留各自
-的 `scoring_config_sha256`；combined TSV 本身不冒充一次单独的 32-system validator
-运行。
+| Comparison | ESO En-De mean delta |
+| --- | ---: |
+| Old InfiniSST vs release-cache RASST | -3.1716 |
+| Old InfiniSST vs paper-exact RASST | -2.1012 |
+| **New InfiniSST vs paper-exact RASST（推荐）** | **-1.3848** |
+
+ACL 12 cells 不变。与推荐 ESO 结果合并后，16-cell macro 为 RASST `78.0131`、
+InfiniSST `78.2724`、差值 `-0.2593`，8/16 cells 为正。
+
+[`xcomet_new_infinisst_vs_paper_exact_rasst.tsv`](xcomet_new_infinisst_vs_paper_exact_rasst.tsv)
+由各自独立验证的 system means 交叉组合。两边使用同一 xCOMET model revision、
+checkpoint、segmenter 和 scorer，但不是同一次联合 scorer run，因此只报告 system
+means 与 cell-macro delta，不从该交叉表声称 combined sentence-level
+win/tie/loss。`xcomet_paper_exact_combined_{summary,paired}.tsv` 保留为旧 InfiniSST
+baseline 的历史视图，不再是推荐结果。
 
 ## 输入核对
 
@@ -54,14 +61,26 @@ xCOMET 对 `instances.strip_term.log` 评分，因为它是论文 BLEU/TERM_ACC 
   `sglang-omni-jaxan-07120847`。
 - Physical GPUs：2、3；2-way DDP，batch size 16，`num_workers=0`。
 - 稳定推理阶段连续 10 秒窗口的双卡利用率为 99%--100%。
-- 评分规模：8 systems、4 strict pairs、11,496 sentence segments。
-- 独立 validator 结果：8 systems、4 pairs、11,496 segments，全部与逐句 JSONL
-  重算一致。
+- Paper-exact RASST 来源运行：8 systems、4 pairs、11,496 segments；独立
+  validator 全部重算一致。
+- New InfiniSST lm1--3 来源运行：6 systems、3 pairs、8,622 segments；exit 0，
+  validator `status=ok`。
+- New InfiniSST lm4 来源运行：2 systems、1 pair、2,874 segments；exit 0，
+  validator `status=ok`。
+- New InfiniSST 来源运行内部同时评分了 release-cache RASST；推荐交叉表只取其中
+  InfiniSST system rows，再与独立验证的 paper-exact RASST system rows 组合。
 
 Git-tracked 轻量产物：
 
 | Artifact | SHA-256 |
 | --- | --- |
+| [`xcomet_new_infinisst_vs_paper_exact_rasst.tsv`](xcomet_new_infinisst_vs_paper_exact_rasst.tsv) | `94e88b680c104697900df961b18a047d876e9b445a63894c3f2af5628073e0e6` |
+| [`xcomet_new_infinisst_lm123_summary.tsv`](xcomet_new_infinisst_lm123_summary.tsv) | `14d3dea52d9243d4a730e7bd22a7455492be10f7469c910d20b6eed1d5f8b61e` |
+| [`xcomet_new_infinisst_lm123_manifest.tsv`](xcomet_new_infinisst_lm123_manifest.tsv) | `ead6cf9be73be8ed3c6a27a6b10c38a013ec84133f5f67f49d081455bfda428e` |
+| [`xcomet_new_infinisst_lm123_validation.json`](xcomet_new_infinisst_lm123_validation.json) | `b7c62d5a6a9449079ca8b0c36800e5fd96ac405c8fa287ff9f18be009b5bb561` |
+| [`xcomet_new_infinisst_lm4_summary.tsv`](xcomet_new_infinisst_lm4_summary.tsv) | `42f57b77feb658c81747fdc874f9986ae76a2e1c01f0399b4f580db3a0c90087` |
+| [`xcomet_new_infinisst_lm4_manifest.tsv`](xcomet_new_infinisst_lm4_manifest.tsv) | `59cb5e26eda0b5c74838cd1a52b5e00db4352dabe8e7f10db379f2d28e8b701c` |
+| [`xcomet_new_infinisst_lm4_validation.json`](xcomet_new_infinisst_lm4_validation.json) | `86b522fa35a093febe78251b4000bae260a62ab7a6473cd210349f3ad19e08a2` |
 | [`xcomet_paper_exact_combined_summary.tsv`](xcomet_paper_exact_combined_summary.tsv) | `e84a55a2e779c59f9e63e2fb33ec2c699b2bfb125828876f8d66e2ba6069142d` |
 | [`xcomet_paper_exact_combined_paired.tsv`](xcomet_paper_exact_combined_paired.tsv) | `3c0dbdb2f46f115fcc4ea1551075e302834026ee07bb0ea7a02377955df4df21` |
 | [`xcomet_paper_exact_eso_de_summary.tsv`](xcomet_paper_exact_eso_de_summary.tsv) | `d39004098ef158430d80f0389475eaa114f919f5c9d28b043cd2ec28eaea3279` |
@@ -83,11 +102,16 @@ portable bundle 均为最终 hash
 
 ```text
 /data02/jaxan/RASST_rebuttal_20260710/results/xcomet_paper_exact_eso_de_20260712/segments.jsonl
+/data02/jaxan/RASST_rebuttal_20260710/results/xcomet_eso_de_infinisst_rerun_lm123_20260712/segments.jsonl
+/data02/jaxan/RASST_rebuttal_20260710/results/xcomet_eso_de_infinisst_rerun_lm4_20260712/segments.jsonl
 ```
 
-文件大小约 28 MiB，SHA-256 为
-`40454563ea39d20f04970b8a733dc0a370d8ab0e0a4cb25c0f7720bf5491e997`。
-portable bundle 位于：
+paper-exact RASST 来源文件大小约 28 MiB，SHA-256 为
+`40454563ea39d20f04970b8a733dc0a370d8ab0e0a4cb25c0f7720bf5491e997`；new
+InfiniSST lm1--3 与 lm4 逐句文件的 SHA-256 分别为
+`244a8fb4d5e3538ff4bb0bdbf6860a95ca4f88306ff96d7259f89dccb99fcca3` 与
+`50708b41855173ba2231c23f567de824342da687c87a840c89320bc5f3615df9`。
+paper-exact portable bundle 位于：
 
 ```text
 /data02/jaxan/RASST_rebuttal_20260710/xcomet_paper_exact_eso_de_bundle/
