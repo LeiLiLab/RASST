@@ -168,25 +168,36 @@ pre-submit validation 已完成；13/16 shards 已完成下载，Medicine En-De 
 
 ## Paper-derived realistic glossary
 
-状态：**fresh extraction blocked，推理未启动**。
+状态：**legacy paper-derived glossary v1 的三语 `lm=2` default-setting 结果已由
+作者确认；fresh model-ID-pinned re-extraction 仍未完成。**
 
-- 新 extractor 固定 `gemini-2.5-flash`，只读取 5 篇对应 ACL paper PDF，不读取
-  transcript、reference、gold tags 或 gold evaluation glossary；保存 prompt、PDF、
-  raw response 和 glossary hashes。
-- Taurus legacy script 中的 Gemini API key 已被 Google 标记为 leaked 并返回 403。
-  没有使用其他用户的 key，也没有把 key 复制到新文件或日志。
-- 新 pipeline 为每篇 paper / 每种 target language 生成独立 runtime glossary，
-  inference 只使用该 glossary；最终 exact-form TERM_ACC 始终使用现有 raw-gold
-  glossary（SHA-256
-  `f9f171c6475c4bb19250f5f93063a5ef034cbdcc1f8a995c593647718cf9a5b6`）作为固定
-  denominator。评分器通过显式 `--mwer-segmenter` 参数运行，不依赖环境变量。
-- 旧表中已有 12 个 `acl_paper_extracted` RASST cells，但它们被标记为
-  `user_supplied_reusable`，没有可追溯的 exact `instances.log`，因此不作为这次
-  fresh rebuttal evidence。
+- 每个 RASST run 只使用对应 ACL paper 导出的 glossary 作为 inference index；
+  index 构建不读取 transcript、reference、gold tags 或 gold evaluation glossary。
+- RASST 与 InfiniSST 最终都用完整 tagged-raw ACL glossary（SHA-256
+  `f9f171c6475c4bb19250f5f93063a5ef034cbdcc1f8a995c593647718cf9a5b6`）评分；
+  未被 paper-derived index 覆盖的 gold terms 仍计为错误。
+- 作者确认的 rebuttal readout：
 
-Fresh glossary、raw responses 和 manifest 的预定 Hugging Face 目标为
-`gavinlaw/rasst-main-result-data` 下的 versioned rebuttal artifact；在新 key 可用并
-完成生成前，上传状态为 **blocked**。
+| Language | Reported TERM_ACC RASST / InfiniSST (delta) | Pooled correct counts | BLEU RASST / InfiniSST (delta) |
+| --- | ---: | ---: | ---: |
+| En-Zh | 77.87 / 75.17 (**+2.70 pp**) | 693/890 vs. 669/890 | 46.3280 / 45.8268 (**+0.5012**) |
+| En-Ja | 65.32 / 65.96 (**-0.64 pp**) | 614/940 vs. 620/940 | 27.7656 / 27.7202 (**+0.0455**) |
+| En-De | 70.91 / 68.21 (**+2.70 pp**) | 652/935 vs. 632/935 | 29.2086 / 30.2743 (**-1.0657**) |
+
+De 的 reported TERM_ACC 与 pooled count ratio（69.73% vs. 67.59%，delta
++2.14 pp）不是同一聚合口径，因此必须分列，不能写成
+`652/935 = 70.91%`。正式 rebuttal 使用作者确认的 reported TERM_ACC；pooled counts
+仅保留作 provenance。三语 reported TERM_ACC macro delta 为 `+1.59 pp`；BLEU
+为 mixed，因此该实验只支持 non-oracle terminology robustness，不支持 uniform
+overall-quality improvement。
+
+Legacy glossary 的 exact historical Gemini model identifier 未保存在 extraction
+旁，正式文本只能称 `paper-derived glossary v1`，不能称 fresh Gemini 2.5 Flash。
+对应的 Git source of truth 已同步到 `main@60c995e`，包括 reported/pool 两套
+TERM_ACC 字段和 author-confirmed snapshot。
+完整数据 artifact 的预定 Hugging Face 目标仍为
+`gavinlaw/rasst-main-result-data` 下的 versioned rebuttal artifact；在上传前状态为
+**pending**。
 
 ## Retrieval degradation sensitivity
 
@@ -258,7 +269,7 @@ canonical artifact。
 
 按 Reviewer Mzub、oktu、gbii 顺序整理的精简 OpenReview 单评论稿位于
 [`../../rebuttal_2026_openreview_responses.md`](../../rebuttal_2026_openreview_responses.md)。
-三段正文分别为 `3622 / 4414 / 3651` characters，均低于 5000-character 上限；该稿
+三段正文分别为 `3711 / 4414 / 3972` characters，均低于 5000-character 上限；该稿
 只使用已验证的 main/rebuttal-experiments 结果，并明确排除 LLM-as-a-judge 与宽语义
 audit。文末的内部取舍和 evidence SoT 不应提交到 OpenReview。
 

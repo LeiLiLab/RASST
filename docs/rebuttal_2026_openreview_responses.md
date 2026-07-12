@@ -57,12 +57,14 @@ tags therefore provide useful span-level supervision; they are not hard
 decoding constraints or scoring artifacts, and are removed before scoring. We
 will report this ablation and clarify the design.
 
-**Notation and presentation.** We will replace the ambiguous middle-dot
-notation in Eq. 1 with explicit chunk indexing and define the chunk as
-`c_i = s_[l_i,r_i]`; define `phi` as the retriever parameters in `R_phi`;
-explain `[CLS]` as the classification-token representation used for BGE-M3
-pooling; use a clearer source-to-target separator in Fig. 1; and correct
-"Speehc" to "Speech." Thank you for catching these issues.
+**Notation clarification and camera-ready fixes.** We will make the method
+definitions explicit: replace the ambiguous middle-dot in Eq. 1 with chunk
+indexing (`c_i = s_[l_i,r_i]`), define `phi` in `R_phi` as the retriever
+parameters, and explain `[CLS]` as the classification token whose BGE-M3
+representation is used for text pooling. The remaining points are presentation
+fixes for the camera-ready: Fig. 1 will use a clearer
+`source term -> target term` separator, and "Speehc" will be corrected to
+"Speech."
 <!-- RESPONSE:MZUB:END -->
 
 ## 2. Reviewer oktu
@@ -151,7 +153,6 @@ scoring pipeline, with retrieval disabled. Our new controlled evidence is:
 | --- | --- | --- |
 | Multi-scale, Zh `lm=2` | Largest-infer / fixed-window train+infer | TERM_ACC **90.00 vs. 84.72/73.93**; BLEU 47.88 vs. 47.83/45.80 |
 | Target-tag SFT, Zh `lm=1-4` | Target tags removed only | **+4.11 pp** TERM_ACC; **+5.36 pp** correct-term adoption |
-| Paper-derived glossary v1, `lm=2` | No-RAG InfiniSST; unchanged ACL denominator | Delta TERM_ACC Zh/Ja/De: **+2.70/-0.64/+2.14 pp** (macro **+1.40 pp**) |
 | 25%/50% hint corruption, `lm=2` | 0%; same hint count/retrieval compute | Delta TERM_ACC Zh: -1.91/-4.27; De: -3.31/-7.59; Ja: -1.80/-6.17 pp; xCOMET lower in all six |
 | Target-masked BLEU, 12 cells | InfiniSST | **+0.99** average; **10/12** wins (regular BLEU: +1.91) |
 
@@ -164,9 +165,19 @@ with different backbones or budgets.
 RASST run retrieves only from a glossary built from that talk's paper; neither
 the ACL tagged-raw glossary nor references are used to build the index. Both
 systems are scored against the unchanged ACL tagged-raw glossary, so terms
-absent from the paper-derived index remain errors. The table shows that the
-advantage largely survives without oracle test-term selection or an easier
-denominator; En-Ja is within six correct occurrences of InfiniSST.
+absent from the paper-derived index remain errors. At the default `lm=2`
+operating point:
+
+| Language | TERM_ACC: RASST / InfiniSST (delta) | BLEU: RASST / InfiniSST (delta) |
+| --- | ---: | ---: |
+| En-Zh | **77.87 / 75.17 (+2.70 pp)** | **46.3280 / 45.8268 (+0.5012)** |
+| En-Ja | **65.32 / 65.96 (-0.64 pp)** | **27.7656 / 27.7202 (+0.0455)** |
+| En-De | **70.91 / 68.21 (+2.70 pp)** | **29.2086 / 30.2743 (-1.0657)** |
+
+The term-accuracy macro delta is **+1.59 points**: the advantage survives in
+En-Zh and En-De, while En-Ja is near parity. BLEU is preserved in En-Zh/En-Ja
+and lower in En-De, so we treat this as a terminology-robustness result rather
+than a uniform overall-quality claim.
 
 **Sensitivity to retrieval quality.** The corruption test holds retrieval
 calls, hint count, rank/score metadata, Speech LLM, and generation settings
@@ -214,10 +225,14 @@ ESO/Medicine.
   50 个新增 morphology/compound hits。若来不及，保留 metric rename 和 limitation，
   删除数值。
 - **Paper-derived glossary v1:** gbii 明确要求，建议保留当前完整三语 TERM_ACC 口径；
-  它总体为 +1.40 points、Zh/De 正、Ja 仅 -0.64。但历史 extraction 旁未保存精确
+  作者确认的 reported macro delta 为 +1.59 points、Zh/De 正、Ja 仅 -0.64。但
+  De 的 pooled counts `652/935` 和 `632/935` 对应 69.73% 与 67.59%，并不等于
+  reported 70.91% 与 68.21%；内部 SoT 必须把 reported TERM_ACC 与 pooled counts
+  分列，正式 rebuttal 只报作者确认的 reported metric。历史 extraction 旁未保存精确
   Gemini model ID，必须只称 `paper-derived glossary v1` 或 `automatically extracted
-  from each paper`，不能称 fresh Gemini 2.5 Flash。该条件 BLEU mixed，不把它包装成
-  overall-quality win。
+  from each paper`，不能称 fresh Gemini 2.5 Flash。BLEU 为
+  `+0.5012/+0.0455/-1.0657`（Zh/Ja/De），应明确是 mixed，不包装成 overall-quality
+  win。
 - **ESO 七阶段 provenance:** oktu 直接问术语由谁选择/验证，因此建议用一行表格和
   一段流程透明披露。Stage 5 虽然是 GPT 对 baseline 的判断，但它只用于定义
   hard-term subset，不是本次 rebuttal 的通用 translation-quality evaluation。
@@ -233,8 +248,6 @@ ESO/Medicine.
 - 宽语义 audit（De 96.91%、Zh/Ja 语义修正数）和 Codex-assisted 标签。
 - ESO En-De 或 Ja `lm=2` 的负 xCOMET、完整 mixed xCOMET breakdown。
 - raw false-copy/FCR、small-n harmful-adoption 分析，以及 no-tag 较低 FCR。
-- paper-derived glossary 的 De BLEU -2.13，除非 reviewer 追问该 robustness condition
-  的 general-quality 指标；当前回复明确只把它当 terminology robustness test。
 - 声称 xCOMET 显著提升、三语 paper-derived glossary 都提升，或已加入新的外部
   matched-compute biasing baseline。
 - 把 ESO hard-term inventory 称为 fully human-authored、professional-translator
@@ -242,7 +255,9 @@ ESO/Medicine.
 
 ## Evidence source of truth
 
-- `origin/main@f0e4ba4`: corrected paper-derived glossary denominator and comparison.
+- `origin/main:docs/results/acl_paper_extracted_lm2/author_reported_lm2_update.tsv`:
+  author-confirmed default-`lm=2` paper-derived TERM_ACC/BLEU, with
+  reported-vs-pooled aggregation kept separate.
 - `origin/main@4446ad8`: compact retrieval-degradation rebuttal table.
 - `origin/main@ae24301`: En-Zh target-tag ablation.
 - `origin/main@06afe4d`: validated ACL xCOMET paired results.
