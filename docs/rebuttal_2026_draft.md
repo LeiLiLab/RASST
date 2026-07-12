@@ -88,28 +88,32 @@ we replace `0% / 25% / 50%` of sentence-window-relevant correct hints with
 unique distractors from the same ACL glossary. The retriever is still executed,
 and the number, rank, and score metadata of hints, model checkpoint, generation
 settings, and latency multiplier remain fixed. Actual correct-hint replacement
-rates are `26.17/50.58%` (Zh), `28.27/52.28%` (De), and `25.54/50.56%` (Ja).
+rates are `26.17/50.58%` (Zh), `28.27/52.28%` (De), and `24.31/50.26%` (Ja).
+
+| Language | Actual replacement | Retrieval P/R | TERM_ACC | BLEU | xCOMET | LAAL | ΔTERM_ACC | ΔBLEU | ΔxCOMET |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| En-Zh | 0.00% | 64.92/23.41 | 90.00 | 47.878 | 83.628 | 1814 ms | -- | -- | -- |
+| En-Zh | 26.17% | 47.93/17.28 | 88.09 | 48.137 | 83.028 | 1795 ms | -1.91 | +0.259 | -0.599 |
+| En-Zh | 50.58% | 32.08/11.57 | 85.73 | 48.331 | 82.608 | 1792 ms | -4.27 | +0.453 | -1.020 |
+| En-De | 0.00% | 64.92/23.41 | 83.10 | 30.869 | 83.966 | 1648 ms | -- | -- | -- |
+| En-De | 28.27% | 46.57/16.79 | 79.79 | 31.077 | 83.214 | 1666 ms | -3.31 | +0.208 | -0.752 |
+| En-De | 52.28% | 30.98/11.17 | 75.51 | 31.584 | 83.496 | 1655 ms | -7.59 | +0.715 | -0.471 |
+| En-Ja | 0.00% | 64.95/23.37 | 84.57 | 29.889 | 70.379 | 2231 ms | -- | -- | -- |
+| En-Ja | 24.31% | 49.16/17.69 | 82.77 | 28.717 | 68.417 | 2208 ms | -1.80 | -1.172 | -1.962 |
+| En-Ja | 50.26% | 32.30/11.62 | 78.40 | 27.717 | 67.137 | 2325 ms | -6.17 | -2.172 | -3.242 |
 
 As final hint precision/recall decrease, exact-form TERM_ACC drops from
 `90.00` to `88.09/85.73%` for En-Zh and from `83.10` to `79.79/75.51%` for
-En-De. BLEU nevertheless rises by `+0.259/+0.453` and `+0.208/+0.715`,
-respectively, illustrating that corpus BLEU can miss degradation concentrated
-in terminology. xCOMET (multiplied by 100) is lower than the corresponding
-`0%` control in all six degraded cells: deltas are `-0.599/-1.020` (Zh),
-`-0.752/-0.471` (De), and `-5.971/-1.071` (Ja). The first En-Ja `25%` run
-enters a particularly poor autoregressive path in one talk. A full same-mask
-rerun reproduces its BLEU (`18.714`), TERM_ACC (`70.00%`), xCOMET (`64.408`),
-and the same max-token loop, so this is not a scoring error or one-off decoding
-sample. With an independently drawn corruption mask (actual replacement
-`24.31/50.26%`), no loop occurs and En-Ja changes monotonically from the `0%`
-control: TERM_ACC `84.57 -> 82.77 -> 78.40%`, BLEU
-`29.889 -> 28.717 -> 27.717`, and xCOMET
-`70.379 -> 68.417 -> 67.137`. Across both masks every degraded En-Ja condition
-is below control in TERM_ACC and xCOMET, but the magnitude and ordering are
-mask-sensitive. We therefore claim sensitivity, not a universal monotonic
-dose-response or significance result. StreamLAAL is stable within 23 ms of
-control for En-Zh/De; En-Ja latency varies with output length and generation
-path.
+En-De, and from `84.57` to `82.77/78.40%` for En-Ja. xCOMET (multiplied by
+100) is lower than the corresponding `0%` control in all six degraded cells:
+deltas are `-0.599/-1.020` (Zh), `-0.752/-0.471` (De), and
+`-1.962/-3.242` (Ja). BLEU nevertheless rises by `+0.259/+0.453` for En-Zh
+and `+0.208/+0.715` for En-De, even while their terminology accuracy and
+xCOMET decrease. This illustrates that corpus BLEU can obscure degradation
+concentrated in terminology. En-Ja BLEU decreases by `-1.172/-2.172`.
+StreamLAAL differs from control by at most `23ms` for En-Zh/De and `94ms` for
+En-Ja. We interpret these results as a controlled sensitivity analysis rather
+than a significance or universally monotonic dose-response claim.
 
 ### Why terminology gains can be much larger than BLEU gains
 
@@ -326,7 +330,8 @@ Before submission, the revision will:
   independent xCOMET validation, including the En-Ja same-mask rerun and fresh
   corruption-seed sensitivity check:
   `docs/results/rebuttal_2026/retrieval_degradation_ablation.md`,
-  `docs/results/rebuttal_2026/retrieval_degradation_acl_lm2.tsv`, and
+  `docs/results/rebuttal_2026/retrieval_degradation_acl_lm2.tsv`,
+  `docs/results/rebuttal_2026/retrieval_degradation_rebuttal_table.tsv`,
   `docs/results/rebuttal_2026/retrieval_degradation_xcomet_validation.json`,
   `docs/results/rebuttal_2026/retrieval_degradation_ja_seed_sensitivity.tsv`,
   and `docs/results/rebuttal_2026/retrieval_degradation_ja_rerun_xcomet_summary.tsv`

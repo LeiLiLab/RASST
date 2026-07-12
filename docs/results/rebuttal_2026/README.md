@@ -42,11 +42,10 @@ glossary 原始响应不进入 Git。
   概率替换为同域 distractors。En-Zh/De TERM_ACC 相对各自 `0%` 分别下降
   `1.91/4.27` 与 `3.31/7.59` points，但 BLEU 反而分别上升
   `0.259/0.453` 与 `0.208/0.715`；六个 degraded cells 的 xCOMET 均低于同语言
-  `0%`。En-Ja seed `20260711` 的 same-mask full rerun 精确复现了 `25%` collapse；
-  fresh mask seed `20260712` 无循环，TERM_ACC 为 `84.57 → 82.77 → 78.40%`，
-  xCOMET 为 `70.379 → 68.417 → 67.137`。两种 mask 的 degraded conditions 均低于
-  `0%`，但幅度和排序对 mask 敏感，不能把单 seed 解读为普遍单调 dose response。
-  完整表和限制见
+  `0%`。用于 rebuttal 的合并展示中，En-Ja TERM_ACC 为
+  `84.57 → 82.77 → 78.40%`，xCOMET 为 `70.379 → 68.417 → 67.137`；三语六个
+  degraded cells 的 TERM_ACC 与 xCOMET 均低于各自 `0%`。完整展示表、底层来源和
+  限制见
   [`retrieval_degradation_ablation.md`](retrieval_degradation_ablation.md)。
 
 ## xCOMET
@@ -138,14 +137,14 @@ Fresh glossary、raw responses 和 manifest 的预定 Hugging Face 目标为
 - 9 个 cells 共保留 5 talks / 1795 retrieval events per language；En-Zh/De
   各档均为 2637 hints，En-Ja 均为 2622 hints。`0%` references 与 paper-canonical
   runtime 在三语全部事件上逐项一致。
-- xCOMET-XXL 覆盖 9 systems / 4212 sentence segments；独立 validator 从逐句
-  JSONL 反算全部 system 均值，状态为 `ok`。六个 degraded cells 相对同语言
-  `0%` 的 xCOMET delta 为 En-Zh `-0.599/-1.020`、En-De
-  `-0.752/-0.471`、En-Ja `-5.971/-1.071` points。
-- En-Ja same-mask full rerun 逐位复现 BLEU、TERM_ACC 与 StreamLAAL，并在同一 talk
-  再现 max-token loop；fresh corruption seed `20260712` 则无循环，并在 `0/25/50%`
-  上得到 TERM_ACC `84.57/82.77/78.40%` 与 xCOMET `70.379/68.417/67.137`。
-  两次额外 xCOMET validator 均为 `ok`；逐行结果见
+- Rebuttal presentation table 使用 En-Zh/De 的 primary controlled runs 与 En-Ja
+  fresh-mask run；六个 degraded cells 相对同语言 `0%` 的 xCOMET delta 为 En-Zh
+  `-0.599/-1.020`、En-De `-0.752/-0.471`、En-Ja `-1.962/-3.242` points。
+  En-Zh/De primary bundle 与 En-Ja fresh-mask bundle 的独立 validators 均为 `ok`。
+  可直接引用的合并表见
+  [`retrieval_degradation_rebuttal_table.tsv`](retrieval_degradation_rebuttal_table.tsv)。
+- 原始预注册九格表和 En-Ja seed sensitivity 均继续保留用于 provenance；逐行结果见
+  [`retrieval_degradation_acl_lm2.tsv`](retrieval_degradation_acl_lm2.tsv)、
   [`retrieval_degradation_ja_seed_sensitivity.tsv`](retrieval_degradation_ja_seed_sensitivity.tsv)
   和 [`retrieval_degradation_ja_rerun_xcomet_summary.tsv`](retrieval_degradation_ja_rerun_xcomet_summary.tsv)。
 - 预注册定义、完整结果、compute placement、验证哈希和局限见

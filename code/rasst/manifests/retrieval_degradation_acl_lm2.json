@@ -92,6 +92,8 @@
   },
   "results": {
     "summary_tsv": "docs/results/rebuttal_2026/retrieval_degradation_acl_lm2.tsv",
+    "rebuttal_presentation_tsv": "docs/results/rebuttal_2026/retrieval_degradation_rebuttal_table.tsv",
+    "rebuttal_presentation_tsv_sha256": "cb0af9fbd484398a76457105c3cf0b945026def1fe4475baeeedca4e829a097b",
     "xcomet_summary_tsv": "docs/results/rebuttal_2026/retrieval_degradation_xcomet_summary.tsv",
     "xcomet_paired_25_vs_0_tsv": "docs/results/rebuttal_2026/retrieval_degradation_xcomet_paired_25_vs_0.tsv",
     "xcomet_validation_json": "docs/results/rebuttal_2026/retrieval_degradation_xcomet_validation.json",
