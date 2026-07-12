@@ -102,6 +102,13 @@ class GeminiLlmJudgeWmt25Test(unittest.TestCase):
         cls.fixture_dir = Path(cls._temp_dir.name)
         cls.acl_path = cls.fixture_dir / "acl_release_cache_segments.jsonl"
         cls.medicine_path = cls.fixture_dir / "medicine_paper_exact_segments.jsonl"
+        cls.medicine_infinisst_lm123_path = (
+            cls.fixture_dir / "medicine_new_infinisst_lm123_segments.jsonl"
+        )
+        cls.medicine_infinisst_lm4_path = (
+            cls.fixture_dir / "medicine_new_infinisst_lm4_segments.jsonl"
+        )
+        cls.medicine_rasst_path = cls.fixture_dir / "medicine_paper_exact_rasst_segments.jsonl"
 
         acl_rows = _matrix_rows(
             dataset=MODULE.ACL_DATASET,
@@ -131,8 +138,28 @@ class GeminiLlmJudgeWmt25Test(unittest.TestCase):
                 ],
             ),
         )
+        for split_path in (
+            cls.medicine_infinisst_lm123_path,
+            cls.medicine_infinisst_lm4_path,
+            cls.medicine_rasst_path,
+        ):
+            _write_jsonl(
+                split_path,
+                _matrix_rows(
+                    dataset=MODULE.MEDICINE_DATASET,
+                    languages=("de",),
+                    segments_per_system=MODULE.EXPECTED_SEGMENTS_PER_SYSTEM[
+                        MODULE.MEDICINE_DATASET
+                    ],
+                ),
+            )
         cls.acl_sha256 = _sha256_file(cls.acl_path)
         cls.medicine_sha256 = _sha256_file(cls.medicine_path)
+        cls.medicine_infinisst_lm123_sha256 = _sha256_file(
+            cls.medicine_infinisst_lm123_path
+        )
+        cls.medicine_infinisst_lm4_sha256 = _sha256_file(cls.medicine_infinisst_lm4_path)
+        cls.medicine_rasst_sha256 = _sha256_file(cls.medicine_rasst_path)
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -293,8 +320,14 @@ class GeminiLlmJudgeWmt25Test(unittest.TestCase):
         args = argparse.Namespace(
             acl_segments=self.acl_path,
             acl_segments_sha256=self.acl_sha256,
-            medicine_segments=self.medicine_path,
-            medicine_segments_sha256=self.medicine_sha256,
+            medicine_segments=None,
+            medicine_segments_sha256=None,
+            medicine_infinisst_lm123_segments=self.medicine_infinisst_lm123_path,
+            medicine_infinisst_lm123_segments_sha256=self.medicine_infinisst_lm123_sha256,
+            medicine_infinisst_lm4_segments=self.medicine_infinisst_lm4_path,
+            medicine_infinisst_lm4_segments_sha256=self.medicine_infinisst_lm4_sha256,
+            medicine_rasst_segments=self.medicine_rasst_path,
+            medicine_rasst_segments_sha256=self.medicine_rasst_sha256,
             output_dir=output_dir,
             run_id="unit-full-matrix",
             model="gemini-2.5-pro",
@@ -329,6 +362,26 @@ class GeminiLlmJudgeWmt25Test(unittest.TestCase):
         self.assertEqual(acl_artifact["selected_rows"], 11_232)
         self.assertEqual(acl_artifact["total_rows"], 11_233)
         self.assertEqual(acl_artifact["dataset_counts"][MODULE.MEDICINE_DATASET], 1)
+        selected_by_role = {
+            artifact["role"]: artifact for artifact in manifest["source_artifacts"]
+        }
+        self.assertEqual(
+            selected_by_role["medicine_new_infinisst_lm123"]["selected_rows"], 4_311
+        )
+        self.assertEqual(
+            selected_by_role["medicine_new_infinisst_lm123"]["selection"],
+            {
+                "dataset_equals": MODULE.MEDICINE_DATASET,
+                "method_equals": "InfiniSST",
+                "lm_in": ["1", "2", "3"],
+            },
+        )
+        self.assertEqual(
+            selected_by_role["medicine_new_infinisst_lm4"]["selected_rows"], 1_437
+        )
+        self.assertEqual(
+            selected_by_role["medicine_paper_exact_rasst"]["selected_rows"], 5_748
+        )
 
         systems: set[tuple[str, str, str, str]] = set()
         pairs: set[tuple[str, str, str]] = set()

@@ -2,10 +2,11 @@
 """Run the WMT25 reference-free LLM-judge prompt with Gemini Batch.
 
 The rebuttal matrix is deliberately strict: ACL En-{Zh,De,Ja} is selected
-from the release-cache xCOMET segment artifact, while Medicine/ESO En-De is
-selected from the submitted-paper-exact replacement artifact.  The script
-prepares opaque-keyed Gemini Batch JSONL shards, submits one shard at a time,
-polls and downloads completed jobs, and aggregates only a complete result set.
+from the release-cache xCOMET segment artifact. Medicine/ESO En-De may use one
+combined artifact or explicitly split new-InfiniSST and paper-exact-RASST
+artifacts. The script prepares opaque-keyed Gemini Batch JSONL shards, submits
+one shard at a time, polls and downloads completed jobs, and aggregates only a
+complete result set.
 
 No environment variable is read for configuration or credentials.  Gemini
 credentials must be supplied through an owner-only regular file.
@@ -128,6 +129,34 @@ class SourceRecord:
             self.talk_id,
             self.talk_sentence_index,
         )
+
+
+@dataclass(frozen=True)
+class SourceArtifactSelection:
+    role: str
+    path: Path
+    expected_sha256: str
+    dataset: str
+    method: Optional[str] = None
+    lms: Optional[Tuple[str, ...]] = None
+
+    def matches(self, row: Mapping[str, Any]) -> bool:
+        if str(row.get("dataset") or "") != self.dataset:
+            return False
+        if self.method is not None and str(row.get("method") or "") != self.method:
+            return False
+        if self.lms is not None and str(row.get("lm") or "") not in self.lms:
+            return False
+        return True
+
+    @property
+    def selection(self) -> Dict[str, Any]:
+        selection: Dict[str, Any] = {"dataset_equals": self.dataset}
+        if self.method is not None:
+            selection["method_equals"] = self.method
+        if self.lms is not None:
+            selection["lm_in"] = list(self.lms)
+        return selection
 
 
 def utc_now() -> str:
@@ -380,21 +409,93 @@ def load_selected_source_records(
     *,
     acl_segments: Path,
     acl_expected_sha256: str,
-    medicine_segments: Path,
-    medicine_expected_sha256: str,
+    medicine_segments: Optional[Path] = None,
+    medicine_expected_sha256: Optional[str] = None,
+    medicine_infinisst_lm123_segments: Optional[Path] = None,
+    medicine_infinisst_lm123_expected_sha256: Optional[str] = None,
+    medicine_infinisst_lm4_segments: Optional[Path] = None,
+    medicine_infinisst_lm4_expected_sha256: Optional[str] = None,
+    medicine_rasst_segments: Optional[Path] = None,
+    medicine_rasst_expected_sha256: Optional[str] = None,
 ) -> Tuple[List[SourceRecord], List[Dict[str, Any]]]:
-    specifications = (
-        ("acl_release_cache", lexical_absolute(acl_segments), acl_expected_sha256, ACL_DATASET),
-        (
-            "medicine_paper_exact",
-            lexical_absolute(medicine_segments),
-            medicine_expected_sha256,
-            MEDICINE_DATASET,
-        ),
+    specifications = [
+        SourceArtifactSelection(
+            role="acl_release_cache",
+            path=lexical_absolute(acl_segments),
+            expected_sha256=acl_expected_sha256,
+            dataset=ACL_DATASET,
+        )
+    ]
+    combined_values = (medicine_segments, medicine_expected_sha256)
+    split_values = (
+        medicine_infinisst_lm123_segments,
+        medicine_infinisst_lm123_expected_sha256,
+        medicine_infinisst_lm4_segments,
+        medicine_infinisst_lm4_expected_sha256,
+        medicine_rasst_segments,
+        medicine_rasst_expected_sha256,
     )
+    if all(value is not None for value in combined_values) and all(
+        value is None for value in split_values
+    ):
+        assert medicine_segments is not None and medicine_expected_sha256 is not None
+        specifications.append(
+            SourceArtifactSelection(
+                role="medicine_paper_exact",
+                path=lexical_absolute(medicine_segments),
+                expected_sha256=medicine_expected_sha256,
+                dataset=MEDICINE_DATASET,
+            )
+        )
+    elif all(value is None for value in combined_values) and all(
+        value is not None for value in split_values
+    ):
+        assert medicine_infinisst_lm123_segments is not None
+        assert medicine_infinisst_lm123_expected_sha256 is not None
+        assert medicine_infinisst_lm4_segments is not None
+        assert medicine_infinisst_lm4_expected_sha256 is not None
+        assert medicine_rasst_segments is not None
+        assert medicine_rasst_expected_sha256 is not None
+        specifications.extend(
+            (
+                SourceArtifactSelection(
+                    role="medicine_new_infinisst_lm123",
+                    path=lexical_absolute(medicine_infinisst_lm123_segments),
+                    expected_sha256=medicine_infinisst_lm123_expected_sha256,
+                    dataset=MEDICINE_DATASET,
+                    method="InfiniSST",
+                    lms=("1", "2", "3"),
+                ),
+                SourceArtifactSelection(
+                    role="medicine_new_infinisst_lm4",
+                    path=lexical_absolute(medicine_infinisst_lm4_segments),
+                    expected_sha256=medicine_infinisst_lm4_expected_sha256,
+                    dataset=MEDICINE_DATASET,
+                    method="InfiniSST",
+                    lms=("4",),
+                ),
+                SourceArtifactSelection(
+                    role="medicine_paper_exact_rasst",
+                    path=lexical_absolute(medicine_rasst_segments),
+                    expected_sha256=medicine_rasst_expected_sha256,
+                    dataset=MEDICINE_DATASET,
+                    method="RASST",
+                    lms=LM_SETTINGS,
+                ),
+            )
+        )
+    else:
+        raise LLMJudgeError(
+            "Provide either the combined medicine artifact plus its SHA-256, or all three "
+            "split medicine artifacts (new InfiniSST lm1-3, new InfiniSST lm4, and "
+            "paper-exact RASST) plus their SHA-256 values"
+        )
     selected: List[SourceRecord] = []
     artifacts: List[Dict[str, Any]] = []
-    for role, path, expected_hash, selected_dataset in specifications:
+    for specification in specifications:
+        role = specification.role
+        path = specification.path
+        expected_hash = specification.expected_sha256
         if not path.is_file():
             raise LLMJudgeError(f"Input artifact is not a file: {path}")
         expected_hash = require_sha256(expected_hash, label=f"{role} expected SHA-256")
@@ -410,7 +511,7 @@ def load_selected_source_records(
             total_rows += 1
             dataset = str(row.get("dataset") or "")
             dataset_counts[dataset] += 1
-            if dataset != selected_dataset:
+            if not specification.matches(row):
                 continue
             selected.append(
                 _source_record_from_json(
@@ -429,7 +530,7 @@ def load_selected_source_records(
                 "bytes": path.stat().st_size,
                 "total_rows": total_rows,
                 "dataset_counts": dict(sorted(dataset_counts.items())),
-                "selection": {"dataset_equals": selected_dataset},
+                "selection": specification.selection,
                 "selected_rows": selected_rows,
             }
         )
@@ -551,8 +652,24 @@ def prepare_run(args: argparse.Namespace) -> Dict[str, Any]:
     records, source_artifacts = load_selected_source_records(
         acl_segments=args.acl_segments,
         acl_expected_sha256=args.acl_segments_sha256,
-        medicine_segments=args.medicine_segments,
-        medicine_expected_sha256=args.medicine_segments_sha256,
+        medicine_segments=getattr(args, "medicine_segments", None),
+        medicine_expected_sha256=getattr(args, "medicine_segments_sha256", None),
+        medicine_infinisst_lm123_segments=getattr(
+            args, "medicine_infinisst_lm123_segments", None
+        ),
+        medicine_infinisst_lm123_expected_sha256=getattr(
+            args, "medicine_infinisst_lm123_segments_sha256", None
+        ),
+        medicine_infinisst_lm4_segments=getattr(
+            args, "medicine_infinisst_lm4_segments", None
+        ),
+        medicine_infinisst_lm4_expected_sha256=getattr(
+            args, "medicine_infinisst_lm4_segments_sha256", None
+        ),
+        medicine_rasst_segments=getattr(args, "medicine_rasst_segments", None),
+        medicine_rasst_expected_sha256=getattr(
+            args, "medicine_rasst_segments_sha256", None
+        ),
     )
     records = sorted(
         records,
@@ -1707,8 +1824,18 @@ def build_parser() -> argparse.ArgumentParser:
     prepare = subparsers.add_parser("prepare", help="Prepare the strict 16-shard rebuttal matrix.")
     prepare.add_argument("--acl-segments", required=True, type=Path)
     prepare.add_argument("--acl-segments-sha256", required=True)
-    prepare.add_argument("--medicine-segments", required=True, type=Path)
-    prepare.add_argument("--medicine-segments-sha256", required=True)
+    prepare.add_argument(
+        "--medicine-segments",
+        type=Path,
+        help="Combined Medicine artifact; mutually exclusive with the three split inputs.",
+    )
+    prepare.add_argument("--medicine-segments-sha256")
+    prepare.add_argument("--medicine-infinisst-lm123-segments", type=Path)
+    prepare.add_argument("--medicine-infinisst-lm123-segments-sha256")
+    prepare.add_argument("--medicine-infinisst-lm4-segments", type=Path)
+    prepare.add_argument("--medicine-infinisst-lm4-segments-sha256")
+    prepare.add_argument("--medicine-rasst-segments", type=Path)
+    prepare.add_argument("--medicine-rasst-segments-sha256")
     prepare.add_argument("--output-dir", required=True, type=Path)
     prepare.add_argument("--run-id", required=True)
     prepare.add_argument("--model", required=True)

@@ -456,31 +456,60 @@ def _validate_manifest(output_dir: Path) -> Tuple[Dict[str, Any], Dict[str, Dict
     _canonical_nonnegative_int(matrix.get("empty_hypotheses"), context="matrix.empty_hypotheses")
 
     source_artifacts = manifest.get("source_artifacts")
-    if not isinstance(source_artifacts, list) or len(source_artifacts) != 2:
-        raise GeminiJudgeValidationError("manifest must contain exactly two source artifacts")
+    if not isinstance(source_artifacts, list):
+        raise GeminiJudgeValidationError("manifest source_artifacts must be a list")
     source_by_role: Dict[str, Dict[str, Any]] = {}
-    expected_role_dataset = {
-        "acl_release_cache": ACL_DATASET,
-        "medicine_paper_exact": MEDICINE_DATASET,
+    expected_role_selection = {
+        "acl_release_cache": {"dataset_equals": ACL_DATASET},
+        "medicine_paper_exact": {"dataset_equals": MEDICINE_DATASET},
+        "medicine_new_infinisst_lm123": {
+            "dataset_equals": MEDICINE_DATASET,
+            "method_equals": "InfiniSST",
+            "lm_in": ["1", "2", "3"],
+        },
+        "medicine_new_infinisst_lm4": {
+            "dataset_equals": MEDICINE_DATASET,
+            "method_equals": "InfiniSST",
+            "lm_in": ["4"],
+        },
+        "medicine_paper_exact_rasst": {
+            "dataset_equals": MEDICINE_DATASET,
+            "method_equals": "RASST",
+            "lm_in": ["1", "2", "3", "4"],
+        },
     }
+    allowed_role_sets = (
+        {"acl_release_cache", "medicine_paper_exact"},
+        {
+            "acl_release_cache",
+            "medicine_new_infinisst_lm123",
+            "medicine_new_infinisst_lm4",
+            "medicine_paper_exact_rasst",
+        },
+    )
     for artifact in source_artifacts:
         if not isinstance(artifact, dict):
             raise GeminiJudgeValidationError("source artifact entry must be an object")
         role = _nonempty(artifact.get("role"), context="source artifact role")
         if role in source_by_role:
             raise GeminiJudgeValidationError(f"Duplicate source artifact role: {role}")
-        if role not in expected_role_dataset:
+        if role not in expected_role_selection:
             raise GeminiJudgeValidationError(f"Unexpected source artifact role: {role}")
         _sha256(artifact.get("sha256"), context=f"source artifact {role} sha256")
         selection = artifact.get("selection")
         if not isinstance(selection, dict):
             raise GeminiJudgeValidationError(f"source artifact {role} selection is malformed")
         _assert_equal(
-            selection.get("dataset_equals"),
-            expected_role_dataset[role],
+            selection,
+            expected_role_selection[role],
             context=f"source artifact {role} selection",
         )
         source_by_role[role] = artifact
+    if not any(set(source_by_role) == expected_roles for expected_roles in allowed_role_sets):
+        raise GeminiJudgeValidationError(
+            "Source artifact role set must be either the combined two-artifact layout or "
+            "the split four-artifact layout"
+        )
 
     shards = manifest.get("shards")
     if not isinstance(shards, list):
