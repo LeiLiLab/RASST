@@ -312,7 +312,8 @@ echo "[INFO] ============================================================"
 # We therefore skip `conda activate` when the caller already prepared a working
 # env via PATH/LD_LIBRARY_PATH, and only fall back to `conda activate` when no
 # env is on PATH.
-cd "${ROOT_DIR}"
+# note (luojiaxuan): Release source lists use repo-relative data/... paths.
+cd "${RASST_ROOT}"
 TARGET_ENV_DIR="${CONDA_BASE}/envs/${CONDA_ENV_NAME}"
 if [[ -n "${CONDA_ENV_NAME}" ]] && [[ -x "${TARGET_ENV_DIR}/bin/python" ]] \
    && [[ ":${PATH}:" == *":${TARGET_ENV_DIR}/bin:"* ]]; then
