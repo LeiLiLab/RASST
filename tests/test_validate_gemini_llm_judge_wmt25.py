@@ -130,7 +130,7 @@ def _score(sidecar: Dict[str, Any]) -> int:
     return base
 
 
-def _build_fixture(root: Path) -> Dict[str, Any]:
+def _build_fixture(root: Path, *, split_medicine: bool = True) -> Dict[str, Any]:
     acl_source = root / "acl_source.jsonl"
     medicine_source = root / "medicine_source.jsonl"
     _write_jsonl(
@@ -141,17 +141,45 @@ def _build_fixture(root: Path) -> Dict[str, Any]:
         medicine_source,
         _source_rows(SCORER.MEDICINE_DATASET, ["de"]),
     )
+    medicine_infinisst_lm123_source = root / "medicine_infinisst_lm123_source.jsonl"
+    medicine_infinisst_lm4_source = root / "medicine_infinisst_lm4_source.jsonl"
+    medicine_rasst_source = root / "medicine_rasst_source.jsonl"
+    for path in (
+        medicine_infinisst_lm123_source,
+        medicine_infinisst_lm4_source,
+        medicine_rasst_source,
+    ):
+        _write_jsonl(path, _source_rows(SCORER.MEDICINE_DATASET, ["de"]))
     output_dir = root / "judge_run"
-    prepare_args = argparse.Namespace(
+    prepare_kwargs = dict(
         output_dir=output_dir,
         run_id="unit-test",
         model="gemini-2.5-pro",
         generation_config_mode="api-default",
         acl_segments=acl_source,
         acl_segments_sha256=SCORER.sha256_file(acl_source),
-        medicine_segments=medicine_source,
-        medicine_segments_sha256=SCORER.sha256_file(medicine_source),
     )
+    if split_medicine:
+        prepare_kwargs.update(
+            medicine_segments=None,
+            medicine_segments_sha256=None,
+            medicine_infinisst_lm123_segments=medicine_infinisst_lm123_source,
+            medicine_infinisst_lm123_segments_sha256=SCORER.sha256_file(
+                medicine_infinisst_lm123_source
+            ),
+            medicine_infinisst_lm4_segments=medicine_infinisst_lm4_source,
+            medicine_infinisst_lm4_segments_sha256=SCORER.sha256_file(
+                medicine_infinisst_lm4_source
+            ),
+            medicine_rasst_segments=medicine_rasst_source,
+            medicine_rasst_segments_sha256=SCORER.sha256_file(medicine_rasst_source),
+        )
+    else:
+        prepare_kwargs.update(
+            medicine_segments=medicine_source,
+            medicine_segments_sha256=SCORER.sha256_file(medicine_source),
+        )
+    prepare_args = argparse.Namespace(**prepare_kwargs)
     with contextlib.redirect_stdout(io.StringIO()):
         SCORER.prepare_run(prepare_args)
     manifest = _read_json(output_dir / "run_manifest.json")
@@ -266,6 +294,12 @@ class ValidateGeminiLlmJudgeWmt25Test(unittest.TestCase):
             )
             self.assertEqual(report["validated_counts"]["talk_pairs"], 80)
             self.assertEqual(report["validated_counts"]["groups"], 6)
+
+    def test_validates_legacy_combined_source_layout(self) -> None:
+        with _small_matrix(), tempfile.TemporaryDirectory() as raw_temp:
+            fixture = _build_fixture(Path(raw_temp), split_medicine=False)
+            report = VALIDATOR.validate_output_dir(output_dir=fixture["output_dir"])
+            self.assertEqual(report["status"], "ok")
 
     def test_rejects_changed_source_artifact_hash(self) -> None:
         with _small_matrix(), tempfile.TemporaryDirectory() as raw_temp:
