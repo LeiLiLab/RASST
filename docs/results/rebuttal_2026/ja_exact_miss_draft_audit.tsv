@@ -1,0 +1,162 @@
+sentence_index	term	translation	audit_label	audit_note
+2	NLP task	自然言語処理タスク	valid_compound_or_orthography	自然言語処理のタスク 与固定串 自然言語処理タスク 仅差助词，语义完整。
+6	lexical	語彙的	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+6	linguistic	言語的	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+16	words	単語	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+18	speech	スピーチ	wrong_translation	text-to-speech 被译为 テキスト要約（文本摘要），speech 概念发生实质错译。
+26	English	英語	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+26	texts	テキスト	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+26	words	単語	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+27	extracting	抽出	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+27	spans	スパン	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+28	word	単語	valid_paraphrase	源文转写的 previous word 很可能是 previous work；hypothesis 给出先行研究内容，固定 word→単語 不适用。
+30	approach	アプローチ	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+33	generalize	一般化する	valid_morphology	hypothesis 使用了符合日语语法或派生关系的词形变体，属于 exact-match 假阴性。
+33	unseen	見えない	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+36	annotated	注釈付き	valid_morphology	hypothesis 使用了符合日语语法或派生关系的词形变体，属于 exact-match 假阴性。
+48	learning	学習	valid_compound_or_orthography	machine learning 被输出为 machinelearning，属于空格表记差异。
+48	machine learning	機械学習	valid_compound_or_orthography	machine learning 被输出为 machinelearning，属于空格表记差异。
+52	dataset	データセット	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+53	word	単語	valid_compound_or_orthography	hypothesis 以连写、片假名、大小写或表记变体表达目标，属于 exact-match 假阴性。
+54	encode	エンコード	valid_morphology	hypothesis 使用了符合日语语法或派生关系的词形变体，属于 exact-match 假阴性。
+60	features	機能	valid_paraphrase	features 被正确译为 特徴量；固定译法 機能 在机器学习语境中反而不自然。
+61	features	機能	valid_paraphrase	features 被正确译为 特徴量；固定译法 機能 在机器学习语境中反而不自然。
+62	features	機能	valid_paraphrase	features 被正确译为 特徴量；固定译法 機能 在机器学习语境中反而不自然。
+65	features	機能	valid_paraphrase	features 被正确译为 特徴量；固定译法 機能 在机器学习语境中反而不自然。
+65	named entity recognition	名前付きエンティティ認識	wrong_translation	named entity recognition 被错译为 名詞認識，丢失命名实体含义。
+67	features	機能	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+68	detection	検出	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+68	features	機能	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+72	transformers	トランスフォーマー	valid_compound_or_orthography	Transformers 专名只存在大小写/脚本表记差异。
+74	metrics	メトリックス	valid_paraphrase	metrics 被译为 指標，是比固定 メトリックス 更自然的同义表达。
+77	question	質問	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+79	text	テキスト	valid_compound_or_orthography	FastText 是专名整体，固定 text→テキスト 的子词要求不适用。
+80	BETO	BETO	wrong_translation	BETO 被替换为 BERT，属于模型专名错误。
+80	contextualized	文脈で理解できる	valid_paraphrase	non-contextualized 被译为 非文脈依存型，比固定 文脈で理解できる 更准确。
+91	pretrained	事前訓練された	valid_morphology	hypothesis 使用了符合日语语法或派生关系的词形变体，属于 exact-match 假阴性。
+97	annotated	注釈付き	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+97	lexical	語彙的	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+97	newswire	ニュースワイヤー	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+98	OOV	OOV	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+98	previous	前の	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+98	resources	リソース	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+103	embedding	埋込み	valid_compound_or_orthography	埋め込み 与固定表记 埋込み 仅有送り仮名差异。
+113	pretrained language	事前訓練された言語	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+114	number	いくつも	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+115	lexical	語彙的	valid_morphology	hypothesis 使用了符合日语语法或派生关系的词形变体，属于 exact-match 假阴性。
+118	oracle	Oracle	omitted_term	oracle 限定语被省略；固定保留 Oracle 也不是唯一自然译法，保守仍按遗漏。
+121	morphologically	形態素	valid_morphology	hypothesis 使用了符合日语语法或派生关系的词形变体，属于 exact-match 假阴性。
+122	KinyaBERT	KinyaBERT	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+122	morphologically	形態素	valid_morphology	hypothesis 使用了符合日语语法或派生关系的词形变体，属于 exact-match 假阴性。
+130	speech	スピーチ	valid_paraphrase	part of speech 被正确整体译为 品詞，不应要求 speech 单独译为 スピーチ。
+136	vectors	ベクトル	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+137	speech	スピーチ	valid_paraphrase	part of speech 被正确整体译为 品詞，不应要求 speech 单独译为 スピーチ。
+138	embedding	埋込み	valid_morphology	hypothesis 使用了符合日语语法或派生关系的词形变体，属于 exact-match 假阴性。
+141	morphological analyzer	形態素アナライザー	valid_paraphrase	morphological analyzer 被译为 形態的アナライザー，语义保留但表记不一致。
+141	Morphology	語形論	valid_paraphrase	Morphology 被译为 形態論，是语境正确的同义术语。
+143	speech	スピーチ	valid_paraphrase	part of speech 被正确整体译为 品詞，不应要求 speech 单独译为 スピーチ。
+145	speech	スピーチ	valid_paraphrase	part of speech 被正确整体译为 品詞，不应要求 speech 单独译为 スピーチ。
+146	speech	スピーチ	valid_paraphrase	part of speech 被正确整体译为 品詞，不应要求 speech 单独译为 スピーチ。
+149	morphological	形態的	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+150	information	情報	wrong_translation	positional information 被替换为 positional encoding，技术概念不完全等价。
+151	ICLR	ICLR	wrong_translation	ICLR 被替换为 ACL，属于会议专名错误。
+162	pretrained	事前訓練された	valid_morphology	hypothesis 使用了符合日语语法或派生关系的词形变体，属于 exact-match 假阴性。
+164	pretrained	事前訓練された	valid_morphology	hypothesis 使用了符合日语语法或派生关系的词形变体，属于 exact-match 假阴性。
+168	annotated	注釈付き	valid_morphology	hypothesis 使用了符合日语语法或派生关系的词形变体，属于 exact-match 假阴性。
+173	evaluation	評価	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+173	user	ユーザー	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+177	regression	回帰	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+180	previous	前の	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+180	text	テキスト	wrong_translation	text classification 被译成 文脈分類，text 概念发生变化。
+180	text classification	テキスト分類	wrong_translation	text classification 被译成 文脈分類，属于任务名称错译。
+186	morphological	形態的	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+187	compositionality	構成の可能性	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+189	paper	論文	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+190	AI	AI	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+192	method	方法	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+195	answer	応答	valid_paraphrase	answer 被自然地译为 答える，而非固定名词 応答。
+195	document	文章	valid_paraphrase	document 被译为 文書，比固定 文章 更贴合此处语境。
+197	relations	relations	valid_paraphrase	relations 被音译为 リレーション，语义等价于固定英文串。
+198	computational	計算	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+201	BLEU	BLEU	valid_paraphrase	此处 ASR/gold 将口语 blue squares 误记为 BLEU score；hypothesis 的 青い正方形 符合真实 talk 语义。
+201	BLEU score	BLEUスコア	valid_paraphrase	此处 ASR/gold 将口语 blue squares 误记为 BLEU score；hypothesis 的 青い正方形 符合真实 talk 语义。
+201	relations	relations	valid_paraphrase	relations 被音译为 リレーション，固定英文串未命中。
+202	input	入力	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+202	relations	relations	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+202	sequence	シーケンス	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+204	encoder	エンコーダ	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+205	decoder	デコーダ	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+205	method	方法	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+218	gradient	傾度	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+218	training	訓練	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+221	softmax	softmax	valid_paraphrase	softmax 被常见片假名表记 ソフトマックス 表达。
+221	weights	荷重	valid_paraphrase	weights 被正确译为 重み；固定 荷重 在此机器学习语境不自然。
+222	weights	荷重	valid_paraphrase	weights 被正确译为 重み；固定 荷重 在此机器学习语境不自然。
+223	softmax	softmax	valid_paraphrase	softmax 被常见片假名表记 ソフトマックス 表达。
+231	Representation	表現	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+233	decoder	デコーダ	wrong_translation	decoder 被替换为 次の層，技术对象改变。
+238	computational	計算	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+252	previous	前の	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+256	Dialogue	ダイアログ	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+257	Semantic	意味論的	valid_paraphrase	组织名 Semantic Machines 被直译为 意味機械；本 draft 视为语义保留，作者可决定是否要求专名保留。
+258	Dialogue	ダイアログ	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+258	utterances	発話	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+265	system	システム	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+271	Semantic	意味論的	wrong_translation	semantic parsing 退化为普通 構文解析，丢失 semantic 限定。
+271	Semantic Parsing	意味論的構文解析	wrong_translation	semantic parsing 退化为普通 構文解析，丢失 semantic 限定。
+274	user	ユーザー	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+297	utterance	発話	wrong_translation	utterance timeline 被错译为 オプションの時間軸。
+298	Semantic	意味論的	wrong_translation	semantic parsing 退化为普通 構文解析，丢失 semantic 限定。
+298	Semantic Parsing	意味論的構文解析	wrong_translation	semantic parsing 退化为普通 構文解析，丢失 semantic 限定。
+305	graph	グラフ	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+306	method	方法	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+307	graph	グラフ	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+310	training	訓練	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+313	problem	問題	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+323	generating	生成	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+330	Semantic	意味論的	wrong_translation	semantic parsing 退化为普通 構文解析，丢失 semantic 限定。
+330	Semantic Parsing	意味論的構文解析	wrong_translation	semantic parsing 退化为普通 構文解析，丢失 semantic 限定。
+330	SMCalFlow	SMCalFlow	wrong_translation	SMCalFlow 被替换为 SM-CapFlow，属于数据集专名错误。
+331	datasets	データセット	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+332	compared	比較して	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+333	graph	グラフ	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+333	parser	パーサー	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+337	utterance	発話	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+340	training	訓練	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+341	utterance	発話	wrong_translation	full utterance 被替换为 完全なオーダー，属于错译。
+344	FLR	FLR	wrong_translation	FLR 被替换为 FLOPs，属于指标专名错误。
+349	methods	方法	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+358	Online	オンライン	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+358	parsing	構文解析	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+358	Semantic	意味論的	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+358	Semantic Parsing	意味論的構文解析	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+359	graph	グラフ	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+360	approach	アプローチ	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+364	question	質問	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+364	question answering	質問に回答する	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+364	tasks	タスク	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+366	task	タスク	valid_paraphrase	task 被上下文意译为 研究の動機，基本语义保留。
+369	words	単語	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+378	text	テキスト	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+381	generated	生成された	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+389	Semantic	意味論的	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+396	corresponding	対応する	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+400	REALM	REALM	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+408	retrieved	回収された	valid_paraphrase	retrieved 被自然译为 取得した，而非固定 回収された。
+409	query	疑問	valid_paraphrase	query 被译为 クエリ，是检索语境下的标准表达。
+417	edit	編集	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+424	query	疑問	valid_paraphrase	query 被译为 質問，是问答语境下的自然表达。
+433	answer	応答	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+436	method	方法	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+438	context	文脈	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+438	question	質問	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+438	reading comprehension	読解	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+443	training	訓練	valid_paraphrase	hypothesis 用上下文合适的日语同义或意译表达了该概念，固定字符串未命中。
+444	retrieval	取得	wrong_translation	retrieval 被输出为无关的 グリッドアクセリーバル，属于实质错译。
+448	dataset	データセット	valid_alignment_boundary	流式分句出现截断、前后句串接或延迟提交，当前对齐 hypothesis 不能作为独立术语错误归因。
+449	query	疑問	valid_paraphrase	query 被译为 クエリ，是检索语境下的标准表达。
+451	query	疑問	valid_paraphrase	query 被译为 クエリ，是检索语境下的标准表达。
+463	augmentation	拡張	valid_paraphrase	augmentation 在同句后文以 拡張 表达，前部 强化 也是可接受意译；exact 标记存在对齐假阴性。
+463	data augmentation	データ拡張	valid_paraphrase	data augmentation 被译为 非現実データの強化/拡張，语义保留但固定连续串未出现。
+466	RGF	RGF	omitted_term	当前 hypothesis 未表达源文中的该术语概念，保守判为遗漏。
+466	semantically	意味論的に	valid_alignment_boundary	hypothesis 从 論的に 开始，明显是 意味論的に 被跨分句截断。

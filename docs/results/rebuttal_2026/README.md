@@ -29,14 +29,16 @@ glossary 原始响应不进入 Git。
   synthetic reference 的 ESO En-Zh/En-Ja BLEU/xCOMET、exact-form TERM_ACC 和
   reference-aligned latency。Hard glossary 实际为 215 rows、212 unique terms，
   不是论文中的 217。
-- **ACL `lm=2` failure analysis 已完成。** De/Zh 的
+- **ACL `lm=2` failure analysis 已完成。** 本分析只使用 5 个 ACL talks，明确排除
+  Medicine/ESO。De/Zh/Ja 的
   `P(exact | retrieved on time/late/never)` 分别为
-  `86.11/82.82/59.26%` 与 `92.74/89.80/71.56%`。De exact-form TERM_ACC 为
+  `86.11/82.82/59.26%`、`92.74/89.80/71.56%` 与
+  `89.21/83.59/60.78%`。De exact-form TERM_ACC 为
   `83.32%`；接受逐条核验的屈折、复合、大小写和 tokenization variants 后，保守
-  morphology-aware diagnostic 为 `88.47%`（`+5.15 points`）。82 个 raw
-  false-copy flags 的审计表明，其中多数是 source morphology/semantics 或 streaming
-  boundary，不应直接称为 term noise。完整结论、真实 cases 与提交限制见
-  [`term_failure_analysis_acl_lm2.md`](term_failure_analysis_acl_lm2.md)。德语语义
+  morphology-aware diagnostic 为 `88.47%`（`+5.15 points`）。135 个 raw
+  false-copy flags 的审计表明，其中多数是 source morphology/semantics 或
+  streaming boundary，不应直接称为 term noise。完整结论、真实 cases 与提交限制见
+  [`term_failure_analysis_acl_lm2.md`](term_failure_analysis_acl_lm2.md)。三语语义
   标签当前仍是 Codex 辅助的非专家 draft，作者 sign-off 前不能称为人工专业评测。
 - **Retrieval degradation sensitivity 已完成。** 在 ACL 三语 `lm=2` 固定
   hint count 与 compute，将 sentence-relevant correct hints 按 `25% / 50%`
@@ -137,32 +139,37 @@ Fresh glossary、raw responses 和 manifest 的预定 Hugging Face 目标为
 Taurus/Aries 没有 token，Hyper00 现有凭据属于另一账号，未越权使用；在作者提供
 授权凭据并上传前，staging 仍不是 canonical artifact。
 
-## Failure analysis 与 German morphology audit
+## Failure analysis 与三语 exact-match audit
 
 状态：**自动计数完成；draft audit 完成；作者复核 pending**。
 
 - 固定 ACL `lm=2`，从 runtime retrieval timestamps、sentence-aligned
-  `term_adoption.json` 和 paper-exact xCOMET segments 复算 971 个 De 与 1,173 个
-  Zh gold occurrences。
+  `term_adoption.json` 和 paper-exact xCOMET segments 复算 971 个 De、1,173 个
+  Zh 与 1,122 个 Ja gold occurrences。分析器用 `--require-acl-talks` 校验 scope，
+  Medicine/ESO 没有进入分析。
 - 自动化输出包含 on-time/late/never conditional accuracy、exact-miss failure chain、
   paired sentence xCOMET term-gain/tie/loss 分组，以及每个 occurrence 的 provenance。
-- De 162 个 exact misses 和 De/Zh 共 82 个 raw false-copy flags 已逐条给出 draft
-  label 与理由。保守 morphology-aware 数字只加入 36 个 compound/orthography 和
+- De/Zh/Ja 的 162/114/161 个 exact misses 和三语共 135 个 raw false-copy flags 已
+  逐条给出 draft label 与理由。De 保守 morphology-aware 数字只加入 36 个
+  compound/orthography 和
   14 个 morphology variants；69 个 paraphrases 与 13 个 boundary cases 不进入该
   数字。
 - `term_map_false_copy` 是 candidate diagnostic，不是 true-noise ground truth。审计后
-  只确认 De/Zh 各 2 个 harmful unsupported-hint adoptions；这仍是观察性标签，
-  不是 retrieval 的因果效应。Boundary flags 的 xCOMET 反而极低，说明 sentence
-  alignment 是重要混杂。
+  De/Zh/Ja 分别只保留 2/2/4 个 harmful unsupported-hint adoption candidates；这仍是
+  观察性标签，不是 retrieval 的因果效应。Ja 4 个 harmful cases 平均 xCOMET
+  `-9.50` points，但 exact-tie 句也平均下降 `-3.96`，所以 term noise 只解释部分
+  质量下降。Boundary flags 的 xCOMET 很低，说明 sentence alignment 是重要混杂。
 - Git-tracked 轻量证据：
   [`term_failure_chain_acl_lm2.tsv`](term_failure_chain_acl_lm2.tsv)、
   [`xcomet_failure_groups_acl_lm2.tsv`](xcomet_failure_groups_acl_lm2.tsv)、
   [`retrieval_noise_audit_acl_lm2.tsv`](retrieval_noise_audit_acl_lm2.tsv)、
-  [`german_morphology_manual_audit.tsv`](german_morphology_manual_audit.tsv) 和
+  [`german_morphology_manual_audit.tsv`](german_morphology_manual_audit.tsv)、
+  [`zh_exact_miss_draft_audit.tsv`](zh_exact_miss_draft_audit.tsv)、
+  [`ja_exact_miss_draft_audit.tsv`](ja_exact_miss_draft_audit.tsv) 和
   [`retrieved_false_copy_draft_audit.tsv`](retrieved_false_copy_draft_audit.tsv)。
 
 完整 per-occurrence/per-sentence 输出已复制到本机 persistent ignored staging
-`/Users/luojiaxuan/Documents/RASST/outputs/rebuttal_2026/term_failure_acl_lm2/{de,zh}`，
+`/Users/luojiaxuan/Documents/RASST/outputs/rebuttal_2026/term_failure_acl_lm2/{de,zh,ja}`，
 预定 Hugging Face 目标为
 `gavinlaw/rasst-rebuttal-term-failure-analysis-acl`，上传状态为 **pending**。
 当前本机没有 Hugging Face CLI/写入凭据；在上传完成前，该本机 staging 仍不是
@@ -174,5 +181,6 @@ canonical artifact。
 所有 `PENDING` 都是提交保护标记：只有生成、复核并写入本索引的数字才可替换。
 Masked BLEU 是 diagnostic，不是因果分解；TERM_ACC 必须称为 exact-form metric。
 German morphology-aware 结果只能称为 non-expert author diagnostic，并且必须在
-作者逐行复核 draft audit 后才能提交；更宽的 paraphrase-aware `96.91%` 仅供内部
-定位 metric false negatives，不应作为 rebuttal headline。
+作者逐行复核 draft audit 后才能提交；De/Zh/Ja 更宽的语义 draft
+`96.91/96.85/95.28%` 仅供内部定位 metric false negatives，不应作为 rebuttal
+headline。
