@@ -1,0 +1,4 @@
+dataset	lang	lm	rasst_method	infinisst_method	paired_talks	paired_segments	rasst_xcomet_mean	infinisst_xcomet_mean	delta_rasst_minus_infinisst	paired_delta_stddev	rasst_wins	ties	infinisst_wins
+acl_retrieval_degradation	de	2	RASST-25	RASST-0	5	468	0.8321399967	0.8396634361	-0.0075234394	0.1368225408	192	91	185
+acl_retrieval_degradation	ja	2	RASST-25	RASST-0	5	468	0.6440768435	0.7037905372	-0.0597136937	0.2873511868	155	89	224
+acl_retrieval_degradation	zh	2	RASST-25	RASST-0	5	468	0.8302822319	0.8362750296	-0.0059927977	0.1059777152	143	159	166

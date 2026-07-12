@@ -107,6 +107,9 @@ RAG_STREAMING_MODE_OVERRIDE="${RAG_STREAMING_MODE_OVERRIDE:-timeline}"
 RAG_SCORE_THRESHOLD_OVERRIDE="${RAG_SCORE_THRESHOLD_OVERRIDE:-0.73}"
 TERM_MAP_FORMAT_OVERRIDE="${TERM_MAP_FORMAT_OVERRIDE:-plain}"
 ORACLE_TERM_MAP_PATH_OVERRIDE="${ORACLE_TERM_MAP_PATH_OVERRIDE:-}"
+RETRIEVAL_DEGRADATION_PLAN_OVERRIDE="${RETRIEVAL_DEGRADATION_PLAN_OVERRIDE:-}"
+RETRIEVAL_DEGRADATION_RATE_OVERRIDE="${RETRIEVAL_DEGRADATION_RATE_OVERRIDE:-0.0}"
+RETRIEVAL_DEGRADATION_SEED_OVERRIDE="${RETRIEVAL_DEGRADATION_SEED_OVERRIDE:-0}"
 GPU_MEMORY_UTILIZATION_OVERRIDE="${GPU_MEMORY_UTILIZATION_OVERRIDE:-}"
 USE_VLLM_OVERRIDE="${USE_VLLM_OVERRIDE:-}"
 # Keep this short: vLLM creates Unix-domain IPC sockets here and sockaddr_un is
@@ -312,7 +315,8 @@ echo "[INFO] ============================================================"
 # We therefore skip `conda activate` when the caller already prepared a working
 # env via PATH/LD_LIBRARY_PATH, and only fall back to `conda activate` when no
 # env is on PATH.
-cd "${ROOT_DIR}"
+# note (luojiaxuan): Release source lists use repo-relative data/... paths.
+cd "${RASST_ROOT}"
 TARGET_ENV_DIR="${CONDA_BASE}/envs/${CONDA_ENV_NAME}"
 if [[ -n "${CONDA_ENV_NAME}" ]] && [[ -x "${TARGET_ENV_DIR}/bin/python" ]] \
    && [[ ":${PATH}:" == *":${TARGET_ENV_DIR}/bin:"* ]]; then
@@ -505,6 +509,18 @@ fi
 
 read -r -a RAG_MAXSIM_WINDOWS_ARGS <<< "${RAG_MAXSIM_WINDOWS_OVERRIDE}"
 AGENT_TERM_ARGS=()
+RETRIEVAL_DEGRADATION_ARGS=()
+if [[ -n "${RETRIEVAL_DEGRADATION_PLAN_OVERRIDE}" ]]; then
+  if [[ ! -f "${RETRIEVAL_DEGRADATION_PLAN_OVERRIDE}" ]]; then
+    echo "[ERROR] Retrieval degradation plan not found: ${RETRIEVAL_DEGRADATION_PLAN_OVERRIDE}" >&2
+    exit "${EXIT_CONFIG_ERROR}"
+  fi
+  RETRIEVAL_DEGRADATION_ARGS=(
+    --retrieval-degradation-plan "${RETRIEVAL_DEGRADATION_PLAN_OVERRIDE}"
+    --retrieval-degradation-rate "${RETRIEVAL_DEGRADATION_RATE_OVERRIDE}"
+    --retrieval-degradation-seed "${RETRIEVAL_DEGRADATION_SEED_OVERRIDE}"
+  )
+fi
 if [[ "${BASELINE_NO_RAG}" == "1" ]]; then
   # No-RAG baseline: do not pass --rag-enabled or any term_map args.  The agent
   # builds its native no-RAG system prompt.  We still pass the prompt style so
@@ -578,6 +594,7 @@ else
     --sacrebleu-tokenizer "${SACREBLEU_TOKENIZER}" \
     --vllm-segment-sec "${VLLM_SEGMENT_SEC}" \
     "${AGENT_TERM_ARGS[@]}" \
+    "${RETRIEVAL_DEGRADATION_ARGS[@]}" \
     --runtime-log-dir "${OUTPUT_DIR}" \
     2>&1 | tee "${OUTPUT_DIR}/simuleval.log"
 fi

@@ -1,0 +1,15 @@
+lang	lm	group	sentence_count	mean_xcomet_delta_points	median_xcomet_delta_points	negative_sentence_count	negative_sentence_pct	note
+de	2	all	468	-0.4907	0.0000	228	48.72	paper-exact paired sentence xCOMET
+de	2	net_exact_term_gain	135	+1.8602	+1.9923	54	40.00	RASST exact gold-term count exceeds InfiniSST
+de	2	exact_term_tie	308	-0.6396	-0.1005	156	50.65	equal exact gold-term count
+de	2	net_exact_term_loss	25	-11.3519	-5.3900	18	72.00	RASST exact gold-term count below InfiniSST
+de	2	raw_false_copy_flag	44	-3.5166	-0.5621	23	52.27	unverified exact diagnostic; heavily confounded
+de	2	audited_alignment_boundary_flag	10	-20.9530	-17.5885	8	80.00	streaming/mWER boundary, not confirmed term noise
+de	2	audited_harmful_unsupported_adoption	2	-11.3491	-11.3491	2	100.00	morphological analyzer→analysis; arXiv→Oracle; observational, not causal
+zh	2	all	468	+0.1442	0.0000	219	46.79	paper-exact paired sentence xCOMET
+zh	2	net_exact_term_gain	145	+2.3779	+1.6089	62	42.76	RASST exact gold-term count exceeds InfiniSST
+zh	2	exact_term_tie	305	-0.0790	0.0000	143	46.89	equal exact gold-term count
+zh	2	net_exact_term_loss	18	-14.0675	-13.5726	14	77.78	RASST exact gold-term count below InfiniSST
+zh	2	raw_false_copy_flag	31	-5.1178	-1.2132	16	51.61	unverified exact diagnostic; heavily confounded
+zh	2	audited_alignment_boundary_flag	7	-23.7002	-25.8420	7	100.00	streaming/mWER boundary, not confirmed term noise
+zh	2	audited_harmful_unsupported_adoption	2	+2.7368	+2.7368	1	50.00	newspapers→新闻专线; passages→问题; xCOMET blind spot

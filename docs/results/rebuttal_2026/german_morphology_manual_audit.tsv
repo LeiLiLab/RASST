@@ -1,0 +1,163 @@
+sentence_index	term	translation	candidate_kind	candidate_span	audit_label	audit_note
+0	Annotated Corpus	annotierter Korpus	fuzzy_inflection_candidate	annotierter korpora	wrong_translation	源文是单数标题，hypothesis 改成复数 Korpora 且结构不自然；保守判错。
+17	words	Wörtern	fuzzy_inflection_candidate	wörter	valid_morphology	Wörter 是符合 hypothesis 句法的合法复数形式。
+33	generalize	verallgemeinert	fuzzy_inflection_candidate	verallgemeinern	valid_morphology	情态结构 konnte 要求不定式 verallgemeinern。
+55	BIO	BIO	spacing_or_hyphen_variant	bio	valid_compound_or_orthography	B, I, O 只是缩写字母的标点与空格展开。
+68	detection	Erkennung	casefold_or_compound_substring	erkennung	valid_compound_or_orthography	Entlehnungserkennung 是 source 中 lexical borrowing detection 的合法复合词。
+69	tasks	Aufgaben	fuzzy_inflection_candidate	aufgabe	wrong_translation	源文和 reference 都是复数，hypothesis 改为单数；保守不计入形态命中。
+77	linguistic	sprachlichen	fuzzy_inflection_candidate	sprachliche	valid_morphology	不同句法结构触发合法的形容词词尾变化。
+78	BiLSTM-CRF	BiLSTM-CRF	spacing_or_hyphen_variant	bilstmcrf	valid_compound_or_orthography	BiLSTM -CRF 仅多出空格。
+83	BiLSTM-CRF	BiLSTM-CRF	spacing_or_hyphen_variant	bilstmcrf	valid_compound_or_orthography	BiLSTM -CRF 仅多出空格。
+89	transformer	Transformer	casefold_or_compound_substring	transformer	valid_compound_or_orthography	句中 transformer-based 只存在大小写差异。
+91	pretrained	vortrainiert	fuzzy_inflection_candidate	vortraining	valid_paraphrase	im Vortraining 表达了预训练阶段，语义可接受但不是同一屈折形式。
+91	transformer	Transformer	casefold_or_compound_substring	transformer	valid_compound_or_orthography	句中 transformer-basierten 只存在大小写差异。
+120	resources	Ressourcen	casefold_or_compound_substring	ressourcen	valid_morphology	ressourcenarmen 把 Ressourcen 合法派生为复合形容词，语义对应 low resources。
+127	words	Wörtern	fuzzy_inflection_candidate	wörter	valid_morphology	Wörter 是 jedem 后所需结构中的合法复数形式。
+141	morphological analyzer	morphologischen Analysator	fuzzy_inflection_candidate	morphologische analyse	wrong_translation	analysis 与 analyzer 指代不同，hypothesis 丢失了分析器实体。
+145	words	Wörtern	casefold_or_compound_substring	örtern 	valid_compound_or_orthography	Eingabewörtern 是 input words 的合法德语复合词。
+152	correlations	Korrelationen	casefold_or_compound_substring	korrelationen	valid_compound_or_orthography	Positionskorrelationen 是 positional correlations 的合法复合词。
+153	pre-training	Vortrainings	fuzzy_inflection_candidate	vortraining-ziel	valid_compound_or_orthography	Vortraining-Ziel 与 Vortrainingsziel 是连字符/连接音书写变体，术语语义相同。
+155	words	Wörtern	fuzzy_inflection_candidate	wörter	valid_morphology	Wörter 是合法的复数格形式变化。
+160	models	Modelle	casefold_or_compound_substring	modelle	valid_compound_or_orthography	Basismodelle 精确表达 baseline models。
+162	morphological analysis	morphologische Analyse	fuzzy_inflection_candidate	morphologischer analyse	valid_morphology	mittels 支配第二格，morphologischer Analyse 是合法屈折。
+180	task	Aufgabe	casefold_or_compound_substring	aufgabe	valid_compound_or_orthography	aufgabe 被无空格拼接，目标词本身完整出现且语义正确。
+182	task	Aufgabe	casefold_or_compound_substring	aufgabe	valid_compound_or_orthography	aufgabe 被无空格拼接，目标词本身完整出现且语义正确。
+184	GLUE	GLUE	casefold_or_compound_substring	glue	valid_compound_or_orthography	专名仅大小写不同。
+185	finetuning	Feinabstimmung	casefold_or_compound_substring	einabstimmungb	valid_compound_or_orthography	feinabstimmung 与后词错误粘连，但术语完整且语义正确。
+185	KinyaBERT	KinyaBERT	casefold_or_compound_substring	inyabert 	valid_compound_or_orthography	专名仅大小写及前词粘连不同。
+186	information	Informationen	casefold_or_compound_substring	informationen	valid_compound_or_orthography	仅句中名词大小写错误。
+187	aspect	Aspekt	casefold_or_compound_substring	aspekt	valid_compound_or_orthography	仅句中名词大小写错误。
+188	research	Forschung	casefold_or_compound_substring	forschung	valid_compound_or_orthography	仅句中名词大小写错误；单数也符合不可数 research。
+195	answer	beantwortet	fuzzy_inflection_candidate	beantworten	valid_morphology	zu beantworten 是 hypothesis 句法要求的不定式。
+199	decoder	Decoders	fuzzy_inflection_candidate	decoder	valid_morphology	改写句法后使用 Decoder，实体和术语语义不变。
+202	sequence	Sequenz	casefold_or_compound_substring	sequenz	valid_compound_or_orthography	Eingabesequenz 精确表达 input sequence。
+204	token	Token	casefold_or_compound_substring	token	valid_compound_or_orthography	Eingabetoken 精确表达 input token。
+223	softmax	Softmax	spacing_or_hyphen_variant	softmax	valid_compound_or_orthography	Soft max 只是内部空格差异。
+240	model	Modell	casefold_or_compound_substring	modell	valid_compound_or_orthography	Pyramidenmodell 是 source 中 pyramidion model 的合法复合词。
+252	models	Modelle	casefold_or_compound_substring	modelle	valid_compound_or_orthography	Grundmodelle 合法表达 foundational models。
+252	pretraining	Vortraining	casefold_or_compound_substring	ortrainings	valid_compound_or_orthography	Sprachvortrainingsziele 合法表达 language pretraining objectives。
+256	parsing	Parsing	casefold_or_compound_substring	parsing	valid_compound_or_orthography	术语仅大小写不同。
+257	Semantic	Semantic	casefold_or_compound_substring	SEMANTIC	valid_compound_or_orthography	Microsoft Semantic Machines 专名仅大小写不同。
+275	graph	Graph	casefold_or_compound_substring	graph	valid_compound_or_orthography	Charaktergraph 是 character graph 的合法复合词。
+286	dependency	Abhängigkeit	spacing_or_hyphen_variant	abhängigkeit	valid_compound_or_orthography	Programmab hängigkeitsstruktur 含流式输出空格裂分，语义对应 program dependency structure。
+295	event	Ereignisses	fuzzy_inflection_candidate	ereigniszeit	valid_morphology	Ereigniszeit 精确表达 event time，并以复合词词干替代第二格形式。
+296	dependency	Abhängigkeit	casefold_or_compound_substring	bhängigkeits	valid_compound_or_orthography	Programmabhängigkeitsstrukturen 合法表达 program dependency structures。
+310	Online	Online	casefold_or_compound_substring	online	valid_compound_or_orthography	Online-Parser 中仅大小写不同。
+330	conversational	Konversationen	fuzzy_inflection_candidate	konversationellen	valid_morphology	konversationellen 是 conversational 的合法形容词形式，且比 glossary 名词更贴近 source。
+331	graph	Graph	casefold_or_compound_substring	graph	valid_compound_or_orthography	graphbasiertes 精确表达 graph based。
+341	parsing	Parsing	casefold_or_compound_substring	parsing	valid_compound_or_orthography	Eingabeparsings 合法表达 input/full-utterance parsing 的核心术语。
+364	retrieval	Retrieval	casefold_or_compound_substring	retrieval	valid_compound_or_orthography	retrieval-augmentierten 中仅大小写不同。
+409	model	Modell	casefold_or_compound_substring	modell	valid_compound_or_orthography	Fragengenerierungsmodell 精确表达 question generation model。
+432	augmentation	Aufbaus	casefold_or_compound_substring	aufbaus	valid_compound_or_orthography	Datenaufbaus-Basislinien 完整保留固定 glossary 译法并构成复合词。
+449	learning	Lernen	casefold_or_compound_substring	lernen	valid_morphology	zu lernen 是改写句法后的合法不定式，语义对应 learning。
+0	corpus	Korpus	no_candidate		wrong_translation	源文是单数 corpus，hypothesis 使用复数 Korpora；保守判错。
+6	lexical	lexikalische	no_candidate		omitted_term	hypothesis 只表达 linguistic borrowing，没有保留 lexical 这一限定。
+14	linguistics	Linguistik	no_candidate		valid_paraphrase	aus sprachlicher Sicht 是 from the point of view of linguistics 的自然改写。
+18	speech	Sprache	no_candidate		wrong_translation	text-to-speech synthesis 被译成 Textzusammenfassung，任务类型错误。
+43	OOV	OOV	no_candidate		valid_alignment_boundary	同一源句的输出跨 mWER 边界：OOV 出现在相邻句 42/44。
+51	number	Reihe	no_candidate		valid_paraphrase	Anzahl 是该语境中 number 的正确译法，固定 glossary 的 Reihe 不自然。
+53	word	Wort	no_candidate		valid_paraphrase	mehrteilige Entlehnung 保留了 multi-word borrowing 的核心含义。
+57	extracting	extrahieren	no_candidate		valid_morphology	Extraktion 是 extracting 的合法名词化改写。
+60	features	Funktionen	no_candidate		valid_paraphrase	Merkmale 是机器学习语境中 features 的正确德语译法。
+61	features	Funktionen	no_candidate		valid_paraphrase	Merkmale 是机器学习语境中 features 的正确德语译法。
+62	features	Funktionen	no_candidate		valid_paraphrase	binäre Merkmale 正确表达 binary features。
+65	features	Funktionen	no_candidate		valid_paraphrase	Merkmale 正确表达 named-entity-recognition features。
+67	features	Funktionen	no_candidate		valid_paraphrase	handgefertigte Merkmale 正确表达 handcrafted features。
+68	compared	im Vergleich zu	no_candidate		valid_paraphrase	gegenüber 是 compared to 的自然同义表达。
+68	features	Funktionen	no_candidate		valid_paraphrase	Merkmale 正确表达 features；gold/reference 中 Funktionen 不自然。
+68	lexical	lexikalische	no_candidate		omitted_term	spanische Entlehnungserkennung 未明确保留 lexical 限定。
+77	encode	kodieren	no_candidate		valid_paraphrase	Informationen enthalten 在该句中可接受地表达 embeddings encode information。
+80	BETO	BETO	no_candidate		wrong_translation	西语 BETO 被错误替换成 BERT，专名错误。
+80	contextualized	kontextualisierte	no_candidate		valid_paraphrase	Transformer-basierten 与 nicht-kontextuelle 的对比保留了 contextualized 含义。
+87	compared	im Vergleich zu	no_candidate		valid_paraphrase	gegenüber diesen Ergebnissen 是自然同义表达。
+91	LinCE	LinCE	no_candidate		wrong_translation	数据集专名 LinCE 被误识别为 LINTEX。
+92	LinCE	LinCE	no_candidate		wrong_translation	数据集专名 LinCE 被误识别为 LINTEX。
+95	embeddings	Einbettungen	no_candidate		omitted_term	句子截断，未生成 embeddings 对应内容。
+98	OOV	OOV	no_candidate		omitted_term	OOV-rich 的 OOV 信息未表达。
+98	resources	Ressourcen	no_candidate		valid_alignment_boundary	Compared to previous resources 跨分句边界，Ressourcen 出现在下一句 hypothesis。
+103	embedding	Einbettung	no_candidate		valid_alignment_boundary	character embeddings 被分到上一句 hypothesis，当前句只保留谓语。
+109	paper	Paper	no_candidate		valid_paraphrase	Arbeit 是学术报告中 paper 的自然译法。
+113	natural language processing	NLP	no_candidate		valid_paraphrase	natürliche Sprachverarbeitung 完整表达 natural language processing。
+114	number	Reihe	no_candidate		valid_paraphrase	nicht frei von Einschränkungen 自然表达 a number of limitations。
+115	lexical	lexikalische	no_candidate		valid_paraphrase	Subwortlexeme 正确表达 subword lexical units。
+118	oracle	Oracle	no_candidate		omitted_term	oracle 限定被删除，仅保留 morphological analyzer。
+129	noun	Substantiv	no_candidate		wrong_translation	noun class 被译为 Nomenklatur，概念错误。
+137	speech	Sprache	no_candidate		valid_paraphrase	Wortarten 正确表达 part of speech；glossary 的孤立 Sprache 不适合该短语。
+143	algorithm	Algorithmus	no_candidate		valid_paraphrase	Wortarten-Tagging-Methode 可接受地表达 tagging algorithm。
+151	embeddings	Einbettungen	no_candidate		valid_paraphrase	Positionskodierung 是 positional embeddings 的常见技术同义表达。
+151	ICLR	ICLR	no_candidate		wrong_translation	会议专名 ICLR 被误识别为 ICLIA。
+152	embeddings	Einbettungen	no_candidate		valid_paraphrase	Positionskodierungen 可接受地表达 positional embeddings。
+157	number	Reihe	no_candidate		valid_paraphrase	Anzahl 是 fixed number 的正确译法。
+161	corpora	korpora	no_candidate		valid_paraphrase	Textkorpus 保留 large text corpus 的含义；源文自身将 corpora 当单数使用。
+161	multilingual	mehrsprachiges	no_candidate		valid_paraphrase	multilinguales Modell 是德语技术文本中可接受的借词表达。
+162	algorithm	Algorithmus	no_candidate		valid_paraphrase	byte pair encoding 在该结构中已明确指算法，省略 Algorithmus 不损失实体。
+162	baselines	Baselines	no_candidate		valid_paraphrase	Basismodelle 在上下文中正确指代 baseline models。
+173	evaluation	evaluation	no_candidate		valid_paraphrase	Benutzerbewertung 正确表达 user evaluation。
+177	regression	regression	no_candidate		wrong_translation	regression 被生成成 Regulierung，统计目标发生变化。
+179	news	Nachrichten	no_candidate		wrong_translation	news categorization 被误识别成 Neue skategorisierung。
+179	task	Aufgabe	no_candidate		valid_paraphrase	hypothesis 保留英语借词 task，任务含义仍在。
+181	language models	Sprachmodelle	no_candidate		valid_alignment_boundary	Sprachmodelle 被 mWER 切到下一句 hypothesis。
+181	pretrained	vortrainiert	no_candidate		omitted_term	当前及相邻输出未可靠表达 pretrained 限定。
+181	pretrained language	vortrainierten Sprach	no_candidate		omitted_term	pretrained language 组合限定未完整表达。
+182	news	Nachrichten	no_candidate		wrong_translation	news categorization 再次被误识别成 neueskategorisierung。
+184	named entity recognition	Named Entity Recognition	no_candidate		valid_paraphrase	Namenentitätserkennung 是该任务的正确德语译法。
+184	regression	regression	no_candidate		wrong_translation	regression 被误译成 Regulierung。
+189	Representation	Representation	no_candidate		valid_paraphrase	Repräsentationen-Pooling 是 Representation Pooling 的合法德语数形变化。
+190	AI	KI	no_candidate		valid_paraphrase	德语技术语境保留缩写 AI 可接受，指代未改变。
+198	computational	rechnerische	no_candidate		valid_paraphrase	Berechnungskomplexität 正确表达 computational complexity。
+198	number	Reihe	no_candidate		valid_paraphrase	Anzahl der Schichten 正确表达 number of layers。
+204	number	Reihe	no_candidate		valid_paraphrase	Anzahl der Berechnungen 正确表达 number of computations。
+214	input	Eingabe	no_candidate		valid_paraphrase	Eingang 在此处略不自然但仍清楚指代模型 input。
+220	vector	Vektor	no_candidate		valid_paraphrase	Einbettung 与该段中的 vector/embedding 实体同指。
+222	vectors	Vektoren	no_candidate		valid_paraphrase	Einbettungen 与该段中的 vectors 同指。
+231	encoder	Encoder	no_candidate		valid_alignment_boundary	Encoder-Schicht 被 mWER 切到下一句 hypothesis。
+252	language	Sprache	no_candidate		valid_compound_or_orthography	Sprachvortrainingsziele 以合法复合词词干 Sprach- 表达 language。
+265	system	System	no_candidate		valid_alignment_boundary	主句跨边界延迟完成，System 出现在下一句 hypothesis。
+266	Online	Online	no_candidate		omitted_term	online 限定未出现在该句或对应延迟片段中。
+266	problem	Problem	no_candidate		omitted_term	prediction and decision problem 的 Problem 被省略。
+267	REALM	REALM	no_candidate		valid_paraphrase	源文 realm 是普通名词，Bereich 才是正确译法；gold glossary 将其误当作专名 REALM。
+271	parsing	Parsing	no_candidate		valid_paraphrase	semantische Analyse 可接受地表达 semantic parsing。
+279	information	Informationen	no_candidate		valid_paraphrase	Zeitangaben 精确表达 timing information。
+297	utterance	Äußerung	no_candidate		omitted_term	utterance timeline 被省略，且输出发生截断。
+298	parsing	Parsing	no_candidate		valid_paraphrase	Online-Semantik-Parser 保留 online semantic parsing 的任务含义。
+303	token	Token	no_candidate		valid_alignment_boundary	jedem Token 被延迟到下一句 hypothesis。
+304	approach	Ansatz	no_candidate		valid_paraphrase	zweistufiges Verfahren 正确表达 two-step approach。
+306	method	Methode	no_candidate		valid_paraphrase	Verfahren 是 method 的自然同义词。
+307	approach	Ansatz	no_candidate		valid_paraphrase	Variante 在此上下文正确指代 approach。
+307	graph	Graph	no_candidate		valid_alignment_boundary	Graph-Parser 被延迟到下一句 hypothesis。
+307	parsing	Parsing	no_candidate		valid_alignment_boundary	下一句的 Graph-Parser 完成了 graph parsing 概念。
+309	approach	Ansatz	no_candidate		valid_paraphrase	Variante 在此上下文正确指代 approach。
+316	number	Reihe	no_candidate		valid_paraphrase	Zahl 是 number 的正确译法。
+324	heuristic	heuristisch	no_candidate		valid_morphology	Schwellenwertheuristiken 以名词复数形式正确表达 thresholding heuristic。
+326	methods	Methoden	no_candidate		valid_paraphrase	Online-Verfahren 正确表达 online methods，虽使用集合单数。
+328	utterance	Äußerung	no_candidate		wrong_translation	utterance timeline 被替换为更宽泛的 Eingabepipeline；保守判错。
+329	FLR	FLR	no_candidate		valid_alignment_boundary	FLR 被切到上一句 hypothesis 末尾。
+330	SMCalFlow	SMCalFlow	no_candidate		wrong_translation	数据集专名被误识别为 SM-Copula。
+332	BLEU	BLEU	no_candidate		wrong_translation	BLEU 被同音误识别为 Blue，是明确 acronym/homophone failure。
+332	model	Modell	no_candidate		valid_alignment_boundary	Online-Modell 主语被 mWER 切到上一句 hypothesis 末尾。
+337	utterance	Äußerung	no_candidate		valid_paraphrase	vollständige Eingabe 在该实验语境可接受地指 full utterance。
+341	utterance	Äußerung	no_candidate		valid_paraphrase	Eingabeparsing 保留 full-utterance parsing 的含义。
+343	number	Reihe	no_candidate		valid_paraphrase	Anzahl der Quell-Token 正确表达 number of source tokens。
+344	FLR	FLR	no_candidate		wrong_translation	FLR 被错误替换为 F1，指标专名错误。
+344	number	Reihe	no_candidate		valid_paraphrase	Anzahl der Funktionsaufrufe 正确表达 number of function calls。
+351	FLR	FLR	no_candidate		valid_alignment_boundary	Verbesserung der FLR 被延迟到下一句 hypothesis。
+364	augmented	erweiterten	no_candidate		valid_paraphrase	retrieval-augmentierten 保留英文技术词根并正确表达 augmented。
+364	tasks	Aufgaben	no_candidate		valid_paraphrase	für die Fragenbeantwortung 可接受地表达 question answering tasks。
+368	task	Aufgabe	no_candidate		valid_paraphrase	Task-Label 保留通用英语技术借词，含义不变。
+371	compared	im Vergleich zu	no_candidate		valid_paraphrase	gegenüber ... robuster als 正确表达 compared to。
+373	biases	Bias	no_candidate		valid_paraphrase	systematische Verzerrungen 是 systematic biases 的正确译法。
+373	dataset	Datensatz	no_candidate		wrong_translation	Dataset 被译成 Datenmenge，含义变成 data amount。
+406	question generation	Fragengenerierung	no_candidate		valid_paraphrase	neue Fragen zu generieren 是 question generation 的合法动词化。
+408	previous	früheren	no_candidate		valid_paraphrase	vorherigen 是 previous 的直接同义词。
+415	edit	Bearbeitung	no_candidate		valid_paraphrase	Edit-Distanz 保留标准英文技术术语 edit distance。
+417	edit	Bearbeitung	no_candidate		valid_paraphrase	Edit-Distanz 保留标准英文技术术语 edit distance。
+420	query	Anfrage	no_candidate		valid_paraphrase	Abfrage 是 query 的正确技术同义词。
+421	QED	QED	no_candidate		valid_alignment_boundary	QED 被切到上一句 hypothesis 末尾。
+432	baselines	Baselines	no_candidate		valid_paraphrase	Datenaufbaus-Basislinien 正确表达 data augmentation baselines。
+433	question generation	Fragengenerierung	no_candidate		valid_paraphrase	基线专名中完整保留 Question Generation，实体未丢失。
+436	method	Methode	no_candidate		valid_paraphrase	Verfahren 是 method 的自然同义词。
+436	question	Frage	no_candidate		valid_paraphrase	基线专名中保留 Question，指代未改变。
+440	baselines	Baselines	no_candidate		valid_paraphrase	Datenaufbaus-Basislinien 正确表达 data augmentation baselines。
+449	data	Daten	no_candidate		omitted_term	counterfactual data augmentation 中 data 未在当前术语片段明确表达。
+463	data augmentation	Datenaufbaus	no_candidate		valid_paraphrase	Datenvergrößerung 是 data augmentation 的可接受译法。
+463	queries	Abfragen	no_candidate		valid_paraphrase	Informationsanfragen 正确表达 information-seeking queries。
