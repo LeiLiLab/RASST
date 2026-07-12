@@ -81,6 +81,17 @@ Fresh glossary、raw responses 和 manifest 的预定 Hugging Face 目标为
 `gavinlaw/rasst-main-result-data` 下的 versioned rebuttal artifact；在新 key 可用并
 完成生成前，上传状态为 **blocked**。
 
+## Retrieval degradation sensitivity
+
+状态：**运行中**。
+
+- 固定 ACL 三语 `lm=2`，将 sentence-window-relevant correct hints 以
+  `0% / 25% / 50%` 的概率替换为同域 distractors。
+- 检索执行、top-k、prompt hint count、rank/score metadata 和 Speech LLM 配置不变；
+  runtime log 保存 before/after references 和逐次 audit。
+- 预注册定义、指标、compute placement 和 artifact 目标见
+  [`retrieval_degradation_ablation.md`](retrieval_degradation_ablation.md)。
+
 ## Rebuttal 文本
 
 英文工作稿位于 [`../../rebuttal_2026_draft.md`](../../rebuttal_2026_draft.md)。其中

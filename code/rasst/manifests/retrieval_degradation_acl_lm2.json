@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "experiment": "retrieval_degradation_sensitivity",
+  "status": "running",
+  "main_result_manifest": "code/rasst/manifests/main_result_eval.global_cache30_30_20_20.json",
+  "domain": "acl_tagged_raw",
+  "languages": ["zh", "de", "ja"],
+  "latency_multiplier": 2,
+  "configured_replacement_rates": [0.0, 0.25, 0.5],
+  "corruption_seed": 20260711,
+  "retrieval": {
+    "top_k": 10,
+    "score_threshold": 0.78,
+    "timeline_lookback_sec": 1.92,
+    "definition": "A correct hint exactly matches a raw-gold glossary entry whose English source term occurs in a sentence overlapping the retrieval window. Selected correct hints are replaced by unique ACL glossary entries absent from that window.",
+    "selection": "Independent deterministic SHA-256 draw per instance, segment, rank, and hint.",
+    "fixed_factors": [
+      "retriever execution",
+      "retrieved hint count",
+      "hint rank",
+      "retrieval score metadata",
+      "Speech LLM checkpoint",
+      "generation config",
+      "latency multiplier"
+    ]
+  },
+  "metrics": [
+    "achieved retrieval precision",
+    "achieved retrieval recall",
+    "achieved correct-hint replacement rate",
+    "TERM_ACC",
+    "REAL_TERM_ADOPT",
+    "BLEU",
+    "XCOMET-XXL",
+    "StreamLAAL"
+  ],
+  "compute": {
+    "inference_host": "aries.cs.ucsb.edu",
+    "physical_gpu_groups": ["2,3,4", "5,6,7"],
+    "vllm_tensor_parallel_size": 2,
+    "retriever_logical_device": "cuda:2",
+    "container_prefix": "sglang-omni-jaxan"
+  },
+  "staging": {
+    "root": "/mnt/aries/data4/jiaxuanluo/rasst-retrieval-degradation",
+    "git_branch": "luojiaxuan/rebuttal-experiments",
+    "git_implementation_commit": "257ff8b",
+    "hf_dataset_destination": "gavinlaw/rasst-rebuttal-retrieval-degradation-acl",
+    "hf_upload_status": "pending"
+  }
+}
