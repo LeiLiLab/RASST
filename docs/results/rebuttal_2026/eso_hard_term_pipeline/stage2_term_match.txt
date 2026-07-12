@@ -1,0 +1,97 @@
+ROLE:
+You post-process medical lecture translation annotations.
+
+TASK:
+For each input sentence, revise term annotations from an ESO v2 raw output.
+You must make two things true at the same time:
+
+1. Exact-match consistency:
+   Every kept term translation must be an exact contiguous substring copied from the
+   returned sentence translation in the same language.
+
+2. Abbreviation consistency:
+   Abbreviated English terms must be handled consistently across Chinese, German,
+   and Japanese. If an abbreviation is expanded in one language, it should be
+   expanded in all three languages and the returned sentence translations must
+   contain those expansions. If the abbreviation is merely copied, or copied with
+   only a generic suffix such as "program", "scan", "trial", "regimen", or
+   "guideline", then the term is not useful as a translation term and should be
+   dropped.
+
+INPUT:
+Each sentence item contains:
+- `sentence_id`
+- `source_sentence`
+- current full `translations` for `zh`, `de`, `ja`
+- `terms`, each with `term_id`, English `term`, current `target_translations`,
+  and a heuristic `is_abbreviation_like` flag
+
+WHAT TO DO:
+- Use the current sentence translations as the base and edit them minimally.
+- Do not add new terms.
+- You may drop noisy, duplicated, or untranslatable terms.
+- You may revise full sentence translations when needed so a kept term's target
+  translation appears exactly in that full sentence translation.
+- Preserve the meaning of the English source sentence.
+- For ordinary non-abbreviation terms, choose the faithful exact span in each
+  returned sentence translation.
+- For abbreviation-like terms:
+  - Keep only if the term has a meaningful target-language expansion or
+    translation in all three languages.
+  - If a short abbreviation term duplicates a spelled-out full-form term in the
+    same sentence, drop the abbreviation term and keep the full-form term.
+  - If the safest target translation is just the acronym itself in all languages,
+    drop the term.
+  - Do not invent speculative expansions. Expand only when the entity or concept
+    is clear in context.
+
+EXAMPLES OF DECISIONS:
+- ASCO may be kept only if Chinese, German, and Japanese all use the full society
+  name, and the sentence translations are revised to contain those names.
+- NSQIP program should be dropped when the same sentence already contains the
+  full phrase "national surgical quality improvement program".
+- CAPOX should be dropped if the annotation would only repeat "CAPOX" in the
+  target languages.
+
+OUTPUT FORMAT:
+Return ONLY a valid JSON object:
+
+{
+  "sentences": [
+    {
+      "sentence_id": 123,
+      "translations": {
+        "zh": "revised full Chinese sentence",
+        "de": "revised full German sentence",
+        "ja": "revised full Japanese sentence"
+      },
+      "terms": [
+        {
+          "term_id": 0,
+          "term": "English term copied from input",
+          "keep": true,
+          "target_translations": {
+            "zh": "exact span copied from translations.zh",
+            "de": "exact span copied from translations.de",
+            "ja": "exact span copied from translations.ja"
+          },
+          "decision": "keep_exact|keep_expanded_abbreviation|drop_untranslated_abbreviation|drop_duplicate_abbreviation|drop_no_exact_span|drop_other",
+          "reason": "brief reason"
+        }
+      ]
+    }
+  ]
+}
+
+STRICT CONSTRAINTS:
+- Return one sentence object for every input sentence_id.
+- Return one term object for every input term_id.
+- Preserve every `sentence_id`, `term_id`, and English `term` exactly.
+- A kept term must have non-empty `zh`, `de`, and `ja` target translations.
+- Every kept target translation must be an exact substring of the returned full
+  sentence translation for the same language.
+- A dropped term should use `keep: false` and may omit `target_translations`.
+- Do not include markdown or explanation outside the JSON object.
+
+SENTENCES_JSON:
+[[SENTENCES_JSON]]
