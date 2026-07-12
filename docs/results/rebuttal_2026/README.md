@@ -7,10 +7,13 @@ glossary 原始响应不进入 Git。
 
 ## 当前结论
 
-- **xCOMET-XXL 已完成。** ACL 12 cells 的 cell-macro 差值为 `+0.1158`
-  xCOMET points（乘以 100），8/12 为正；ESO En-De 为 `-3.1716`，0/4 为正。
-  该结果不支持“overall translation quality 普遍提升”，应将论文主张收窄为
-  terminology handling 改善且 contextual quality effects mixed。
+- **xCOMET-XXL 已完成并修正为 paper-exact ESO 输出。** ACL 12 cells 的
+  cell-macro 差值为 `+0.1158` xCOMET points（乘以 100），8/12 为正；
+  submitted-paper exact ESO En-De 为 `-2.1012`，0/4 为正。16-cell macro 为
+  `-0.4385`，8/16 为正。此前 `-3.1716` 的 ESO 数字来自 release-canonical
+  `30/30, 30/30, 20/20, 20/20` cache 输出，不是 paper-exact 四档 `30/30` 输出。
+  该结果仍不支持“overall translation quality 普遍提升”，但 lm4 的旧大幅负差
+  `-4.3289` 修正为 `-0.2571`。
 - **Masked BLEU 已完成并全量复算。** 排除 ESO En-Zh/En-Ja 后，RASST 相对
   InfiniSST 的 target-term-masked BLEU 在 12/16 cells 为正，平均差值
   `+0.6927`；ACL 12 cells 的平均差值为 `+0.9919`，ESO En-De 4 cells 的
@@ -32,30 +35,42 @@ glossary 原始响应不进入 Git。
 状态：**已完成并独立复算验证**。
 
 - 评分矩阵：ACL En-Zh/De/Ja 与 ESO En-De，RASST/InfiniSST，4 个 latency settings，
-  共 32 system rows / 16 strict pairs / 22,728 sentence segments。
+  共 32 system rows / 16 strict pairs / 22,728 sentence segments。ACL 使用已验证的
+  release run；ESO En-De 使用 submitted-paper exact 四档 cache `30/30` 输出。
 - Metric：`Unbabel/XCOMET-XXL`，revision
   `873bac1b1c461e410c4a6e379f6790d3d1c7c214`。
 - Encoder tokenizer/config：`facebook/xlm-roberta-xxl`，revision
   `03e0fb540c3c9afd4bdda0072e7cb82d2eafd060`。
-- Taurus 原始输入清单：[`xcomet_input_manifest.taurus.tsv`](xcomet_input_manifest.taurus.tsv)。
-- 可移植输入 bundle：40 个 content-addressed payloads、26,100,339 bytes；portable
-  manifest SHA-256 为
-  `dbf07fd4f8fc6460f2edd0cf1c167ffe61740da6cab63cab9307d3775ad84e89`。
+- 原 32-system release-cache 输入清单：
+  [`xcomet_input_manifest.taurus.tsv`](xcomet_input_manifest.taurus.tsv)。paper-exact
+  ESO 四行的原始路径与 hash 见
+  [`xcomet_paper_exact_eso_de_input_provenance.tsv`](xcomet_paper_exact_eso_de_input_provenance.tsv)，
+  corrected portable manifest 见
+  [`xcomet_paper_exact_eso_de_manifest.portable.tsv`](xcomet_paper_exact_eso_de_manifest.portable.tsv)。
 - ACL 12 cells 的 cell-macro xCOMET（乘以 100）为 RASST `78.7042`、
   InfiniSST `78.5884`，平均差值 `+0.1158`，8/12 cells 为正；其中 En-Zh
   `+0.6356`、En-De `+0.0050`、En-Ja `-0.2933`。
-- ESO En-De 4 cells 为 RASST `74.8694`、InfiniSST `78.0410`，平均差值
-  `-3.1716`，0/4 cells 为正。16 cells 合计差值为 `-0.7060`，8/16 为正。
+- Paper-exact ESO En-De 4 cells 为 RASST `75.9398`、InfiniSST `78.0410`，
+  平均差值 `-2.1012`，0/4 cells 为正。16 cells 合计为 RASST `78.0131`、
+  InfiniSST `78.4515`、差值 `-0.4385`，8/16 为正。
 - 结果是 mixed；不能用 xCOMET 声称 RASST 的 overall translation quality 普遍或
-  显著提升。详细结果、失败恢复链条、环境和全部哈希见
-  [`xcomet_xxl_report.md`](xcomet_xxl_report.md)。
-- Git-tracked 轻量产物：[`xcomet_xxl_summary.tsv`](xcomet_xxl_summary.tsv)、
-  [`xcomet_xxl_paired.tsv`](xcomet_xxl_paired.tsv) 和
-  [`xcomet_xxl_validation.json`](xcomet_xxl_validation.json)。独立 validator 从
-  22,728 条逐句结果反算并核对了全部 system 与 paired statistics。
+  显著提升。paper-exact ESO 复算、cache 差异、运行环境和全部哈希见
+  [`xcomet_paper_exact_eso_de_report.md`](xcomet_paper_exact_eso_de_report.md)。
+  原 [`xcomet_xxl_report.md`](xcomet_xxl_report.md) 保留为 release-cache 诊断，
+  其中 ESO `-3.1716` 不再作为 submitted-paper exact 结果。
+- Git-tracked paper-exact ESO 轻量产物：
+  [`xcomet_paper_exact_combined_summary.tsv`](xcomet_paper_exact_combined_summary.tsv)、
+  [`xcomet_paper_exact_combined_paired.tsv`](xcomet_paper_exact_combined_paired.tsv)、
+  [`xcomet_paper_exact_eso_de_summary.tsv`](xcomet_paper_exact_eso_de_summary.tsv)、
+  [`xcomet_paper_exact_eso_de_paired.tsv`](xcomet_paper_exact_eso_de_paired.tsv) 和
+  [`xcomet_paper_exact_eso_de_validation.json`](xcomet_paper_exact_eso_de_validation.json)。
+  独立 validator 从 11,496 条逐句结果反算并核对了 8 systems / 4 pairs；原 ACL
+  24 systems / 12 pairs 的 validator 结果保持不变。
 
-逐句 JSONL 与 DDP prediction 文件位于 Hyper00 staging
-`/data02/jaxan/RASST_rebuttal_20260710`。它们的预定 Hugging Face 目标为
+逐句 JSONL 与输入 bundle 位于 Hyper00 staging
+`/data02/jaxan/RASST_rebuttal_20260710`；paper-exact ESO 逐句文件为
+`results/xcomet_paper_exact_eso_de_20260712/segments.jsonl`。它们的预定
+Hugging Face 目标为
 `gavinlaw/rasst-main-result-data` 下的 versioned rebuttal artifact。目前没有可用的
 Hugging Face 写入凭据，上传状态为 **pending**，本地 staging 不能视为 canonical。
 

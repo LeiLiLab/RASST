@@ -28,10 +28,11 @@ report xCOMET multiplied by 100 and average
 the paired cells equally. On ACL, RASST scores **78.704** versus **78.588** for
 InfiniSST, a mean paired difference of **+0.116**, with RASST higher in **8/12**
 cells. The language-level differences are **+0.636** for En-Zh, **+0.005** for
-En-De, and **-0.293** for En-Ja. On human-reference ESO En-De, RASST scores
-**74.869** versus **78.041**, a difference of **-3.172**, and is lower in all
-four cells. Across all 16 retained cells, the cell-macro difference is
-**-0.706** and 8/16 cells are positive. Thus, the contextual-metric evidence is
+En-De, and **-0.293** for En-Ja. On human-reference ESO En-De, using the exact
+submitted-paper outputs, RASST scores **75.940** versus **78.041**, a difference
+of **-2.101**; RASST is lower in all four cells. Across all 16 retained cells,
+the cell-macro difference is
+**-0.438** and 8/16 cells are positive. Thus, the contextual-metric evidence is
 mixed: it does not support a claim of uniformly improved overall translation
 quality, and we will narrow the main claim to terminology handling rather than
 general quality improvement. We make no significance claim for this analysis.
@@ -129,7 +130,7 @@ evaluation and notation need correction.
 **Translation-quality metric.** We agree that BLEU alone is insufficient. We
 add xCOMET on the 16 retained paired cells and the target-term-masked BLEU
 diagnostic summarized above. ACL is nearly unchanged on average under xCOMET
-(+0.116 points; 8/12 cells positive), whereas ESO En-De decreases by 3.172
+(+0.116 points; 8/12 cells positive), whereas ESO En-De decreases by 2.101
 points in all four cells. We will report this negative result and temper the
 quality claim accordingly.
 
@@ -243,10 +244,15 @@ Before submission, the revision will:
   `docs/results/rebuttal_2026/masked_terms_quality_compare_vs_infinisst_global_cache30_30_20_20_snapshot.tsv`
 - Token and sentence prevalence:
   `docs/results/rebuttal_2026/term_prevalence.tsv`
-- Verified xCOMET report, paired table, and independent validation:
+- Verified ACL/release-cache xCOMET report, paired table, and independent validation:
   `docs/results/rebuttal_2026/xcomet_xxl_report.md`,
   `docs/results/rebuttal_2026/xcomet_xxl_paired.tsv`, and
   `docs/results/rebuttal_2026/xcomet_xxl_validation.json`
+- Submitted-paper exact ESO En-De xCOMET correction, paired table, and validation:
+  `docs/results/rebuttal_2026/xcomet_paper_exact_eso_de_report.md`,
+  `docs/results/rebuttal_2026/xcomet_paper_exact_combined_paired.tsv`,
+  `docs/results/rebuttal_2026/xcomet_paper_exact_eso_de_paired.tsv`, and
+  `docs/results/rebuttal_2026/xcomet_paper_exact_eso_de_validation.json`
 - Official xCOMET paper and implementation provenance:
   [TACL paper](https://aclanthology.org/2024.tacl-1.54/),
   [COMET repository](https://github.com/Unbabel/COMET)
@@ -276,7 +282,8 @@ Before submission, the revision will:
   changes length and neighboring n-grams.
 - **Do not describe xCOMET as uniformly positive.** ACL averages +0.116 points
   with 8/12 positive cells, but En-Ja averages -0.293 and ESO En-De averages
-  -3.172 with 0/4 positive cells; the 16-cell macro average is -0.706.
+  -2.101 with 0/4 positive cells; the 16-cell macro average is -0.438. The old
+  ESO value -3.172 used release-cache outputs and is not paper exact.
 - **Do not report paper-derived glossary numbers until fresh artifacts have
   been generated and validated.** Those fields remain deliberate placeholders.
 - **Do not reuse the legacy `acl_paper_extracted` cells as fresh evidence.** The

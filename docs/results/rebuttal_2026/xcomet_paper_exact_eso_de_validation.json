@@ -1,0 +1,192 @@
+{
+  "expected_counts": {
+    "pairs": 4,
+    "segments": 11496,
+    "systems": 8
+  },
+  "pairs": [
+    {
+      "dataset": "medicine_hardraw",
+      "delta_rasst_minus_infinisst": -0.055631237533578626,
+      "infinisst_method": "InfiniSST",
+      "infinisst_wins": 826,
+      "infinisst_xcomet_mean": 0.7644106816907433,
+      "lang": "de",
+      "lm": "1",
+      "paired_delta_stddev": 0.24352230879136963,
+      "paired_segments": 1437,
+      "paired_talks": 5,
+      "rasst_method": "RASST",
+      "rasst_wins": 568,
+      "rasst_xcomet_mean": 0.7087794441571648,
+      "ties": 43
+    },
+    {
+      "dataset": "medicine_hardraw",
+      "delta_rasst_minus_infinisst": -0.01203363374777776,
+      "infinisst_method": "InfiniSST",
+      "infinisst_wins": 736,
+      "infinisst_xcomet_mean": 0.787102043618323,
+      "lang": "de",
+      "lm": "2",
+      "paired_delta_stddev": 0.19559810470040398,
+      "paired_segments": 1437,
+      "paired_talks": 5,
+      "rasst_method": "RASST",
+      "rasst_wins": 646,
+      "rasst_xcomet_mean": 0.7750684098705453,
+      "ties": 55
+    },
+    {
+      "dataset": "medicine_hardraw",
+      "delta_rasst_minus_infinisst": -0.013813620170081914,
+      "infinisst_method": "InfiniSST",
+      "infinisst_wins": 784,
+      "infinisst_xcomet_mean": 0.7836947244389155,
+      "lang": "de",
+      "lm": "3",
+      "paired_delta_stddev": 0.19860975579436613,
+      "paired_segments": 1437,
+      "paired_talks": 5,
+      "rasst_method": "RASST",
+      "rasst_wins": 598,
+      "rasst_xcomet_mean": 0.7698811042688336,
+      "ties": 55
+    },
+    {
+      "dataset": "medicine_hardraw",
+      "delta_rasst_minus_infinisst": -0.00257051282445009,
+      "infinisst_method": "InfiniSST",
+      "infinisst_wins": 724,
+      "infinisst_xcomet_mean": 0.7864331029039252,
+      "lang": "de",
+      "lm": "4",
+      "paired_delta_stddev": 0.17571425305431262,
+      "paired_segments": 1437,
+      "paired_talks": 5,
+      "rasst_method": "RASST",
+      "rasst_wins": 643,
+      "rasst_xcomet_mean": 0.7838625900794751,
+      "ties": 70
+    }
+  ],
+  "paths": {
+    "manifest": "/data/xcomet_paper_exact_eso_de_bundle/manifest.tsv",
+    "paired_tsv": "/data/results/xcomet_paper_exact_eso_de_20260712/paired.tsv",
+    "segments_jsonl": "/data/results/xcomet_paper_exact_eso_de_20260712/segments.jsonl",
+    "summary_tsv": "/data/results/xcomet_paper_exact_eso_de_20260712/summary.tsv"
+  },
+  "run_identity": {
+    "model_id": "Unbabel/XCOMET-XXL",
+    "model_revision": "873bac1b1c461e410c4a6e379f6790d3d1c7c214",
+    "scoring_config_sha256": "abc46556ee285005c82f8c0ea9cc2a22a6999b615781a84929397a1bc6270be4"
+  },
+  "schema_version": "rasst-xcomet-validation-v1",
+  "sha256": {
+    "manifest": "6d3dab49c397142c0d094effadc7935d91377bd333f0975157be177a55bc75ff",
+    "paired_tsv": "c19292c432dea966e631f36366370797ea9c60305c95c962a4e4bf20ebb00e8d",
+    "segments_jsonl": "40454563ea39d20f04970b8a733dc0a370d8ab0e0a4cb25c0f7720bf5491e997",
+    "summary_tsv": "d39004098ef158430d80f0389475eaa114f919f5c9d28b043cd2ec28eaea3279"
+  },
+  "status": "ok",
+  "systems": [
+    {
+      "dataset": "medicine_hardraw",
+      "lang": "de",
+      "lm": "1",
+      "method": "InfiniSST",
+      "segments": 1437,
+      "talks": 5,
+      "xcomet_mean": 0.7644106816907433,
+      "xcomet_mean_x100": 76.44106816907433,
+      "xcomet_talk_macro_mean": 0.7614939051032834
+    },
+    {
+      "dataset": "medicine_hardraw",
+      "lang": "de",
+      "lm": "2",
+      "method": "InfiniSST",
+      "segments": 1437,
+      "talks": 5,
+      "xcomet_mean": 0.787102043618323,
+      "xcomet_mean_x100": 78.7102043618323,
+      "xcomet_talk_macro_mean": 0.7855728990840259
+    },
+    {
+      "dataset": "medicine_hardraw",
+      "lang": "de",
+      "lm": "3",
+      "method": "InfiniSST",
+      "segments": 1437,
+      "talks": 5,
+      "xcomet_mean": 0.7836947244389155,
+      "xcomet_mean_x100": 78.36947244389155,
+      "xcomet_talk_macro_mean": 0.782045381434324
+    },
+    {
+      "dataset": "medicine_hardraw",
+      "lang": "de",
+      "lm": "4",
+      "method": "InfiniSST",
+      "segments": 1437,
+      "talks": 5,
+      "xcomet_mean": 0.7864331029039252,
+      "xcomet_mean_x100": 78.64331029039252,
+      "xcomet_talk_macro_mean": 0.7884227029256945
+    },
+    {
+      "dataset": "medicine_hardraw",
+      "lang": "de",
+      "lm": "1",
+      "method": "RASST",
+      "segments": 1437,
+      "talks": 5,
+      "xcomet_mean": 0.7087794441571648,
+      "xcomet_mean_x100": 70.87794441571647,
+      "xcomet_talk_macro_mean": 0.6977247113687215
+    },
+    {
+      "dataset": "medicine_hardraw",
+      "lang": "de",
+      "lm": "2",
+      "method": "RASST",
+      "segments": 1437,
+      "talks": 5,
+      "xcomet_mean": 0.7750684098705453,
+      "xcomet_mean_x100": 77.50684098705453,
+      "xcomet_talk_macro_mean": 0.7760957424637572
+    },
+    {
+      "dataset": "medicine_hardraw",
+      "lang": "de",
+      "lm": "3",
+      "method": "RASST",
+      "segments": 1437,
+      "talks": 5,
+      "xcomet_mean": 0.7698811042688336,
+      "xcomet_mean_x100": 76.98811042688337,
+      "xcomet_talk_macro_mean": 0.7639717703472009
+    },
+    {
+      "dataset": "medicine_hardraw",
+      "lang": "de",
+      "lm": "4",
+      "method": "RASST",
+      "segments": 1437,
+      "talks": 5,
+      "xcomet_mean": 0.7838625900794751,
+      "xcomet_mean_x100": 78.38625900794752,
+      "xcomet_talk_macro_mean": 0.7834590444453704
+    }
+  ],
+  "tolerances": {
+    "tie": 1e-12,
+    "tsv_absolute": 1e-09
+  },
+  "validated_counts": {
+    "manifest_systems": 8,
+    "pairs": 4,
+    "segments": 11496,
+    "summary_systems": 8
+  }
+}
