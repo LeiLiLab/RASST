@@ -568,6 +568,90 @@ class GeminiLlmJudgeWmt25Test(unittest.TestCase):
         self.assertEqual(resumed_client.files.calls, 0)
         self.assertEqual(resumed_client.batches.calls, 1)
 
+    def test_audit_quota_rejection_requires_no_remote_match(self) -> None:
+        output_dir = self.fixture_dir / "prepared_quota_audit"
+        with contextlib.redirect_stdout(io.StringIO()):
+            manifest = MODULE.prepare_run(
+                argparse.Namespace(
+                    acl_segments=self.acl_path,
+                    acl_segments_sha256=self.acl_sha256,
+                    medicine_segments=self.medicine_path,
+                    medicine_segments_sha256=self.medicine_sha256,
+                    output_dir=output_dir,
+                    run_id="unit-quota-audit",
+                    model="gemini-2.5-flash",
+                    generation_config_mode="api-default",
+                )
+            )
+        shard_id = "acl_tagged_raw__de__lm1"
+        display_name = "unit-quota-audit-display"
+        state_path = output_dir / "states" / f"{shard_id}.json"
+        state = MODULE.read_json(state_path, label="test quota state")
+        state.update(
+            {
+                "status": "SUBMISSION_UNCERTAIN",
+                "uploaded_file_name": "files/already-uploaded",
+                "batch_display_name": display_name,
+                "exception_type": "ClientError",
+                "exception_message": "429 RESOURCE_EXHAUSTED",
+            }
+        )
+        MODULE.atomic_write_json(state_path, state)
+
+        class FakeBatches:
+            def __init__(self, jobs: list[Any]) -> None:
+                self.jobs = jobs
+
+            def list(self) -> list[Any]:
+                return self.jobs
+
+        class FakeClient:
+            def __init__(self, jobs: list[Any]) -> None:
+                self.batches = FakeBatches(jobs)
+
+        def run_audit(jobs: list[Any]) -> None:
+            fake_client = FakeClient(jobs)
+            fake_genai = type(
+                "FakeGenAI",
+                (),
+                {"Client": lambda *args, **kwargs: fake_client},
+            )
+            args = argparse.Namespace(
+                output_dir=output_dir,
+                shard_id=shard_id,
+                api_key_file=Path("unused-by-mock"),
+                confirm_run_config_sha256=manifest["run_config_sha256"],
+                confirm_batch_display_name=display_name,
+            )
+            with (
+                mock.patch.object(MODULE, "read_private_api_key", return_value="test-key"),
+                mock.patch.object(
+                    MODULE,
+                    "_load_google_genai",
+                    return_value=(fake_genai, object(), "test-sdk"),
+                ),
+                contextlib.redirect_stdout(io.StringIO()),
+            ):
+                MODULE.audit_quota_rejection(args)
+
+        matching_job = type(
+            "Job", (), {"display_name": display_name, "name": "batches/existing"}
+        )()
+        with self.assertRaisesRegex(MODULE.LLMJudgeError, "Found remote Batch job"):
+            run_audit([matching_job])
+        self.assertEqual(
+            MODULE.read_json(state_path, label="test quota state")["status"],
+            "SUBMISSION_UNCERTAIN",
+        )
+
+        run_audit([])
+        audited = MODULE.read_json(state_path, label="test quota state")
+        self.assertEqual(audited["status"], "UPLOADED")
+        self.assertEqual(
+            audited["submission_audit_result"],
+            "no_matching_batch_after_429_resource_exhausted",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

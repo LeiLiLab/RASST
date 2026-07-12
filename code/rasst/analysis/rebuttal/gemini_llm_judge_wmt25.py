@@ -1083,6 +1083,72 @@ def submit_shard(args: argparse.Namespace) -> None:
     print(json.dumps({"shard_id": args.shard_id, "job_name": job_name}, sort_keys=True))
 
 
+def audit_quota_rejection(args: argparse.Namespace) -> None:
+    output_dir = args.output_dir.resolve()
+    manifest = load_run_manifest(output_dir)
+    if args.confirm_run_config_sha256 != manifest.get("run_config_sha256"):
+        raise LLMJudgeError(
+            "--confirm-run-config-sha256 must exactly match the prepared run manifest"
+        )
+    _manifest_shard(manifest, args.shard_id)
+    api_key = read_private_api_key(args.api_key_file)
+    genai, _, sdk_version = _load_google_genai()
+    client = genai.Client(vertexai=False, api_key=api_key)
+    with locked_state(output_dir, args.shard_id) as (state_path, state):
+        if state.get("status") != "SUBMISSION_UNCERTAIN":
+            raise LLMJudgeError(
+                f"Shard {args.shard_id} is {state.get('status')!r}, not SUBMISSION_UNCERTAIN"
+            )
+        display_name = require_text(
+            state.get("batch_display_name"), label=f"{args.shard_id} batch display name"
+        )
+        if args.confirm_batch_display_name != display_name:
+            raise LLMJudgeError(
+                "--confirm-batch-display-name must exactly match the frozen submission intent"
+            )
+        exception_message = str(state.get("exception_message") or "")
+        if "429" not in exception_message or "RESOURCE_EXHAUSTED" not in exception_message:
+            raise LLMJudgeError(
+                "Only an explicit 429 RESOURCE_EXHAUSTED create rejection can use this audit"
+            )
+        try:
+            matches = [
+                job
+                for job in client.batches.list()
+                if getattr(job, "display_name", None) == display_name
+            ]
+        except Exception as exc:
+            raise LLMJudgeError(
+                f"Cannot audit remote Batch jobs: {_safe_exception(exc)}"
+            ) from exc
+        if matches:
+            names = [str(getattr(job, "name", "unknown")) for job in matches]
+            raise LLMJudgeError(
+                f"Found remote Batch job(s) for the frozen display name; refusing retry: {names!r}"
+            )
+        update_state(
+            state_path,
+            state,
+            status="UPLOADED",
+            details={
+                "submission_audit_at_utc": utc_now(),
+                "submission_audit_display_name": display_name,
+                "submission_audit_result": "no_matching_batch_after_429_resource_exhausted",
+                "submission_audit_sdk_version": sdk_version,
+            },
+        )
+    print(
+        json.dumps(
+            {
+                "shard_id": args.shard_id,
+                "status": "UPLOADED",
+                "audit_result": "no_matching_batch_after_429_resource_exhausted",
+            },
+            sort_keys=True,
+        )
+    )
+
+
 def _raw_api_json(api_key: str, url: str, *, timeout_seconds: float) -> Dict[str, Any]:
     request = urllib.request.Request(url, headers={"x-goog-api-key": api_key})
     try:
@@ -1856,6 +1922,17 @@ def build_parser() -> argparse.ArgumentParser:
     submit.add_argument("--api-key-file", required=True, type=Path)
     submit.add_argument("--confirm-run-config-sha256", required=True)
     submit.set_defaults(handler=submit_shard)
+
+    audit_rejection = subparsers.add_parser(
+        "audit-quota-rejection",
+        help="Verify that a 429-rejected create made no remote job, then restore UPLOADED.",
+    )
+    audit_rejection.add_argument("--output-dir", required=True, type=Path)
+    audit_rejection.add_argument("--shard-id", required=True)
+    audit_rejection.add_argument("--api-key-file", required=True, type=Path)
+    audit_rejection.add_argument("--confirm-run-config-sha256", required=True)
+    audit_rejection.add_argument("--confirm-batch-display-name", required=True)
+    audit_rejection.set_defaults(handler=audit_quota_rejection)
 
     status = subparsers.add_parser("status", help="Poll one or all submitted shards.")
     status.add_argument("--output-dir", required=True, type=Path)
