@@ -950,9 +950,10 @@ def launch_detached(
     cache_chunks_by_lm_text: Optional[str],
     cache_seconds_rounding: str,
     max_new_tokens_per_lm: Optional[int],
+    allow_launch: bool,
 ) -> None:
-    if os.environ.get("RASST_ALLOW_LAUNCH", "0") != "1":
-        raise RasstError("Set RASST_ALLOW_LAUNCH=1 to launch. Use --dry-run first.")
+    if not allow_launch and os.environ.get("RASST_ALLOW_LAUNCH", "0") != "1":
+        raise RasstError("Pass --allow-launch to launch. Use --dry-run first.")
     log_dir = log_root(root) / "curated"
     run_root.mkdir(parents=True, exist_ok=True)
     log_dir.mkdir(parents=True, exist_ok=True)
@@ -1372,7 +1373,7 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     p.add_argument("--launch-backend", default="local", choices=("local", "sbatch"), help="Launch backend for real runs.")
     p.add_argument("--sbatch", action="store_true", help="Shortcut for --launch-backend sbatch.")
     p.add_argument("--prepare-only", action="store_true", help="Prepare generated launch scripts and metadata without submitting.")
-    p.add_argument("--allow-launch", action="store_true", help="Explicitly authorize submitting an sbatch run after a dry run.")
+    p.add_argument("--allow-launch", action="store_true", help="Explicitly authorize a detached or sbatch run after a dry run.")
     p.add_argument("--sbatch-partition", default=None, help="Slurm partition for --sbatch.")
     p.add_argument("--sbatch-gres", default=None, help="Slurm GRES request for --sbatch, e.g. gpu:2.")
     p.add_argument("--sbatch-cpus", default=None, help="Slurm CPUs per task for --sbatch.")
@@ -1381,6 +1382,7 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     p.add_argument("--sbatch-job-name", default=None, help="Slurm job name for --sbatch.")
     p.add_argument("--sbatch-array-limit", default=None, help="Maximum concurrent Slurm array tasks; use 1 for serial cells.")
     p.add_argument("--physical-gpu-pair", default=None, help="Explicit physical GPU ids passed to each cell, e.g. 2,3; otherwise use Slurm-visible ids.")
+    p.add_argument("--physical-gpu-ids", default=None, help="Explicit comma-separated physical GPU ids for local cells, e.g. 2,3,4 for TP=2 plus retriever.")
     p.add_argument("--run-root", default=None, help="Exact output root. Relative paths are resolved under RASST_ROOT.")
     p.add_argument("--force-runner", default=None, choices=("serial_simuleval", "batch_vllm"), help="Temporarily override selected cell runner without editing the manifest.")
     p.add_argument("--cell-override", action="append", default=[], help="Temporarily override selected cell config, as KEY=VALUE. Repeatable.")
@@ -1406,6 +1408,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     validate_manifest_shape(manifest, root)
     validate_assets(manifest, root)
     cell_overrides = parse_cell_overrides(args.cell_override)
+    if args.physical_gpu_ids:
+        gpu_ids = [item.strip() for item in args.physical_gpu_ids.split(",")]
+        if len(gpu_ids) < 3 or any(not item.isdigit() for item in gpu_ids):
+            raise RasstError(
+                "--physical-gpu-ids requires at least three numeric ids "
+                "(two for vLLM TP and one for retrieval)"
+            )
+        cell_overrides.update(
+            {
+                "CUDA_VISIBLE_DEVICES_PHYSICAL_OVERRIDE": ",".join(gpu_ids),
+                "VLLM_TP_SIZE_OVERRIDE": "2",
+                "RAG_GPU_OVERRIDE": "cuda:2",
+                "RAG_DEVICE_OVERRIDE": "cuda:2",
+            }
+        )
     if args.retrieval_degradation_plan:
         plan_path = rel_or_abs(root, args.retrieval_degradation_plan)
         if not plan_path.is_file():
@@ -1512,6 +1529,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             cache_chunks_by_lm_text=args.cache_chunks_by_lm,
             cache_seconds_rounding=args.cache_seconds_rounding,
             max_new_tokens_per_lm=args.max_new_tokens_per_lm,
+            allow_launch=args.allow_launch,
         )
     return 0
 
