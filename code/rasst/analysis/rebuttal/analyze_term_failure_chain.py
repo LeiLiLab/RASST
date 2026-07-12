@@ -490,7 +490,13 @@ def analyze(
     baseline_method: str = "InfiniSST",
     manual_audit_path: Optional[Path] = None,
     retrieval_noise_audit_path: Optional[Path] = None,
+    require_acl_talks: bool = False,
 ) -> Dict[str, Any]:
+    if require_acl_talks and dataset != "acl_tagged_raw":
+        raise ValueError(
+            "ACL-talk-only analysis requires dataset='acl_tagged_raw'; "
+            f"received {dataset!r}"
+        )
     adoption = json.loads(term_adoption_path.read_text(encoding="utf-8"))
     sentence_rows_raw = adoption.get("sentences")
     if not isinstance(sentence_rows_raw, list):
@@ -781,6 +787,7 @@ def analyze(
     summary = {
         "schema_version": SCHEMA_VERSION,
         "dataset": dataset,
+        "scope": "acl_talks_only" if require_acl_talks else "dataset_as_requested",
         "lang": lang,
         "lm": lm,
         "methods": {"rasst": rasst_method, "baseline": baseline_method},
@@ -973,7 +980,12 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     parser.add_argument("--audio-yaml", required=True)
     parser.add_argument("--xcomet-segments", required=True)
     parser.add_argument("--dataset", required=True)
-    parser.add_argument("--lang", required=True, choices=("de", "zh"))
+    parser.add_argument(
+        "--require-acl-talks",
+        action="store_true",
+        help="Fail unless --dataset is acl_tagged_raw; excludes Medicine/ESO inputs.",
+    )
+    parser.add_argument("--lang", required=True, choices=("de", "zh", "ja"))
     parser.add_argument("--lm", required=True, type=int)
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--rasst-method", default="RASST")
@@ -1000,6 +1012,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         retrieval_noise_audit_path=(
             Path(args.retrieval_noise_audit) if args.retrieval_noise_audit else None
         ),
+        require_acl_talks=args.require_acl_talks,
     )
     print(json.dumps(summary, ensure_ascii=False, sort_keys=True))
     return 0

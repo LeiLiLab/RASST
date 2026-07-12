@@ -20,6 +20,20 @@ SPEC.loader.exec_module(MODULE)
 
 
 class AnalyzeTermFailureChainTest(unittest.TestCase):
+    def test_acl_talk_scope_rejects_non_acl_dataset(self) -> None:
+        with self.assertRaisesRegex(ValueError, "ACL-talk-only"):
+            MODULE.analyze(
+                term_adoption_path=Path("unused"),
+                runtime_log_path=Path("unused"),
+                audio_yaml_path=Path("unused"),
+                xcomet_segments_path=Path("unused"),
+                dataset="medicine_hardraw",
+                lang="ja",
+                lm=2,
+                output_dir=Path("unused"),
+                require_acl_talks=True,
+            )
+
     def test_load_retrieval_noise_audit_filters_language_and_validates_label(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir_raw:
             path = Path(temp_dir_raw) / "noise.tsv"
