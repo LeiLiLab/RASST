@@ -1,0 +1,898 @@
+{
+  "semantic parsing": {
+    "term": "semantic parsing",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "语义解析",
+      "de": "semantische Analyse",
+      "ja": "意味解析"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "task-oriented dialogue": {
+    "term": "task-oriented dialogue",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "面向任务的对话",
+      "de": "aufgabenorientierter Dialog",
+      "ja": "タスク指向対話"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "latency reduction": {
+    "term": "latency reduction",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "延迟降低",
+      "de": "Latenzreduzierung",
+      "ja": "遅延削減"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "function calls": {
+    "term": "function calls",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "函数调用",
+      "de": "Funktionsaufrufe",
+      "ja": "関数呼び出し"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "machine translation": {
+    "term": "machine translation",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "机器翻译",
+      "de": "Maschinenübersetzung",
+      "ja": "機械翻訳"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "dataflow graph": {
+    "term": "dataflow graph",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "数据流图",
+      "de": "Datenflussgraph",
+      "ja": "データフローグラフ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "directed acyclic graph": {
+    "term": "directed acyclic graph",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "有向无环图",
+      "de": "gerichteter azyklischer Graph",
+      "ja": "有向非巡回グラフ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "asr": {
+    "term": "ASR",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "语音识别",
+      "de": "ASR",
+      "ja": "自動音声認識"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "neural graph": {
+    "term": "neural graph",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "神经图",
+      "de": "neuraler Graph",
+      "ja": "ニューラルグラフ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "language model": {
+    "term": "language model",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "语言模型",
+      "de": "Sprachmodell",
+      "ja": "言語モデル"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "lm": {
+    "term": "LM",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "语言模型",
+      "de": "Sprachmodell",
+      "ja": "言語モデル"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "bart": {
+    "term": "BART",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "BART",
+      "de": "BART",
+      "ja": "BART"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "bleu score": {
+    "term": "BLEU score",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "BLEU得分",
+      "de": "BLEU-Score",
+      "ja": "BLEUスコア"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "transformer": {
+    "term": "Transformer",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "Transformer",
+      "de": "Transformer",
+      "ja": "Transformer"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "exact match accuracy": {
+    "term": "exact match accuracy",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "精确匹配准确率",
+      "de": "Exakte Übereinstimmungsgenauigkeit",
+      "ja": "完全一致精度"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "f1 score": {
+    "term": "F1 score",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "F1得分",
+      "de": "F1-Score",
+      "ja": "F1スコア"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "data sets": {
+    "term": "data sets",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "数据集",
+      "de": "Datensätze",
+      "ja": "データセット"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "training data": {
+    "term": "training data",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "训练数据",
+      "de": "Trainingsdaten",
+      "ja": "訓練データ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "validation data": {
+    "term": "validation data",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "验证数据",
+      "de": "Validierungsdaten",
+      "ja": "検証データ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "bert": {
+    "term": "BERT",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "BERT",
+      "de": "BERT",
+      "ja": "BERT"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "attention mechanism": {
+    "term": "attention mechanism",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "注意力机制",
+      "de": "Aufmerksamkeitsmechanismus",
+      "ja": "注意機構"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "utterance completion": {
+    "term": "utterance completion",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "话语补全",
+      "de": "Äußerungsergänzung",
+      "ja": "発話補完"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "subgraph selection": {
+    "term": "subgraph selection",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "子图选择",
+      "de": "Subgraphauswahl",
+      "ja": "サブグラフ選択"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "dialogue system": {
+    "term": "dialogue system",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "对话系统",
+      "de": "Dialogsystem",
+      "ja": "対話システム"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "user intent": {
+    "term": "user intent",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "用户意图",
+      "de": "Benutzerabsicht",
+      "ja": "ユーザー意図"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "sequence-to-sequence": {
+    "term": "sequence-to-sequence",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "序列到序列",
+      "de": "Sequenz-zu-Sequenz",
+      "ja": "シーケンス-ツー-シーケンス"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "encoder-decoder": {
+    "term": "encoder-decoder",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "编码器-解码器",
+      "de": "Encoder-Decoder",
+      "ja": "エンコーダ-デコーダ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "pointer network": {
+    "term": "pointer network",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "指针网络",
+      "de": "Zeigernetzwerk",
+      "ja": "ポインタネットワーク"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "action space": {
+    "term": "action space",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "动作空间",
+      "de": "Aktionsraum",
+      "ja": "アクション空間"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "dtw": {
+    "term": "DTW",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "动态时间规整",
+      "de": "Dynamische Zeitraffung",
+      "ja": "動的時間伸縮法"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "bleu": {
+    "term": "BLEU",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "BLEU",
+      "de": "BLEU",
+      "ja": "BLEU"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "ccg": {
+    "term": "CCG",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "组合范畴语法",
+      "de": "Kombinatorische Kategoriale Grammatik",
+      "ja": "範疇文法"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "amr": {
+    "term": "AMR",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "抽象意义表示",
+      "de": "Abstrakte Bedeutungsrepräsentation",
+      "ja": "抽象意味表現"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "nmt": {
+    "term": "NMT",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "神经机器翻译",
+      "de": "Neuronale maschinelle Übersetzung",
+      "ja": "ニューラル機械翻訳"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "roberta": {
+    "term": "RoBERTa",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "RoBERTa",
+      "de": "RoBERTa",
+      "ja": "RoBERTa"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "fine-tuning": {
+    "term": "fine-tuning",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "微调",
+      "de": "Feinabstimmung",
+      "ja": "微調整"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "semantic representation": {
+    "term": "semantic representation",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "语义表示",
+      "de": "Semantische Repräsentation",
+      "ja": "意味表現"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "smcalflow": {
+    "term": "SMCalFlow",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "SMCalFlow",
+      "de": "SMCalFlow",
+      "ja": "SMCalFlow"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "treedst": {
+    "term": "TreeDST",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "TreeDST",
+      "de": "TreeDST",
+      "ja": "TreeDST"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "flr": {
+    "term": "FLR",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "最终延迟减少",
+      "de": "Finale Latenzreduktion",
+      "ja": "最終レイテンシ削減"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "self-attention": {
+    "term": "self-attention",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "自注意力",
+      "de": "Selbstaufmerksamkeit",
+      "ja": "自己注意"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "cross-attention": {
+    "term": "cross-attention",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "交叉注意力",
+      "de": "Kreuzaufmerksamkeit",
+      "ja": "交差注意"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "adam optimizer": {
+    "term": "Adam optimizer",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "Adam优化器",
+      "de": "Adam Optimierer",
+      "ja": "Adamオプティマイザ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "gradient accumulation": {
+    "term": "gradient accumulation",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "梯度累积",
+      "de": "Gradientenakkumulation",
+      "ja": "勾配累積"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "nvidia titan rtx gpu": {
+    "term": "Nvidia Titan RTX GPU",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "Nvidia Titan RTX GPU",
+      "de": "Nvidia Titan RTX GPU",
+      "ja": "Nvidia Titan RTX GPU"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "fairseq": {
+    "term": "FAIRSEQ",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "FAIRSEQ",
+      "de": "FAIRSEQ",
+      "ja": "FAIRSEQ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "greedy decoding": {
+    "term": "greedy decoding",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "贪婪解码",
+      "de": "Gierige Dekodierung",
+      "ja": "貪欲復号"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "lispress": {
+    "term": "Lispress",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "Lispress",
+      "de": "Lispress",
+      "ja": "Lispress"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "dag": {
+    "term": "DAG",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "有向无环图",
+      "de": "DAG",
+      "ja": "有向非巡回グラフ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "semantic parser": {
+    "term": "semantic parser",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "语义解析器",
+      "de": "Semantischer Parser",
+      "ja": "意味解析器"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "tokenization": {
+    "term": "tokenization",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "分词",
+      "de": "Tokenisierung",
+      "ja": "トークン化"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "embeddings": {
+    "term": "embeddings",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "嵌入",
+      "de": "Einbettungen",
+      "ja": "埋め込み"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "checkpoint": {
+    "term": "checkpoint",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "检查点",
+      "de": "Checkpoint",
+      "ja": "チェックポイント"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "heuristic": {
+    "term": "heuristic",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "启发式",
+      "de": "Heuristik",
+      "ja": "ヒューリスティック"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "latency": {
+    "term": "latency",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "延迟",
+      "de": "Latenz",
+      "ja": "レイテンシ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  },
+  "subgraph": {
+    "term": "subgraph",
+    "classification_reason": "llm_extracted",
+    "confused": false,
+    "short_description": "",
+    "full_form": "",
+    "is_acronym": false,
+    "source_paper": "2022.acl-long.110.pdf",
+    "target_translations": {
+      "zh": "子图",
+      "de": "Subgraph",
+      "ja": "サブグラフ"
+    },
+    "target_translation_source": "llm translation",
+    "url": ""
+  }
+}

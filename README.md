@@ -13,7 +13,7 @@ lm=1,2 -> max_chunks=keep_chunks=30
 lm=3,4 -> max_chunks=keep_chunks=20
 ```
 
-On the final global-cache snapshot, RASST improves terminology accuracy over InfiniSST in all 24 evaluated cells, with positive BLEU deltas in 19/24 cells.
+On the final global-cache snapshot, RASST improves terminology accuracy over InfiniSST in all 24 evaluated cells, with positive BLEU deltas in 19/24 cells. The tracked result package also includes a target-term-masked BLEU audit. The paper-extracted ACL glossaries and the rebuttal evaluation record are tracked under [`data/glossaries/acl_paper_extracted`](data/glossaries/acl_paper_extracted/) and [`docs/results/acl_paper_extracted_lm2`](docs/results/acl_paper_extracted_lm2/).
 
 | Track | Avg. BLEU delta vs. InfiniSST | Avg. TERM_ACC delta vs. InfiniSST |
 | --- | ---: | ---: |
@@ -26,6 +26,10 @@ On the final global-cache snapshot, RASST improves terminology accuracy over Inf
 ![Medicine main result](docs/results/main_result_global_cache30_30_20_20/medicine_main_result_global_cache30_30_20_20.png)
 
 The tracked result tables and figure sources are in [docs/results/main_result_global_cache30_30_20_20](docs/results/main_result_global_cache30_30_20_20/).
+
+The reviewer-facing En-Zh target-tag training ablation, including both sides'
+evaluation artifacts and provenance, is tracked in
+[docs/results/term_tag_ablation_en_zh_20260711](docs/results/term_tag_ablation_en_zh_20260711/).
 
 ## Rebuttal 2026
 

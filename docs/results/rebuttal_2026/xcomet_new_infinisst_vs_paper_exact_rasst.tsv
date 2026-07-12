@@ -1,0 +1,6 @@
+dataset	lang	lm	new_infinisst_xcomet_x100	paper_exact_rasst_xcomet_x100	delta_rasst_minus_infinisst_x100	new_infinisst_summary	paper_rasst_summary	status	note
+medicine_hardraw	de	1	73.3818974463	70.8779444157	-2.5039530305	xcomet_new_infinisst_lm123_summary.tsv	xcomet_paper_exact_eso_de_summary.tsv	validated_sources	cross-run system-mean comparison; both source runs independently validated
+medicine_hardraw	de	2	78.4838143023	77.5068409871	-0.9769733153	xcomet_new_infinisst_lm123_summary.tsv	xcomet_paper_exact_eso_de_summary.tsv	validated_sources	cross-run system-mean comparison; both source runs independently validated
+medicine_hardraw	de	3	78.8174798242	76.9881104269	-1.8293693973	xcomet_new_infinisst_lm123_summary.tsv	xcomet_paper_exact_eso_de_summary.tsv	validated_sources	cross-run system-mean comparison; both source runs independently validated
+medicine_hardraw	de	4	78.6149787904	78.3862590079	-0.2287197824	xcomet_new_infinisst_lm4_summary.tsv	xcomet_paper_exact_eso_de_summary.tsv	validated_sources	cross-run system-mean comparison; both source runs independently validated
+medicine_hardraw	de	macro_mean	77.3245425908	75.9397887094	-1.3847538814	xcomet_new_infinisst_lm123_summary.tsv+xcomet_new_infinisst_lm4_summary.tsv	xcomet_paper_exact_eso_de_summary.tsv	validated_sources	cell-macro mean over lm1-lm4; no combined sentence-level win/tie/loss claim

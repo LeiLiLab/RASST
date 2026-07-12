@@ -81,8 +81,10 @@ def _build_retriever_model(
     text_lora_rank: int,
     maxsim_windows: Optional[List[int]] = None,
     maxsim_stride: int = MAXSIM_STRIDE,
+    use_maxsim: bool = USE_MAXSIM,
+    pooling_type: str = POOLING_TYPE,
 ):
-    """Build MaxSim retriever and text encoder with given LoRA ranks."""
+    """Build a MaxSim or dense retriever with the checkpoint's architecture."""
     Qwen3OmniRetriever, BgeM3TextEncoder, _maxsim_score = _import_model_classes()
     from transformers import WhisperFeatureExtractor
 
@@ -95,8 +97,8 @@ def _build_retriever_model(
         lora_target_modules=LORA_TARGET_MODULES,
         temperature=TEMPERATURE,
         learn_temp=False,
-        pooling_type=POOLING_TYPE,
-        use_maxsim=USE_MAXSIM,
+        pooling_type=pooling_type,
+        use_maxsim=use_maxsim,
         maxsim_windows=maxsim_windows or MAXSIM_WINDOWS,
         maxsim_stride=maxsim_stride,
     ).to(device)
@@ -118,11 +120,26 @@ def _load_checkpoint(
             for k, v in sd.items()
         }
 
-    retriever.load_state_dict(
-        _strip(ckpt.get("model_state_dict", {})), strict=False
-    )
+    state_dict = _strip(ckpt.get("model_state_dict", {}))
+    if not state_dict:
+        raise ValueError(f"Checkpoint has no model_state_dict: {model_path}")
+    incompatible = retriever.load_state_dict(state_dict, strict=False)
+    if hasattr(retriever, "pooler"):
+        missing_pooler = [
+            key for key in incompatible.missing_keys if key.startswith("pooler.")
+        ]
+        if missing_pooler:
+            raise ValueError(
+                "Dense checkpoint did not provide the configured pooling weights: "
+                + ", ".join(missing_pooler[:8])
+            )
     retriever.eval()
-    logger.info("Loaded MaxSim retriever checkpoint from %s", model_path)
+    logger.info(
+        "Loaded retriever checkpoint from %s (missing=%d unexpected=%d)",
+        model_path,
+        len(incompatible.missing_keys),
+        len(incompatible.unexpected_keys),
+    )
 
 
 @torch.no_grad()
@@ -593,12 +610,16 @@ class StreamingMaxSimRetriever:
         score_threshold: float = 0.0,
         maxsim_windows: Optional[List[int]] = None,
         maxsim_stride: int = MAXSIM_STRIDE,
+        use_maxsim: bool = USE_MAXSIM,
+        pooling_type: str = POOLING_TYPE,
     ):
         self.device = torch.device(device)
         self.top_k = top_k
         self.target_lang = target_lang
         self.window_sec = window_sec
         self.score_threshold = float(score_threshold)
+        self.use_maxsim = bool(use_maxsim)
+        self.pooling_type = str(pooling_type)
         self.enabled = False
 
         assert model_path and Path(model_path).is_file(), (
@@ -609,13 +630,16 @@ class StreamingMaxSimRetriever:
         )
 
         logger.info(
-            "Loading MaxSim retriever: model=%s index=%s device=%s lora_r=%d "
-            "window_sec=%.2f maxsim_windows=%s maxsim_stride=%d",
+            "Loading streaming retriever: model=%s index=%s device=%s lora_r=%d "
+            "window_sec=%.2f use_maxsim=%s pooling_type=%s "
+            "maxsim_windows=%s maxsim_stride=%d",
             model_path,
             index_path,
             device,
             lora_rank,
             window_sec,
+            self.use_maxsim,
+            self.pooling_type,
             maxsim_windows or MAXSIM_WINDOWS,
             maxsim_stride,
         )
@@ -626,6 +650,8 @@ class StreamingMaxSimRetriever:
             text_lora_rank,
             maxsim_windows=maxsim_windows,
             maxsim_stride=maxsim_stride,
+            use_maxsim=self.use_maxsim,
+            pooling_type=self.pooling_type,
         )
         _load_checkpoint(self.retriever, model_path, self.device)
 
@@ -751,6 +777,26 @@ class StreamingMaxSimRetriever:
         actual_start_sec = float(buffer_start) / EXPECTED_SAMPLE_RATE
         actual_end_sec = float(buffer_end) / EXPECTED_SAMPLE_RATE
         actual_duration = max(1e-6, actual_end_sec - actual_start_sec)
+
+        if not self.use_maxsim:
+            embs = _encode_audio(
+                chunk, self.retriever, self.feat_ext, self.device
+            )
+            idx_arr, sco_arr = _retrieve_topk(
+                embs, self.text_embs, self._maxsim_score, k
+            )
+            time_starts = np.full(len(idx_arr), actual_start_sec, dtype=np.float32)
+            time_ends = np.full(len(idx_arr), actual_end_sec, dtype=np.float32)
+            results = self._build_results(
+                idx_arr,
+                sco_arr,
+                time_starts=time_starts,
+                time_ends=time_ends,
+                retrieval_mode="timeline_dense",
+            )
+            self._retrieve_offset = buffer_end
+            self._last_results = results
+            return results
 
         projected_seq, mask = _encode_audio_projected_seq(
             chunk, self.retriever, self.feat_ext, self.device
@@ -880,6 +926,38 @@ class StreamingMaxSimRetriever:
             )
 
         if not chunks:
+            return outputs
+
+        if not self.use_maxsim:
+            batch_t0 = time.perf_counter()
+            for chunk, meta in zip(chunks, metas):
+                embs = _encode_audio(
+                    chunk, self.retriever, self.feat_ext, self.device
+                )
+                idx_arr, sco_arr = _retrieve_topk(
+                    embs, self.text_embs, self._maxsim_score, k
+                )
+                time_starts = np.full(
+                    len(idx_arr), float(meta["actual_start_sec"]), dtype=np.float32
+                )
+                time_ends = np.full(
+                    len(idx_arr), float(meta["actual_end_sec"]), dtype=np.float32
+                )
+                outputs[int(meta["request_idx"])] = self._build_results(
+                    idx_arr,
+                    sco_arr,
+                    time_starts=time_starts,
+                    time_ends=time_ends,
+                    retrieval_mode="timeline_dense_batch",
+                )
+            if os.environ.get("RASST_RAG_PROFILE", "1") == "1":
+                print(
+                    "RASST_RAG_METRIC "
+                    f"batch_size={len(requests)} encoded={len(chunks)} "
+                    f"mode=dense terms={len(self.term_list)} "
+                    f"total_s={time.perf_counter() - batch_t0:.4f}",
+                    flush=True,
+                )
             return outputs
 
         batch_t0 = time.perf_counter()
