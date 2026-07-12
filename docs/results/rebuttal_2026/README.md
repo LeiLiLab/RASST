@@ -38,6 +38,14 @@ glossary 原始响应不进入 Git。
   boundary，不应直接称为 term noise。完整结论、真实 cases 与提交限制见
   [`term_failure_analysis_acl_lm2.md`](term_failure_analysis_acl_lm2.md)。德语语义
   标签当前仍是 Codex 辅助的非专家 draft，作者 sign-off 前不能称为人工专业评测。
+- **Retrieval degradation sensitivity 已完成。** 在 ACL 三语 `lm=2` 固定
+  hint count 与 compute，将 sentence-relevant correct hints 按 `25% / 50%`
+  概率替换为同域 distractors。En-Zh/De TERM_ACC 相对各自 `0%` 分别下降
+  `1.91/4.27` 与 `3.31/7.59` points，但 BLEU 反而分别上升
+  `0.259/0.453` 与 `0.208/0.715`；六个 degraded cells 的 xCOMET 均低于同语言
+  `0%`。En-Ja 出现明显 autoregressive path sensitivity，不能把单次 run 解读为
+  单调 dose response。完整表和限制见
+  [`retrieval_degradation_ablation.md`](retrieval_degradation_ablation.md)。
 
 ## xCOMET
 
@@ -107,14 +115,27 @@ Fresh glossary、raw responses 和 manifest 的预定 Hugging Face 目标为
 
 ## Retrieval degradation sensitivity
 
-状态：**运行中**。
+状态：**已完成并独立验证 xCOMET**。
 
 - 固定 ACL 三语 `lm=2`，将 sentence-window-relevant correct hints 以
   `0% / 25% / 50%` 的概率替换为同域 distractors。
 - 检索执行、top-k、prompt hint count、rank/score metadata 和 Speech LLM 配置不变；
   runtime log 保存 before/after references 和逐次 audit。
-- 预注册定义、指标、compute placement 和 artifact 目标见
+- 9 个 cells 共保留 5 talks / 1795 retrieval events per language；En-Zh/De
+  各档均为 2637 hints，En-Ja 均为 2622 hints。`0%` references 与 paper-canonical
+  runtime 在三语全部事件上逐项一致。
+- xCOMET-XXL 覆盖 9 systems / 4212 sentence segments；独立 validator 从逐句
+  JSONL 反算全部 system 均值，状态为 `ok`。六个 degraded cells 相对同语言
+  `0%` 的 xCOMET delta 为 En-Zh `-0.599/-1.020`、En-De
+  `-0.752/-0.471`、En-Ja `-5.971/-1.071` points。
+- 预注册定义、完整结果、compute placement、验证哈希和局限见
   [`retrieval_degradation_ablation.md`](retrieval_degradation_ablation.md)。
+
+完整 runtime logs、instances 和 4212-row xCOMET JSONL 位于 Aries/Hyper00 staging，
+预定 Hugging Face 目标为
+`gavinlaw/rasst-rebuttal-retrieval-degradation-acl`。上传状态为 **blocked**：
+Taurus/Aries 没有 token，Hyper00 现有凭据属于另一账号，未越权使用；在作者提供
+授权凭据并上传前，staging 仍不是 canonical artifact。
 
 ## Failure analysis 与 German morphology audit
 

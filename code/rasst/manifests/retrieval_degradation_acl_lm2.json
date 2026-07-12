@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "experiment": "retrieval_degradation_sensitivity",
-  "status": "running",
+  "status": "complete",
   "main_result_manifest": "code/rasst/manifests/main_result_eval.global_cache30_30_20_20.json",
   "domain": "acl_tagged_raw",
   "languages": ["zh", "de", "ja"],
@@ -13,7 +13,7 @@
     "score_threshold": 0.78,
     "timeline_lookback_sec": 1.92,
     "definition": "A correct hint exactly matches a raw-gold glossary entry whose English source term occurs in a sentence overlapping the retrieval window. Selected correct hints are replaced by unique ACL glossary entries absent from that window.",
-    "selection": "Independent deterministic SHA-256 draw per instance, segment, rank, and hint.",
+    "selection": "Independent deterministic SHA-256 draw per instance, segment, rank, English term, and target translation. Target languages therefore use independent deterministic masks.",
     "fixed_factors": [
       "retriever execution",
       "retrieved hint count",
@@ -40,10 +40,14 @@
     "vllm_tensor_parallel_size": 2,
     "retriever_logical_device": "cuda:2",
     "container_prefix": "sglang-omni-jaxan",
-    "topology_note": "The first two ids are an NVLink vLLM TP pair; the third id is the retriever. GPU 4 is shared by two lightweight retrievers."
+    "topology_note": "The first two ids are an NVLink vLLM TP pair; the third id is the retriever. GPU 4 was shared by two lightweight retrievers.",
+    "xcomet_host": "hyper00",
+    "xcomet_physical_gpu_ids": [0, 1]
   },
   "control_validation": {
-    "status": "zh_complete_de_ja_running",
+    "status": "complete",
+    "retrieval_events_per_language": 1795,
+    "references_exact_to_canonical_for_all_languages": true,
     "zh": {
       "retrieval_events": 1795,
       "references_exact_to_canonical": true,
@@ -59,13 +63,50 @@
       "canonical_term_acc": 0.8899,
       "canonical_stream_laal_ms": 1821.5283510443905
     },
+    "de": {
+      "retrieval_events": 1795,
+      "references_exact_to_canonical": true,
+      "hint_count": 2637,
+      "hint_count_preserved": true,
+      "retrieval_precision": 0.6492226014410315,
+      "retrieval_recall": 0.23407164342357123,
+      "achieved_replacement_rate": 0.0,
+      "bleu": 30.8688570251736,
+      "term_acc": 0.831,
+      "stream_laal_ms": 1647.7116155851602
+    },
+    "ja": {
+      "retrieval_events": 1795,
+      "references_exact_to_canonical": true,
+      "hint_count": 2622,
+      "hint_count_preserved": true,
+      "retrieval_precision": 0.6495041952707856,
+      "retrieval_recall": 0.23370385618224235,
+      "achieved_replacement_rate": 0.0,
+      "bleu": 29.88874504956311,
+      "term_acc": 0.8457,
+      "stream_laal_ms": 2231.107656341304
+    },
+    "controlled_rng_check": "En-Zh 25% prompts and outputs are bitwise identical to the same-environment 0% run before the first replacement; divergence begins at the first corrupted hint.",
     "analysis_baseline": "Compare 25% and 50% against the same-environment 0% rerun because generation uses stochastic sampling."
+  },
+  "results": {
+    "summary_tsv": "docs/results/rebuttal_2026/retrieval_degradation_acl_lm2.tsv",
+    "xcomet_summary_tsv": "docs/results/rebuttal_2026/retrieval_degradation_xcomet_summary.tsv",
+    "xcomet_paired_25_vs_0_tsv": "docs/results/rebuttal_2026/retrieval_degradation_xcomet_paired_25_vs_0.tsv",
+    "xcomet_validation_json": "docs/results/rebuttal_2026/retrieval_degradation_xcomet_validation.json",
+    "aries_summary_sha256": "572f87864dfca3dcf02b2a08ef0a9b6c8bc2282d92b26eaa2f277cc38291f3de",
+    "xcomet_input_bundle_sha256": "6ac7afbdedd16b82466da0502a433de55882cc5d6f79ce830f94523d6e137356",
+    "xcomet_segments_sha256": "eee9371ba074fdfcc6a1d6da0647433560b19f79a799d3927f100e0d09a726da",
+    "xcomet_validated_systems": 9,
+    "xcomet_validated_segments": 4212
   },
   "staging": {
     "root": "/mnt/aries/data4/jiaxuanluo/rasst-retrieval-degradation",
     "git_branch": "luojiaxuan/rebuttal-experiments",
-    "git_implementation_commit": "6f5610e",
+    "git_implementation_commit": "cff4a34",
     "hf_dataset_destination": "gavinlaw/rasst-rebuttal-retrieval-degradation-acl",
-    "hf_upload_status": "pending"
+    "hf_upload_status": "blocked_missing_authorized_credentials",
+    "hf_upload_note": "Taurus and Aries have no Hugging Face token. Hyper00 is authenticated as a different user, so those credentials were not used."
   }
 }
