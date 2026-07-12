@@ -242,6 +242,12 @@ canonical artifact。
 
 ## Rebuttal 文本
 
+按 Reviewer Mzub、oktu、gbii 顺序整理的精简 OpenReview 单评论稿位于
+[`../../rebuttal_2026_openreview_responses.md`](../../rebuttal_2026_openreview_responses.md)。
+三段正文分别为 `3192 / 3367 / 3813` characters，均低于 5000-character 上限；该稿
+只使用已验证的 main/rebuttal-experiments 结果，并明确排除 LLM-as-a-judge 与宽语义
+audit。文末的内部取舍和 evidence SoT 不应提交到 OpenReview。
+
 英文工作稿位于 [`../../rebuttal_2026_draft.md`](../../rebuttal_2026_draft.md)。其中
 所有 `PENDING` 都是提交保护标记：只有生成、复核并写入本索引的数字才可替换。
 Masked BLEU 是 diagnostic，不是因果分解；TERM_ACC 必须称为 exact-form metric。
