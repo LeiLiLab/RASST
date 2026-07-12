@@ -48,11 +48,20 @@ Aries 并发按 NVLink 拓扑安排为：`2,3 + retriever 4`、`6,7 + retriever 
 
 - achieved replacement 接近设定值，并使三语的 retrieval P/R 按预期下降；hint count、检索调用次数和 Speech LLM 配置均保持不变。
 - En-Zh/De 的 TERM_ACC 随 corruption 单调下降：相对 `0%`，`25% / 50%` 分别下降 `1.91 / 4.27` 和 `3.31 / 7.59` points。与此同时 BLEU 分别上升 `0.259 / 0.453` 和 `0.208 / 0.715`。这正说明 corpus BLEU 对 glossary-hint degradation 不敏感，甚至会被非术语措辞变化掩盖。
-- xCOMET 在六个 degraded cells 中全部低于同语言 `0%`：En-Zh 为 `-0.599 / -1.020`，En-De 为 `-0.752 / -0.471`，En-Ja 为 `-5.971 / -1.071` points。它支持“更差 retrieval 会损害 contextual quality”，但 En-De/Ja 的 `25%` 与 `50%` 不构成单调 dose response。
-- En-Ja `25%` 是明显的 autoregressive failure path：其中一个 talk 的大量 chunks 达到 `max_new_tokens=80`，导致 BLEU、xCOMET、TERM_ACC 与输出长度/LAAL 同时异常。由于各 corruption level 是独立 stochastic generation，而非强制共享解码轨迹，单个 corruption 可以较早改变整段后续生成。因此它应作为 sensitivity/failure case 报告，不能据此声称 `25%` degradation 普遍比 `50%` 更坏。
+- xCOMET 在六个 degraded cells 中全部低于同语言 `0%`：En-Zh 为 `-0.599 / -1.020`，En-De 为 `-0.752 / -0.471`，En-Ja 为 `-5.971 / -1.071` points。它支持“更差 retrieval 会损害 contextual quality”，但单个 corruption seed 不足以支持 dose-response 结论。
+- En-Ja seed `20260711` 的 `25%` 是明显的 autoregressive failure path：第二个 talk 的大量 chunks 达到 `max_new_tokens=80`，导致 BLEU、xCOMET、TERM_ACC 与输出长度/LAAL 同时异常。下述 rerun 表明它不是一次解码采样偶然，而是该具体 replacement mask 可复现地触发了循环；不能据此声称 `25%` degradation 普遍比 `50%` 更坏。
 - En-Zh/De 的 StreamLAAL 相对 `0%` 只变化约 `-23` 至 `+18ms`；En-Ja 的较大变化由输出长度和生成路径改变伴生，不能解释为 retrieval compute 变快。`StreamLAAL_CA` 在 En-Zh `25%` 和 En-De `50%` 也随输出路径变化，完整值保留在 TSV。
 
-因此最稳妥的 rebuttal 结论不是强求三语平均或单调曲线，而是：在固定 retrieval compute 和 hint count 下，降低实际 hint P/R 会使三语 TERM_ACC 与 xCOMET 均低于各自 `0%` 基线；BLEU 对 En-Zh/De 的这一损害没有反映出来。单次 stochastic run 不能支持方差或显著性声明。
+因此最稳妥的 rebuttal 结论不是强求三语平均或单调曲线，而是：在固定 retrieval compute 和 hint count 下，降低实际 hint P/R 会使三语 TERM_ACC 与 xCOMET 均低于各自 `0%` 基线；BLEU 对 En-Zh/De 的这一损害没有反映出来。有限 corruption seeds 不能支持方差、显著性或普遍单调性声明。
+
+## En-Ja rerun 与 corruption-seed sensitivity
+
+为判断原 En-Ja `25%` 是否偶然，进行了两种互补检查。完整逐行结果见 [`retrieval_degradation_ja_seed_sensitivity.tsv`](retrieval_degradation_ja_seed_sensitivity.tsv)。
+
+1. **Same-mask replicate。** 固定 seed `20260711`，重新运行完整 `0% / 25% / 50%` 三档。BLEU、TERM_ACC 和 StreamLAAL 在三档均与第一轮逐位一致；xCOMET 的最大差异小于 `6e-8` points。`25%` 在同一个第二 talk 再次进入连续约 `5.1s/chunk` 的 `max_new_tokens=80` 循环，并在 talk 结束后恢复。因此原结果没有算错，也不是一次 generation sampling 偶然。
+2. **Fresh corruption mask。** 将 corruption seed 改为 `20260712`，复用已验证的 `0%` 对照，并重跑 `25% / 50%`。实际替换率为 `24.31% / 50.26%`，全程没有 max-token loop；结果恢复为单调下降：TERM_ACC `84.57 → 82.77 → 78.40`，BLEU `29.889 → 28.717 → 27.717`，xCOMET `70.379 → 68.417 → 67.137`。
+
+两个 corruption seeds 的共同结论是，`25%` 和 `50%` 的 TERM_ACC 与 xCOMET 都低于 `0%`；不同之处是下降幅度和 `25% / 50%` 排序对具体 replacement mask 敏感。Rebuttal 应把 seed `20260711` 的循环作为可复现 failure case，同时报告 fresh-seed sensitivity；不应选择性删除极端 seed，也不应把两点画成普遍单调曲线。若篇幅允许，最终论文应补更多 corruption seeds 并报告均值/方差。
 
 ## xCOMET 验证
 
@@ -65,6 +74,11 @@ Aries 并发按 NVLink 拓扑安排为：`2,3 + retriever 4`、`6,7 + retriever 
 - input bundle tar SHA-256：`6ac7afbdedd16b82466da0502a433de55882cc5d6f79ce830f94523d6e137356`
 - segments JSONL SHA-256：`eee9371ba074fdfcc6a1d6da0647433560b19f79a799d3927f100e0d09a726da`
 
+En-Ja rerun 的轻量 xCOMET 汇总见 [`retrieval_degradation_ja_rerun_xcomet_summary.tsv`](retrieval_degradation_ja_rerun_xcomet_summary.tsv)。两次额外 validator 均为 `ok`：
+
+- same-mask replicate：3 systems / 1404 segments，validation SHA-256 `c95edc810e31f6b419c452a9325ac156d413a3454f2f31be5fad8581b8b616f5`，segments SHA-256 `75f2cec5122b203ed7aad66ce91bf83ae3ce7bdd598ffb32937976b1601f1a17`
+- fresh seed `20260712`：3 systems / 1404 segments，validation SHA-256 `fa54caeffad57019415a5bcea748e9a50ca897d636a14d4542141dfe540ae926`，segments SHA-256 `23dabc4f31a3694d33199d9cddc113c973b701c629c07a818962a63baa73f0bf`
+
 ## Source of Truth
 
 - 实现分支：`luojiaxuan/rebuttal-experiments`
@@ -74,6 +88,8 @@ Aries 并发按 NVLink 拓扑安排为：`2,3 + retriever 4`、`6,7 + retriever 
 - 实验 manifest：`code/rasst/manifests/retrieval_degradation_acl_lm2.json`
 - Aries 临时 staging：`/mnt/aries/data4/jiaxuanluo/rasst-retrieval-degradation`
 - Hyper00 xCOMET staging：`/data02/jaxan/RASST_rebuttal_20260710/retrieval_degradation_20260712`
+- Hyper00 same-mask rerun xCOMET staging：`/data02/jaxan/RASST_rebuttal_20260710/retrieval_degradation_replicate2_20260712`
+- Hyper00 fresh-seed xCOMET staging：`/data02/jaxan/RASST_rebuttal_20260710/retrieval_degradation_seed20260712_20260712`
 - 计划中的 Hugging Face dataset：`gavinlaw/rasst-rebuttal-retrieval-degradation-acl`（上传 blocked：Taurus/Aries 无 Hugging Face token；Hyper00 当前凭据属于另一账号，未越权使用）
 
 Reusable runtime logs、instances、score JSON 和 XCOMET inputs/results 将上传到上述 Hugging Face dataset；Git 仅保存 manifest、轻量汇总、验证报告和 rebuttal 文本。

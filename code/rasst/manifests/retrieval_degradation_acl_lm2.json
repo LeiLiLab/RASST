@@ -101,6 +101,38 @@
     "xcomet_validated_systems": 9,
     "xcomet_validated_segments": 4212
   },
+  "en_ja_rerun_validation": {
+    "same_mask_seed": 20260711,
+    "same_mask_replicate": {
+      "status": "exact_bleu_term_acc_stream_laal_reproduction",
+      "bleu": [29.88874504956311, 18.7139128567, 27.982816778],
+      "term_acc": [0.8457, 0.7, 0.7606],
+      "xcomet_x100": [70.3790537217, 64.4076843547, 69.3077926744],
+      "stream_laal_ms": [2231.107656341304, 1533.743717059, 2134.0664019679],
+      "failure_reproduced": "The 25% condition reproduced the max_new_tokens=80 loop in the same second talk."
+    },
+    "fresh_corruption_mask": {
+      "seed": 20260712,
+      "achieved_replacement_rates": [0.0, 0.243100411, 0.5026423958],
+      "retrieval_precision": [0.6495041953, 0.4916094584, 0.3230358505],
+      "retrieval_recall": [0.2337038562, 0.1768903527, 0.11623439],
+      "bleu": [29.88874504956311, 28.7165117413, 27.7169558596],
+      "term_acc": [0.8457, 0.8277, 0.784],
+      "xcomet_x100": [70.3790537217, 68.4168425826, 67.1366534427],
+      "stream_laal_ms": [2231.107656341304, 2207.946349566, 2325.1027114284],
+      "max_token_loop_observed": false,
+      "monotonic_for_this_seed": true
+    },
+    "interpretation": "Both masks place every degraded condition below the 0% control in TERM_ACC and xCOMET. The magnitude and 25%/50% ordering are mask-sensitive, so two corruption seeds do not establish universal monotonicity or significance.",
+    "result_tsv": "docs/results/rebuttal_2026/retrieval_degradation_ja_seed_sensitivity.tsv",
+    "xcomet_summary_tsv": "docs/results/rebuttal_2026/retrieval_degradation_ja_rerun_xcomet_summary.tsv",
+    "same_mask_xcomet_validation_sha256": "c95edc810e31f6b419c452a9325ac156d413a3454f2f31be5fad8581b8b616f5",
+    "fresh_seed_xcomet_validation_sha256": "fa54caeffad57019415a5bcea748e9a50ca897d636a14d4542141dfe540ae926",
+    "same_mask_xcomet_segments_sha256": "75f2cec5122b203ed7aad66ce91bf83ae3ce7bdd598ffb32937976b1601f1a17",
+    "fresh_seed_xcomet_segments_sha256": "23dabc4f31a3694d33199d9cddc113c973b701c629c07a818962a63baa73f0bf",
+    "same_mask_xcomet_bundle_sha256": "7961ff4cf75c257063bfb76971be18f09fdff4032ee69d5e96a623b1df0d64c7",
+    "fresh_seed_xcomet_bundle_sha256": "674620a4420518a1406e489049b7d2a654002649fa17682f0183efe254778c1c"
+  },
   "staging": {
     "root": "/mnt/aries/data4/jiaxuanluo/rasst-retrieval-degradation",
     "git_branch": "luojiaxuan/rebuttal-experiments",
