@@ -28,8 +28,8 @@ class AnalyzeTermFailureChainTest(unittest.TestCase):
             )
             path.write_text(
                 header
-                + "de\t3\toracle\tOracle\ttrue_harmful_noise\twrong entity\n"
-                + "zh\t3\toracle\t甲骨文\ttrue_harmful_noise\twrong entity\n",
+                + "de\t3\toracle\tOracle\tharmful_unsupported_adoption\twrong entity\n"
+                + "zh\t3\toracle\t甲骨文\tharmful_unsupported_adoption\twrong entity\n",
                 encoding="utf-8",
             )
             rows = MODULE.load_retrieval_noise_audit(path, "de")
