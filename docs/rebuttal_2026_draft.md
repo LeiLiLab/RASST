@@ -29,10 +29,10 @@ the paired cells equally. On ACL, RASST scores **78.704** versus **78.588** for
 InfiniSST, a mean paired difference of **+0.116**, with RASST higher in **8/12**
 cells. The language-level differences are **+0.636** for En-Zh, **+0.005** for
 En-De, and **-0.293** for En-Ja. On human-reference ESO En-De, using the exact
-submitted-paper outputs, RASST scores **75.940** versus **78.041**, a difference
-of **-2.101**; RASST is lower in all four cells. Across all 16 retained cells,
-the cell-macro difference is
-**-0.438** and 8/16 cells are positive. Thus, the contextual-metric evidence is
+submitted-paper RASST outputs and newly reproduced InfiniSST baseline, RASST
+scores **75.940** versus **77.325**, a difference of **-1.385**; RASST is lower
+in all four cells. Across all 16 retained cells, the cell-macro difference is
+**-0.259** and 8/16 cells are positive. Thus, the contextual-metric evidence is
 mixed: it does not support a claim of uniformly improved overall translation
 quality, and we will narrow the main claim to terminology handling rather than
 general quality improvement. We make no significance claim for this analysis.
@@ -155,7 +155,7 @@ evaluation and notation need correction.
 **Translation-quality metric.** We agree that BLEU alone is insufficient. We
 add xCOMET on the 16 retained paired cells and the target-term-masked BLEU
 diagnostic summarized above. ACL is nearly unchanged on average under xCOMET
-(+0.116 points; 8/12 cells positive), whereas ESO En-De decreases by 2.101
+(+0.116 points; 8/12 cells positive), whereas ESO En-De decreases by 1.385
 points in all four cells. We will report this negative result and temper the
 quality claim accordingly.
 
@@ -307,8 +307,9 @@ Before submission, the revision will:
   `docs/results/rebuttal_2026/xcomet_xxl_validation.json`
 - Submitted-paper exact ESO En-De xCOMET correction, paired table, and validation:
   `docs/results/rebuttal_2026/xcomet_paper_exact_eso_de_report.md`,
-  `docs/results/rebuttal_2026/xcomet_paper_exact_combined_paired.tsv`,
-  `docs/results/rebuttal_2026/xcomet_paper_exact_eso_de_paired.tsv`, and
+  `docs/results/rebuttal_2026/xcomet_new_infinisst_vs_paper_exact_rasst.tsv`,
+  `docs/results/rebuttal_2026/xcomet_new_infinisst_lm123_validation.json`,
+  `docs/results/rebuttal_2026/xcomet_new_infinisst_lm4_validation.json`, and
   `docs/results/rebuttal_2026/xcomet_paper_exact_eso_de_validation.json`
 - Fixed-`lm=2` failure chain, German morphology draft audit, and false-copy audit:
   `docs/results/rebuttal_2026/term_failure_analysis_acl_lm2.md`,
@@ -348,8 +349,8 @@ Before submission, the revision will:
   changes length and neighboring n-grams.
 - **Do not describe xCOMET as uniformly positive.** ACL averages +0.116 points
   with 8/12 positive cells, but En-Ja averages -0.293 and ESO En-De averages
-  -2.101 with 0/4 positive cells; the 16-cell macro average is -0.438. The old
-  ESO value -3.172 used release-cache outputs and is not paper exact.
+  -1.385 with 0/4 positive cells; the 16-cell macro average is -0.259. The old
+  ESO values -3.172 and -2.101 used superseded output/baseline combinations.
 - **Do not report paper-derived glossary numbers until fresh artifacts have
   been generated and validated.** Those fields remain deliberate placeholders.
 - **Do not reuse the legacy `acl_paper_extracted` cells as fresh evidence.** The

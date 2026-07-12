@@ -1,19 +1,18 @@
 # RASST rebuttal 2026：实验与 Source of Truth
 
 本目录是 rebuttal 补实验的 Git-tracked 索引。代码、轻量结果表、实验决策和
-进度以本仓库 `luojiaxuan/rebuttal-experiments` 分支为准；公开评测数据和模型
+进度以本仓库 `main` 分支为准；公开评测数据和模型
 仍以 README 中列出的 Hugging Face 仓库为准。大模型权重、逐句评分和生成式
 glossary 原始响应不进入 Git。
 
 ## 当前结论
 
-- **xCOMET-XXL 已完成并修正为 paper-exact ESO 输出。** ACL 12 cells 的
-  cell-macro 差值为 `+0.1158` xCOMET points（乘以 100），8/12 为正；
-  submitted-paper exact ESO En-De 为 `-2.1012`，0/4 为正。16-cell macro 为
-  `-0.4385`，8/16 为正。此前 `-3.1716` 的 ESO 数字来自 release-canonical
-  `30/30, 30/30, 20/20, 20/20` cache 输出，不是 paper-exact 四档 `30/30` 输出。
-  该结果仍不支持“overall translation quality 普遍提升”，但 lm4 的旧大幅负差
-  `-4.3289` 修正为 `-0.2571`。
+- **xCOMET-XXL 已完成，并修正为 new InfiniSST × paper-exact RASST。** ACL
+  12 cells 的 cell-macro 差值为 `+0.1158` xCOMET points（乘以 100），8/12
+  为正；ESO En-De 为 `-1.3848`，0/4 为正。16-cell macro 为 `-0.2593`，
+  8/16 为正。旧 `-3.1716` 同时使用旧 InfiniSST 与 release-cache RASST；中间
+  `-2.1012` 使用旧 InfiniSST 与 paper-exact RASST，均不再是推荐口径。当前 lm4
+  差值仅 `-0.2287`，主要负差来自 lm1 `-2.5040` 与 lm3 `-1.8294`。
 - **Masked BLEU 已完成并全量复算。** 排除 ESO En-Zh/En-Ja 后，RASST 相对
   InfiniSST 的 target-term-masked BLEU 在 12/16 cells 为正，平均差值
   `+0.6927`；ACL 12 cells 的平均差值为 `+0.9919`，ESO En-De 4 cells 的
@@ -51,9 +50,10 @@ glossary 原始响应不进入 Git。
 
 状态：**已完成并独立复算验证**。
 
-- 评分矩阵：ACL En-Zh/De/Ja 与 ESO En-De，RASST/InfiniSST，4 个 latency settings，
-  共 32 system rows / 16 strict pairs / 22,728 sentence segments。ACL 使用已验证的
-  release run；ESO En-De 使用 submitted-paper exact 四档 cache `30/30` 输出。
+- 推荐评分矩阵：ACL En-Zh/De/Ja 与 ESO En-De，RASST/InfiniSST，4 个 latency
+  settings，共 32 system rows / 16 cells / 22,728 sentence segments。ACL 使用已
+  验证的 release run；ESO En-De 交叉组合 independently validated 的 new InfiniSST
+  与 submitted-paper exact 四档 cache `30/30` RASST system means。
 - Metric：`Unbabel/XCOMET-XXL`，revision
   `873bac1b1c461e410c4a6e379f6790d3d1c7c214`。
 - Encoder tokenizer/config：`facebook/xlm-roberta-xxl`，revision
@@ -67,26 +67,37 @@ glossary 原始响应不进入 Git。
 - ACL 12 cells 的 cell-macro xCOMET（乘以 100）为 RASST `78.7042`、
   InfiniSST `78.5884`，平均差值 `+0.1158`，8/12 cells 为正；其中 En-Zh
   `+0.6356`、En-De `+0.0050`、En-Ja `-0.2933`。
-- Paper-exact ESO En-De 4 cells 为 RASST `75.9398`、InfiniSST `78.0410`，
-  平均差值 `-2.1012`，0/4 cells 为正。16 cells 合计为 RASST `78.0131`、
-  InfiniSST `78.4515`、差值 `-0.4385`，8/16 为正。
+- New InfiniSST × paper-exact RASST 的 ESO En-De 4 cells 为 RASST `75.9398`、
+  InfiniSST `77.3245`，平均差值 `-1.3848`，0/4 cells 为正。16 cells 合计为
+  RASST `78.0131`、InfiniSST `78.2724`、差值 `-0.2593`，8/16 为正。
 - 结果是 mixed；不能用 xCOMET 声称 RASST 的 overall translation quality 普遍或
   显著提升。paper-exact ESO 复算、cache 差异、运行环境和全部哈希见
   [`xcomet_paper_exact_eso_de_report.md`](xcomet_paper_exact_eso_de_report.md)。
   原 [`xcomet_xxl_report.md`](xcomet_xxl_report.md) 保留为 release-cache 诊断，
-  其中 ESO `-3.1716` 不再作为 submitted-paper exact 结果。
+  其中 ESO `-3.1716` 不再作为 submitted-paper exact 结果；旧 baseline 与
+  paper-exact RASST 的 `-2.1012` 也仅保留为中间修正记录。
 - Git-tracked paper-exact ESO 轻量产物：
+  [`xcomet_new_infinisst_vs_paper_exact_rasst.tsv`](xcomet_new_infinisst_vs_paper_exact_rasst.tsv)、
+  [`xcomet_new_infinisst_lm123_summary.tsv`](xcomet_new_infinisst_lm123_summary.tsv)、
+  [`xcomet_new_infinisst_lm123_validation.json`](xcomet_new_infinisst_lm123_validation.json)、
+  [`xcomet_new_infinisst_lm4_summary.tsv`](xcomet_new_infinisst_lm4_summary.tsv)、
+  [`xcomet_new_infinisst_lm4_validation.json`](xcomet_new_infinisst_lm4_validation.json)、
   [`xcomet_paper_exact_combined_summary.tsv`](xcomet_paper_exact_combined_summary.tsv)、
   [`xcomet_paper_exact_combined_paired.tsv`](xcomet_paper_exact_combined_paired.tsv)、
   [`xcomet_paper_exact_eso_de_summary.tsv`](xcomet_paper_exact_eso_de_summary.tsv)、
   [`xcomet_paper_exact_eso_de_paired.tsv`](xcomet_paper_exact_eso_de_paired.tsv) 和
   [`xcomet_paper_exact_eso_de_validation.json`](xcomet_paper_exact_eso_de_validation.json)。
-  独立 validator 从 11,496 条逐句结果反算并核对了 8 systems / 4 pairs；原 ACL
-  24 systems / 12 pairs 的 validator 结果保持不变。
+  Paper-exact RASST 来源运行的 validator 核对了 8 systems / 4 pairs / 11,496
+  segments；new InfiniSST 的 lm1--3 与 lm4 来源运行分别核对 6 systems / 3 pairs /
+  8,622 segments 和 2 systems / 1 pair / 2,874 segments。交叉表只组合已验证
+  system means，不声称一次新的 combined sentence-level win/tie/loss 检验。
 
 逐句 JSONL 与输入 bundle 位于 Hyper00 staging
 `/data02/jaxan/RASST_rebuttal_20260710`；paper-exact ESO 逐句文件为
 `results/xcomet_paper_exact_eso_de_20260712/segments.jsonl`。它们的预定
+New InfiniSST 逐句文件位于
+`results/xcomet_eso_de_infinisst_rerun_lm123_20260712/segments.jsonl` 与
+`results/xcomet_eso_de_infinisst_rerun_lm4_20260712/segments.jsonl`。它们的预定
 Hugging Face 目标为
 `gavinlaw/rasst-main-result-data` 下的 versioned rebuttal artifact。目前没有可用的
 Hugging Face 写入凭据，上传状态为 **pending**，本地 staging 不能视为 canonical。
