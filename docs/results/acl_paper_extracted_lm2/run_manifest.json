@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "event_id": "20260711T215140Z__simuleval__rebuttal_acl_paper_extracted_lm2",
-  "status": "partial_zh_complete_ja_running_de_queued",
+  "status": "partial_zh_complete_ja_and_de_running",
   "dataset": "acl6060_paper_extracted_realistic_glossary_v1",
   "glossary_manifest": "data/glossaries/acl_paper_extracted/manifest.json",
   "languages": ["zh", "ja", "de"],
@@ -32,7 +32,10 @@
     "active_or_queued_jobs": {
       "zh": "47067",
       "ja": "47068",
-      "de": "47069"
+      "de": "47072"
+    },
+    "cancelled_jobs": {
+      "de_dependency_job": "47069"
     },
     "runtime_output_root": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/rebuttal_acl_paper_extracted_lm2_20260711T215140Z"
   },
@@ -54,9 +57,10 @@
       "slurm_job_id": "47068"
     },
     "de": {
-      "status": "queued",
-      "slurm_job_id": "47069",
-      "dependency": "afterany:47068"
+      "status": "running",
+      "slurm_job_id": "47072",
+      "gpu_pair": "0,1",
+      "replaces_cancelled_job": "47069"
     }
   },
   "naming_note": "The inherited output density label contains tau073, but RAG_SCORE_THRESHOLD was overridden to 0.78 and per-paper output paths record th0.78. The actual threshold is 0.78.",
