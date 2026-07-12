@@ -103,23 +103,32 @@ Hugging Face 目标为
 `gavinlaw/rasst-main-result-data` 下的 versioned rebuttal artifact。目前没有可用的
 Hugging Face 写入凭据，上传状态为 **pending**，本地 staging 不能视为 canonical。
 
-## LLM-as-a-judge
+## LLM-as-a-judge（WMT25 prompt）
 
-状态：**100-request cost pilot 已完成；full run pending model decision**。
+状态：**100-request pilot 已完成；full Batch blocked，等待作者确认约 50 USD 预算
+并轮换 Gemini key**。
 
-- 与 xCOMET 使用同一 paper-exact scope：32 systems / 16 strict pairs / 22,728
-  sentence outputs。该数量已经包含 RASST 和 InfiniSST，不需要再乘以 2。
-- Pilot 按 16 cells 的真实大小分层抽取 50 个 paired segments，共 100 个 system
-  outputs；两个模型均为 100/100 valid responses。
-- `gemini-3.1-pro-preview` 默认 thinking 为 `771.14 tokens/request`，完整 Batch
-  点估计 `$109.06`；`gemini-2.5-flash` 为 `1,680.43 tokens/request`，点估计
-  `$48.19`。详细区间、模型 agreement、输入 hash 和限制见
+- 使用 WMT25 Appendix A 的 exact Task 1 prompt；judge request 只含 source 与
+  hypothesis。评分 inference 是 reference-free，但逐句 unit 来自依赖 human
+  reference 的 `mwerSegmenter` alignment，不能写成全流程 reference-independent。
+- 全量矩阵为 ACL 5 talks × 4 LM × En-Zh/De/Ja，以及 ESO/Medicine 5 talks ×
+  4 LM × En-De：共 32 system rows / 16 strict pairs / 22,728 requests，按 pair cell
+  拆为 16 shards。该数量已经包含 RASST 和 InfiniSST，不需要再乘以 2。
+- ACL 只从 SHA-256
+  `43b5581bc79e8c389383e6fb84b684f4f7207334c114a0cc0b8b19d47d2a459b`
+  的 artifact 选择 11,232 个 `acl_tagged_raw` rows；ESO/Medicine 必须改用
+  paper-exact SHA-256
+  `40454563ea39d20f04970b8a733dc0a370d8ab0e0a4cb25c0f7720bf5491e997`
+  的 11,496 rows，不能复用旧 release-cache medicine rows。
+- WMT25 的 `gemini-2.5-pro` 在当前账号实测返回 404。100-request paired pilot 使用
+  `generation_config={}` 和 model-default thinking；当前建议可用的
+  `gemini-2.5-flash`，全量 Batch 投影约 `$48.19`（bootstrap 95% `$43.72–$52.93`）。
+  `gemini-3.1-pro-preview` 投影约 `$109.06`，且不是 WMT25 model reproduction。
+- API key 只允许从 Taurus mode `0600` 私有文件读取，key 值不进入 Git、命令、
+  manifest 或日志；聊天中出现过的 key 必须先轮换。Staging root、pinned venv、
+  exact prompt、输入路径/哈希、费用风险和 HF pending 状态见
+  [`llm_judge_wmt25_protocol.md`](llm_judge_wmt25_protocol.md)；pilot 详细数字见
   [`llm_judge_pilot_100.md`](llm_judge_pilot_100.md)。
-- Raw requests、responses、machine-readable report 和 manifest 当前位于 Taurus
-  staging
-  `/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/rebuttal_2026/llm_judge_wmt25/pilot_100`，
-  预定 Hugging Face 目标为 `gavinlaw/rasst-main-result-data` 下的 versioned rebuttal
-  artifact，上传状态为 **pending**。
 
 ## Paper-derived realistic glossary
 
