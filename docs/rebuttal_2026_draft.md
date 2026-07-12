@@ -96,13 +96,20 @@ En-De. BLEU nevertheless rises by `+0.259/+0.453` and `+0.208/+0.715`,
 respectively, illustrating that corpus BLEU can miss degradation concentrated
 in terminology. xCOMET (multiplied by 100) is lower than the corresponding
 `0%` control in all six degraded cells: deltas are `-0.599/-1.020` (Zh),
-`-0.752/-0.471` (De), and `-5.971/-1.071` (Ja). En-Ja TERM_ACC is also lower
-at both settings (`70.00/76.06%` versus `84.57%`), but the `25%` run enters a
-particularly poor autoregressive generation path. We therefore interpret this
-as evidence of sensitivity, not a monotonic dose-response or a significance
-result; each condition is one stochastic rerun. StreamLAAL is stable within
-23 ms of control for En-Zh/De, while En-Ja latency changes with its output
-length and generation path.
+`-0.752/-0.471` (De), and `-5.971/-1.071` (Ja). The first En-Ja `25%` run
+enters a particularly poor autoregressive path in one talk. A full same-mask
+rerun reproduces its BLEU (`18.714`), TERM_ACC (`70.00%`), xCOMET (`64.408`),
+and the same max-token loop, so this is not a scoring error or one-off decoding
+sample. With an independently drawn corruption mask (actual replacement
+`24.31/50.26%`), no loop occurs and En-Ja changes monotonically from the `0%`
+control: TERM_ACC `84.57 -> 82.77 -> 78.40%`, BLEU
+`29.889 -> 28.717 -> 27.717`, and xCOMET
+`70.379 -> 68.417 -> 67.137`. Across both masks every degraded En-Ja condition
+is below control in TERM_ACC and xCOMET, but the magnitude and ordering are
+mask-sensitive. We therefore claim sensitivity, not a universal monotonic
+dose-response or significance result. StreamLAAL is stable within 23 ms of
+control for En-Zh/De; En-Ja latency varies with output length and generation
+path.
 
 ### Why terminology gains can be much larger than BLEU gains
 
@@ -316,10 +323,13 @@ Before submission, the revision will:
   `docs/results/rebuttal_2026/term_failure_chain_acl_lm2.tsv`, and
   `docs/results/rebuttal_2026/retrieval_noise_audit_acl_lm2.tsv`
 - Fixed-compute retrieval degradation protocol, complete 9-cell table, and
-  independent xCOMET validation:
+  independent xCOMET validation, including the En-Ja same-mask rerun and fresh
+  corruption-seed sensitivity check:
   `docs/results/rebuttal_2026/retrieval_degradation_ablation.md`,
   `docs/results/rebuttal_2026/retrieval_degradation_acl_lm2.tsv`, and
-  `docs/results/rebuttal_2026/retrieval_degradation_xcomet_validation.json`
+  `docs/results/rebuttal_2026/retrieval_degradation_xcomet_validation.json`,
+  `docs/results/rebuttal_2026/retrieval_degradation_ja_seed_sensitivity.tsv`,
+  and `docs/results/rebuttal_2026/retrieval_degradation_ja_rerun_xcomet_summary.tsv`
 - Official xCOMET paper and implementation provenance:
   [TACL paper](https://aclanthology.org/2024.tacl-1.54/),
   [COMET repository](https://github.com/Unbabel/COMET)
