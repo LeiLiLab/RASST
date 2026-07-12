@@ -54,6 +54,10 @@ Aries 并发按 NVLink 拓扑安排为：`2,3 + retriever 4`、`6,7 + retriever 
 
 因此最稳妥的 rebuttal 结论不是强求三语平均或单调曲线，而是：在固定 retrieval compute 和 hint count 下，降低实际 hint P/R 会使三语 TERM_ACC 与 xCOMET 均低于各自 `0%` 基线；BLEU 对 En-Zh/De 的这一损害没有反映出来。有限 corruption seeds 不能支持方差、显著性或普遍单调性声明。
 
+## Rebuttal presentation table
+
+用于 rebuttal 正文的紧凑三语表见 [`retrieval_degradation_rebuttal_table.tsv`](retrieval_degradation_rebuttal_table.tsv)。该表组合 En-Zh/De 的 primary controlled runs 与 En-Ja 的 fresh-mask run，使正文只呈现没有 generation loop 的 En-Ja sensitivity 结果。正文不展开 seed 或 same-mask debugging；本文件和下方 seed-sensitivity TSV 继续保留完整 provenance。该合并表不是 multi-seed aggregate，不能据此报告均值、方差或显著性。
+
 ## En-Ja rerun 与 corruption-seed sensitivity
 
 为判断原 En-Ja `25%` 是否偶然，进行了两种互补检查。完整逐行结果见 [`retrieval_degradation_ja_seed_sensitivity.tsv`](retrieval_degradation_ja_seed_sensitivity.tsv)。
