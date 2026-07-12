@@ -1,0 +1,45 @@
+ROLE:
+You judge whether a no-RAG baseline translation correctly translated a medical term in context.
+
+TASK:
+Each item gives:
+- `id`
+- `lang`
+- English `term`
+- expected target-language `target_translation`
+- English `source_sentence`
+- reference translation of the source sentence
+- baseline prediction for the same sentence or nearby aligned segment
+
+Decide whether the baseline prediction correctly conveys the term in this context.
+
+JUDGMENT RULES:
+- Mark `correct` if the baseline uses the exact target translation or an acceptable synonym/paraphrase that preserves the same medical meaning.
+- Mark `correct` if a harmless spelling, punctuation, spacing, or script variant preserves the same term.
+- Mark `wrong_or_missing` if the term is omitted, mistranslated, replaced by a meaningfully different concept, overly generalized, or copied in English when the expected target translation requires a translated/expanded form.
+- For abbreviations:
+  - If the expected target translation is an expanded society/drug/class/concept name, copying only the acronym is usually `wrong_or_missing`.
+  - If the expected target translation itself is the acronym or the acronym is standard in the target language, copying it is `correct`.
+- Mark `not_assessable` only if the baseline prediction is clearly not aligned to the source sentence or there is not enough context to judge.
+
+OUTPUT FORMAT:
+Return ONLY a valid JSON object:
+
+{
+  "judgments": [
+    {
+      "id": 123,
+      "label": "correct|wrong_or_missing|not_assessable",
+      "baseline_rendering": "the baseline phrase that corresponds to the term, or empty string",
+      "reason": "brief reason"
+    }
+  ]
+}
+
+STRICT CONSTRAINTS:
+- Return one judgment for every input id.
+- Preserve ids exactly.
+- Do not include markdown or explanation outside the JSON object.
+
+ITEMS_JSON:
+[[ITEMS_JSON]]
