@@ -129,6 +129,7 @@ print(json.dumps({'index_path': path, 'manifest_path': path + '.manifest.json', 
                 index_cache_dir=root / "index_cache",
                 output_dir=root / "outputs",
                 mwer_segmenter_bin=mwer,
+                lms=[1, 2, 3, 4],
                 density_tag="realistic_gemini25flash",
                 index_device="cuda:1",
                 rag_device="cuda:1",
@@ -180,6 +181,68 @@ print(json.dumps({'index_path': path, 'manifest_path': path + '.manifest.json', 
             self.assertEqual(
                 offline_command[offline_command.index("--mwer-segmenter") + 1],
                 str(mwer.resolve()),
+            )
+
+    def test_plan_can_select_only_default_lm2(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            prepared_path, prepared = self._prepared_fixture(root)
+            prepared["runtime_glossary_policy"] = "paper-derived plus NLP/AI/CS 10k"
+            prepared["runtime_glossary_tag"] = "paper_plus_nlp_ai_cs_10k"
+            prepared_path.write_text(json.dumps(prepared), encoding="utf-8")
+            repo = self._fake_repo(root)
+            model = root / "model"
+            _write(model / "config.json", "{}\n")
+            _write(model / "model.safetensors.index.json", "{}\n")
+            _write(model / "model-00001-of-00001.safetensors", "weights\n")
+            retriever = _write(root / "retriever.pt", "retriever\n")
+            mwer = _write(root / "mwer/mwerSegmenter", "#!/bin/sh\n")
+            mwer.chmod(0o755)
+            args = argparse.Namespace(
+                prepared_manifest=prepared_path,
+                repo_root=repo,
+                python_bin=Path(sys.executable),
+                model=[f"zh={model}"],
+                retriever_checkpoint=retriever,
+                index_cache_dir=root / "index_cache",
+                output_dir=root / "outputs",
+                mwer_segmenter_bin=mwer,
+                lms=[2],
+                density_tag="realistic_paper_plus_10k",
+                index_device="cuda:1",
+                rag_device="cuda:1",
+                rag_top_k=10,
+                rag_score_threshold=0.78,
+                rag_timeline_lookback_sec=1.92,
+                rag_lora_rank=128,
+                text_lora_rank=128,
+                text_lora_alpha=256,
+                vllm_tp_size=2,
+                gpu_memory_utilization=0.72,
+                max_model_len=32768,
+                max_num_seqs=8,
+                scheduler_batch_size=8,
+                schedule_mode="round_robin",
+                vllm_limit_audio=128,
+                vllm_enforce_eager=0,
+                disable_custom_all_reduce=0,
+                safetensors_load_strategy="lazy",
+                temperature=0.6,
+                top_p=0.95,
+                top_k_decode=20,
+                max_new_tokens=40,
+                seed=998244353,
+            )
+            run = MODULE.build_run_manifest(args)
+            self.assertEqual(len(run["eval_tasks"]), 1)
+            self.assertEqual(run["eval_tasks"][0]["lms"], [2])
+            self.assertEqual(run["eval_tasks"][0]["cache_chunks"], 30)
+            self.assertEqual(len(run["aggregate_tasks"]), 1)
+            self.assertEqual(run["aggregate_tasks"][0]["lm"], 2)
+            self.assertEqual(run["parameters"]["lms"], [2])
+            self.assertEqual(
+                run["parameters"]["runtime_glossary"],
+                "paper-derived plus NLP/AI/CS 10k",
             )
 
     def test_merge_aggregate_inputs_preserves_canonical_paper_order(self) -> None:

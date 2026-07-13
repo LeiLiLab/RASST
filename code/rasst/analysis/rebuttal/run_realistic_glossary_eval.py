@@ -148,8 +148,17 @@ def _validate_prepared_manifest(path: Path) -> Dict[str, Any]:
         "rasst_acl_realistic_paper_glossary_prepared"
     ):
         raise ValueError(f"Unsupported prepared manifest: {path}")
-    if manifest.get("gemini_model") != "gemini-2.5-flash":
-        raise ValueError("Prepared manifest is not pinned to gemini-2.5-flash")
+    runtime_policy = manifest.get("runtime_glossary_policy")
+    if runtime_policy is None:
+        if manifest.get("gemini_model") != "gemini-2.5-flash":
+            raise ValueError("Legacy prepared manifest is not pinned to gemini-2.5-flash")
+    elif not isinstance(runtime_policy, str) or not runtime_policy.strip():
+        raise ValueError("Prepared manifest has an invalid runtime_glossary_policy")
+    runtime_tag = manifest.get("runtime_glossary_tag")
+    if runtime_tag is not None and (
+        not isinstance(runtime_tag, str) or _safe_tag(runtime_tag) != runtime_tag
+    ):
+        raise ValueError("Prepared manifest has an invalid runtime_glossary_tag")
     separation = manifest.get("separation_policy")
     if not isinstance(separation, dict) or separation.get(
         "gold_used_to_build_runtime_glossary"
@@ -173,6 +182,29 @@ def _validate_prepared_manifest(path: Path) -> Dict[str, Any]:
             if sha256_file(artifact) != record.get("sha256"):
                 raise ValueError(f"Prepared artifact hash mismatch: {artifact}")
     return manifest
+
+
+def _runtime_glossary_identity(prepared: Mapping[str, Any]) -> Tuple[str, str]:
+    policy = prepared.get("runtime_glossary_policy")
+    if isinstance(policy, str) and policy.strip():
+        tag = str(prepared.get("runtime_glossary_tag") or policy)
+        return policy, _safe_tag(tag)
+    return "paper-specific Gemini-2.5-flash extraction", "gemini25"
+
+
+def _selected_cache_groups(lms: Sequence[int]) -> Tuple[Tuple[Tuple[int, ...], int], ...]:
+    requested = tuple(int(lm) for lm in lms)
+    if not requested or len(requested) != len(set(requested)):
+        raise ValueError("--lms must contain one or more unique values")
+    unsupported = sorted(set(requested) - {1, 2, 3, 4})
+    if unsupported:
+        raise ValueError(f"Unsupported latency multipliers: {unsupported}")
+    groups: List[Tuple[Tuple[int, ...], int]] = []
+    for group_lms, cache_chunks in CACHE_GROUPS:
+        selected = tuple(lm for lm in group_lms if lm in requested)
+        if selected:
+            groups.append((selected, cache_chunks))
+    return tuple(groups)
 
 
 def _run_checked(command: Sequence[str], *, cwd: Path, capture: bool = False) -> str:
@@ -252,6 +284,13 @@ def _expected_eval_dir(
 def build_run_manifest(args: argparse.Namespace) -> Dict[str, Any]:
     prepared_path = _require_file(args.prepared_manifest)
     prepared = _validate_prepared_manifest(prepared_path)
+    runtime_glossary_policy, runtime_glossary_tag = _runtime_glossary_identity(prepared)
+    selected_cache_groups = _selected_cache_groups(
+        getattr(args, "lms", (1, 2, 3, 4))
+    )
+    selected_lms = tuple(
+        lm for group_lms, _ in selected_cache_groups for lm in group_lms
+    )
     repo_root = _require_dir(args.repo_root)
     python_bin = _require_file(args.python_bin)
     retriever = _require_file(args.retriever_checkpoint)
@@ -290,7 +329,9 @@ def build_run_manifest(args: argparse.Namespace) -> Dict[str, Any]:
         for paper_id in prepared["paper_ids"]:
             shard = shard_by_key[(language, paper_id)]
             glossary = Path(shard["runtime_glossary"]["path"])
-            glossary_tag = _safe_tag(f"gemini25_{paper_id}_{language}")
+            glossary_tag = _safe_tag(
+                f"{runtime_glossary_tag}_{paper_id}_{language}"
+            )
             resolved, resolve_command = _resolve_index(
                 python_bin=python_bin,
                 cache_tool=cache_tool,
@@ -371,7 +412,7 @@ def build_run_manifest(args: argparse.Namespace) -> Dict[str, Any]:
         for paper_id in prepared["paper_ids"]:
             shard = shard_by_key[(language, paper_id)]
             index_task = index_by_key[(language, paper_id)]
-            for lms, cache_chunks in CACHE_GROUPS:
+            for lms, cache_chunks in selected_cache_groups:
                 group_tag = "lm" + "_".join(str(lm) for lm in lms)
                 task_output_base = output_dir / "shards" / language / paper_id / group_tag
                 command = [
@@ -394,7 +435,7 @@ def build_run_manifest(args: argparse.Namespace) -> Dict[str, Any]:
                     "--output-base",
                     str(task_output_base),
                     "--run-tag",
-                    f"realistic_gemini25_{language}_{paper_id}_{group_tag}",
+                    f"realistic_{runtime_glossary_tag}_{language}_{paper_id}_{group_tag}",
                     "--density-tag",
                     args.density_tag,
                     "--glossary-tag",
@@ -521,7 +562,7 @@ def build_run_manifest(args: argparse.Namespace) -> Dict[str, Any]:
     aggregate_tasks: List[Dict[str, Any]] = []
     full_gold = prepared["fixed_raw_gold_eval_glossary"]["path"]
     for language in languages:
-        for lm in (1, 2, 3, 4):
+        for lm in selected_lms:
             aggregate_dir = output_dir / "aggregate" / language / f"lm{lm}"
             source_tasks = [
                 task
@@ -614,8 +655,9 @@ def build_run_manifest(args: argparse.Namespace) -> Dict[str, Any]:
             "density_tag": args.density_tag,
             "cache_groups": [
                 {"lms": list(lms), "max_keep_cache_chunks": cache}
-                for lms, cache in CACHE_GROUPS
+                for lms, cache in selected_cache_groups
             ],
+            "lms": list(selected_lms),
             "rag_top_k": args.rag_top_k,
             "rag_score_threshold": args.rag_score_threshold,
             "rag_timeline_lookback_sec": args.rag_timeline_lookback_sec,
@@ -641,7 +683,7 @@ def build_run_manifest(args: argparse.Namespace) -> Dict[str, Any]:
             "max_new_tokens": args.max_new_tokens,
             "max_new_tokens_policy": "lm_scaled",
             "seed": args.seed,
-            "runtime_glossary": "paper-specific Gemini-2.5-flash extraction",
+            "runtime_glossary": runtime_glossary_policy,
             "term_acc_denominator": "fixed existing raw-gold ACL glossary",
         },
         "index_tasks": index_tasks,
@@ -881,7 +923,8 @@ def _add_plan_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--index-cache-dir", required=True, type=Path)
     parser.add_argument("--output-dir", required=True, type=Path)
     parser.add_argument("--mwer-segmenter-bin", required=True, type=Path)
-    parser.add_argument("--density-tag", default="realistic_gemini25flash")
+    parser.add_argument("--lms", nargs="+", type=int, default=[1, 2, 3, 4])
+    parser.add_argument("--density-tag", default="realistic_paper_glossary")
     parser.add_argument("--index-device", default="cuda:1")
     parser.add_argument("--rag-device", default="cuda:1")
     parser.add_argument("--rag-top-k", type=int, default=10)
