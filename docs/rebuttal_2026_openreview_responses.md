@@ -110,30 +110,34 @@ both hypotheses and references, RASST remains higher in **10/12** ACL cells by
 **+0.992 BLEU** on average (regular-BLEU delta: **+1.911**). We present masking
 as a diagnostic, not a causal decomposition.
 
-**Which cases benefit, and which remain difficult.** We traced every gold
-occurrence at the fixed intermediate operating point (`lm=2`) over the five ACL
-talks only. Exact correctness conditioned on the correct hint arriving
-**within the source sentence / after its boundary / never** is
-**86.1/82.8/59.3%** for En-De, **92.7/89.8/71.6%** for En-Zh, and
-**89.2/83.6/60.8%** for En-Ja. All three languages show the same pattern: late
-retrieval causes a modest drop, whereas never retrieving the term corresponds
-to a **21-28 point** drop relative to on-time retrieval.
+**Which terminology types benefit, and which terms remain difficult.** We classified all
+3,266 ACL gold-term occurrences at the fixed `lm=2` point using a reproducible
+English surface-form taxonomy:
 
-The traces make the qualitative pattern concrete. Names/acronyms and multiword
-technical expressions show clear benefits: RASST preserves Japanese `LinCE`
-where InfiniSST outputs `Lingthen`, preserves Chinese `BiLSTM-CRF` where the
-baseline outputs `BIOSD-EM-CRF`, and produces German `maskiertes Sprachmodell`
-("masked language model") where the baseline drifts to a generic pretrained
-language model. Remaining difficulties include a never-retrieved homophone
-(`BLEU` -> `Blue`), a late named entity (`LinCE` -> `LINTEX`; the correct hint
-first arrives about 0.58 s after the sentence boundary), and delayed commitment
-across streaming segments. Exact matching can also undercount valid inflection,
-for example `morphologische Analyse` versus grammatical `mittels
-morphologischer Analyse`; we will distinguish such metric false negatives from
-genuine translation errors.
+| Term type | Occurrences | RASST exact | InfiniSST exact | Delta |
+| --- | ---: | ---: | ---: | ---: |
+| Acronym / symbolic name | 343 | **88.05%** | 53.06% | **+34.99 pp** |
+| Multiword expression | 192 | **84.90%** | 55.21% | **+29.69 pp** |
+| Single-word term | 2,731 | **86.56%** | 74.33% | **+12.23 pp** |
 
-We will add the operational definition, provenance table, xCOMET/masked-BLEU
-results, and a compact success/failure table with these verified examples.
+The strongest gains therefore occur for rare acronyms/symbolic names
+(`KinyaBERT`, `RGF`, `BiLSTM-CRF`, `BETO`, `FLR`) that the baseline often
+corrupts phonetically, and for multiword expressions (`morphological analyzer`,
+`question generation`, `named entity recognition`, `masked language model`)
+whose components the baseline may omit or paraphrase generically. This pattern
+holds separately in all three languages.
+
+Conversely, 109/127 raw exact losses are single-word terms. Our audit finds
+that 71/127 are actually valid paraphrases, morphology/orthography variants, or
+streaming-boundary shifts, leaving 56 genuine losses (34 omissions and 22 wrong
+translations), of which 45 are single-word terms. Genuine difficulty
+concentrates in short, generic/polysemous entries such as `question`, `graph`,
+`input`, and `context`; acoustically confusable rare names
+(`ICLR -> ACL`, `LinCE -> LINTEX`, `BLEU -> Blue`); and overlapping entries
+that require contextual disambiguation (e.g., Japanese `text classification`
+being pulled toward `context -> 文脈`, yielding `文脈分類`). We will add this
+type-level table and representative successes/failures, while separating exact
+metric false negatives from genuine errors.
 <!-- RESPONSE:OKTU:END -->
 
 ## 3. Reviewer gbii
@@ -150,17 +154,35 @@ noisy, time-varying hints. InfiniSST is the most controlled primary baseline:
 it uses the same evaluation inputs, cache/decode policy, latency settings, and
 scoring pipeline, with retrieval disabled. Our new controlled evidence is:
 
+**End-to-end multi-scale comparison.** At the fixed En-Zh `lm=2` operating
+point, we evaluate all variants through the complete SST pipeline:
+
+| Variant | BLEU ↑ | StreamLAAL ↓ | TERM_ACC ↑ |
+| --- | ---: | ---: | ---: |
+| **Multi-scale** | **47.8780** | **1814.34 ms** | **90.00%** |
+| Largest-infer | 47.8261 | 1868.37 ms | 84.72% |
+| Largest-train | 45.7960 | 1863.20 ms | 73.93% |
+
+Relative to Multi-scale, Largest-infer changes BLEU by **-0.052**, StreamLAAL
+by **+54.03 ms**, and TERM_ACC by **-5.28 points**; Largest-train changes them
+by **-2.082**, **+48.86 ms**, and **-16.07 points**, respectively.
+Largest-infer is essentially BLEU-tied but worse in terminology accuracy and
+latency, while Largest-train shows clear end-to-end BLEU and terminology
+losses. This full-pipeline result corroborates the original retrieval-only
+ablation.
+
+Our other controlled evidence is:
+
 | ACL evidence | Matched comparison | Result |
 | --- | --- | --- |
-| Multi-scale, Zh `lm=2` | Largest-infer / fixed-window train+infer | TERM_ACC **90.00 vs. 84.72/73.93**; BLEU 47.88 vs. 47.83/45.80 |
 | Target-tag SFT, Zh `lm=1-4` | Target tags removed only | **+4.11 pp** TERM_ACC; **+5.36 pp** correct-term adoption |
 | 25%/50% hint corruption, `lm=2` | 0%; same hint count/retrieval compute | Delta TERM_ACC Zh: -1.91/-4.27; De: -3.31/-7.59; Ja: -1.80/-6.17 pp; xCOMET lower in all six |
 | Target-masked BLEU, 12 cells | InfiniSST | **+0.99** average; **10/12** wins (regular BLEU: +1.91) |
 
-The first two rows locate the gains in the streaming-specific retrieval and
-training design, not merely appending glossary entries to a prompt. We will
-clarify this scope rather than claim dominance over all biasing architectures
-with different backbones or budgets.
+The end-to-end comparison and target-tag ablation locate the gains in the
+streaming-specific retrieval and training design, not merely appending glossary
+entries to a prompt. We will clarify this scope rather than claim dominance
+over all biasing architectures with different backbones or budgets.
 
 **Less-curated terminology.** In the five-talk paper-derived condition, each
 RASST run retrieves only from a glossary built from that talk's paper; neither
@@ -215,8 +237,9 @@ ESO/Medicine.
 - **oktu:** glossary-entry operational definition；ACL dataset-provided human
   annotations 的官方 qualification（source technical terms 经 domain expert
   check；target 由母语 professional post-editor + second reviewer）；12/12
-  TERM_ACC win；masked BLEU；三语 timing conditionals；`LinCE`、
-  `BiLSTM-CRF`、`masked language model` 成功例与三类困难例。
+  TERM_ACC win；masked BLEU；三语 term-type taxonomy（acronym/symbolic
+  `+34.99 pp`、multiword `+29.69 pp`、single-word `+12.23 pp`）；benefit/loss
+  的真实例子与 exact-metric false-negative 分解。
 - **gbii:** same-checkpoint largest-window end-to-end control；no-tag control；固定 hint
   count/compute 的 degradation；术语 token share 与 masked BLEU；定量 failure chain。
 
@@ -264,6 +287,8 @@ ESO/Medicine.
   reported-vs-pooled aggregation kept separate.
 - `origin/main@4446ad8`: compact retrieval-degradation rebuttal table.
 - `origin/main@ae24301`: En-Zh target-tag ablation.
+- `docs/results/rebuttal_2026/term_type_analysis_acl_lm2.md`: ACL-only
+  `lm=2` terminology-type gains/losses, audit split, and reproducible taxonomy.
 - `origin/main@06afe4d`: validated ACL xCOMET paired results.
 - `origin/main@7277d08`: masked BLEU and term-prevalence diagnostics.
 - `origin/main`: multi-scale end-to-end ablation under

@@ -261,6 +261,23 @@ translation omission，也不要把 raw false-copy flag 直接叫作 true term n
 
 ## 6. 建议给 reviewers 的简短表述
 
+给 oktu 的主回答应使用 term-type analysis，而不是 retrieval timing：
+
+> Across 3,266 ACL gold-term occurrences at `lm=2`, RASST improves exact-form
+> accuracy over InfiniSST by 34.99 points for acronyms/symbolic names, 29.69
+> points for multiword expressions, and 12.23 points for single-word terms.
+> Benefits are largest for rare names/acronyms that the baseline corrupts
+> phonetically and for multiword expressions that it partially omits or
+> paraphrases. Conversely, 109/127 reverse exact losses are single-word terms;
+> an author audit identifies 71 as paraphrase, form, or boundary false
+> negatives, leaving 56 genuine losses, mainly omissions or wrong translations
+> of short/context-dependent terms.
+
+完整 taxonomy、三语一致性与 examples 见
+[`term_type_analysis_acl_lm2.md`](term_type_analysis_acl_lm2.md)。
+
+下面的 timing chain 更适合回答 gbii 关于 retrieval failure 的问题：
+
 > At the fixed intermediate operating point (`lm=2`), exact correctness is
 > 86.1% when the correct hint arrives within the source sentence, 82.8% when it
 > first arrives after the sentence boundary, and 59.3% when it is never

@@ -1,0 +1,35 @@
+{
+  "dataset": "acl_tagged_raw",
+  "input_sha256": {
+    "de": {
+      "path": "outputs/rebuttal_2026/term_failure_acl_lm2/de/occurrences.tsv",
+      "sha256": "7efbea61a62683b2596c02d568cff3de62f1c79449a0b69ba60be87e870207e4"
+    },
+    "ja": {
+      "path": "outputs/rebuttal_2026/term_failure_acl_lm2/ja/occurrences.tsv",
+      "sha256": "05b6c8237d87fd7f3f3306b6a28d160cf2beaac559e4a48d61bc2f051669a289"
+    },
+    "zh": {
+      "path": "outputs/rebuttal_2026/term_failure_acl_lm2/zh/occurrences.tsv",
+      "sha256": "0bdb300b92babc22fe62305aae48e5138e5eea4384366badd1b5a3d49b81e4c4"
+    }
+  },
+  "languages": [
+    "de",
+    "zh",
+    "ja"
+  ],
+  "lm": 2,
+  "occurrence_rows": 3266,
+  "outputs": {
+    "loss_audit": "docs/results/rebuttal_2026/term_type_loss_audit_acl_lm2.tsv",
+    "summary": "docs/results/rebuttal_2026/term_type_outcomes_acl_lm2.tsv",
+    "term_outcomes": "docs/results/rebuttal_2026/term_type_terms_acl_lm2.tsv"
+  },
+  "taxonomy": {
+    "acronym_or_symbolic_name": "contains an all-caps token, internal capitalization, or a digit",
+    "multiword_expression": "contains at least two alphanumeric tokens and is not symbolic",
+    "single_word_term": "all remaining glossary terms"
+  },
+  "unique_source_terms": 238
+}

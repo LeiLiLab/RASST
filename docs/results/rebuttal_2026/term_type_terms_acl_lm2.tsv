@@ -1,0 +1,239 @@
+term_type	term	languages	gain	loss	both_correct	both_wrong	net_gain_minus_loss
+acronym_or_symbolic_name	KinyaBERT	de,ja,zh	25	0	0	2	25
+acronym_or_symbolic_name	RGF	de,ja,zh	21	0	10	2	21
+acronym_or_symbolic_name	REALM	de,ja,zh	11	0	0	2	11
+acronym_or_symbolic_name	BiLSTM-CRF	de,ja,zh	10	1	6	1	9
+acronym_or_symbolic_name	NLP	de,ja,zh	8	0	13	0	8
+acronym_or_symbolic_name	BETO	de,ja,zh	8	1	3	2	7
+acronym_or_symbolic_name	FLR	de,ja,zh	7	1	6	4	6
+acronym_or_symbolic_name	TreeDST	de,ja,zh	5	0	1	0	5
+acronym_or_symbolic_name	BIO	de,ja,zh	4	0	4	1	4
+acronym_or_symbolic_name	BLEU	de,ja,zh	4	0	0	2	4
+acronym_or_symbolic_name	BPE	de,ja,zh	4	0	17	0	4
+acronym_or_symbolic_name	multilingual BERT	de,ja,zh	4	0	6	0	4
+acronym_or_symbolic_name	QUOREF	de,ja,zh	3	0	0	0	3
+acronym_or_symbolic_name	AmbigQA	de,ja,zh	2	0	1	0	2
+acronym_or_symbolic_name	AQA	de,ja,zh	2	0	1	0	2
+acronym_or_symbolic_name	BLEU score	de,ja,zh	2	0	0	1	2
+acronym_or_symbolic_name	LinCE	de,ja,zh	2	0	0	4	2
+acronym_or_symbolic_name	CRF	de,ja,zh	2	1	30	0	1
+acronym_or_symbolic_name	BERT	de,ja,zh	1	0	29	0	1
+acronym_or_symbolic_name	CDA	de,ja,zh	1	0	2	0	1
+acronym_or_symbolic_name	CONLL	de,ja,zh	1	0	2	0	1
+acronym_or_symbolic_name	QED	de,ja,zh	1	0	7	1	1
+acronym_or_symbolic_name	OOV	de,ja,zh	1	1	1	3	0
+acronym_or_symbolic_name	AI	de,ja,zh	0	0	0	3	0
+acronym_or_symbolic_name	BART	de,ja,zh	0	0	3	0	0
+acronym_or_symbolic_name	BERT model	de,ja,zh	0	0	3	0	0
+acronym_or_symbolic_name	NLP task	de,ja,zh	0	0	2	1	0
+acronym_or_symbolic_name	PubMed	de,ja,zh	0	0	3	0	0
+acronym_or_symbolic_name	QA	de,ja,zh	0	0	3	0	0
+acronym_or_symbolic_name	SMCalFlow	de,ja,zh	0	0	0	3	0
+acronym_or_symbolic_name	VFL	de,ja,zh	0	0	6	0	0
+acronym_or_symbolic_name	XLM	de,ja,zh	0	0	3	0	0
+acronym_or_symbolic_name	GLUE	de,ja,zh	0	2	10	0	-2
+acronym_or_symbolic_name	ICLR	de,ja,zh	0	2	1	0	-2
+multiword_expression	pretrained language	de,ja,zh	9	0	5	2	9
+multiword_expression	question generation	de,ja,zh	9	0	8	2	9
+multiword_expression	morphological analyzer	de,ja,zh	8	0	0	2	8
+multiword_expression	named entity recognition	de,ja,zh	5	0	4	2	5
+multiword_expression	question answering	de,ja,zh	4	0	0	1	4
+multiword_expression	transformer encoder	de,ja,zh	4	0	5	0	4
+multiword_expression	byte pair encoding	de,ja,zh	3	0	2	0	3
+multiword_expression	positional encoding	de,ja,zh	3	0	2	0	3
+multiword_expression	semantic role labeling	de,ja,zh	3	0	0	0	3
+multiword_expression	training data	de,ja,zh	3	0	12	0	3
+multiword_expression	data augmentation	de,ja,zh	2	0	7	2	2
+multiword_expression	masked language model	de,ja,zh	2	0	1	0	2
+multiword_expression	pre-training	de,ja,zh	2	0	3	1	2
+multiword_expression	language models	de,ja,zh	2	1	16	0	1
+multiword_expression	Annotated Corpus	de,ja,zh	1	0	1	1	1
+multiword_expression	Language Model	de,ja,zh	1	0	11	0	1
+multiword_expression	low resource	de,ja,zh	1	0	2	0	1
+multiword_expression	machine learning	de,ja,zh	1	0	0	2	1
+multiword_expression	morphological analysis	de,ja,zh	1	1	1	0	0
+multiword_expression	text classification	de,ja,zh	1	1	1	0	0
+multiword_expression	machine translation	de,ja,zh	0	0	3	0	0
+multiword_expression	natural language processing	de,ja,zh	0	0	2	1	0
+multiword_expression	transfer learning	de,ja,zh	0	0	3	0	0
+multiword_expression	language identification	de,ja,zh	0	1	5	0	-1
+multiword_expression	reading comprehension	de,ja,zh	0	1	2	0	-1
+multiword_expression	Semantic Parsing	ja,zh	1	4	1	4	-3
+single_word_term	transformer	de,ja,zh	22	1	25	1	21
+single_word_term	tokens	de,ja,zh	20	0	24	0	20
+single_word_term	question	de,ja,zh	22	5	84	2	17
+single_word_term	counterfactual	de,ja,zh	17	0	16	0	17
+single_word_term	words	de,ja,zh	15	0	21	9	15
+single_word_term	utterance	de,ja,zh	14	0	7	10	14
+single_word_term	lexical	de,ja,zh	16	3	36	5	13
+single_word_term	training	de,ja,zh	14	1	20	3	13
+single_word_term	embeddings	de,ja,zh	13	2	29	3	11
+single_word_term	token	de,ja,zh	11	1	14	1	10
+single_word_term	pretrained	de,ja,zh	10	1	18	4	9
+single_word_term	answer	de,ja,zh	9	0	1	11	9
+single_word_term	parsing	de,ja,zh	12	4	12	5	8
+single_word_term	graph	de,ja,zh	11	4	22	8	7
+single_word_term	morphological	de,ja,zh	8	1	13	2	7
+single_word_term	morphemes	de,ja,zh	7	0	16	0	7
+single_word_term	Morphology	de,ja,zh	6	0	13	1	6
+single_word_term	dataset	de,ja,zh	6	1	39	2	5
+single_word_term	annotated	de,ja,zh	5	0	7	8	5
+single_word_term	encoding	de,ja,zh	5	0	16	0	5
+single_word_term	questions	de,ja,zh	5	0	25	0	5
+single_word_term	sentence	de,ja,zh	5	0	11	0	5
+single_word_term	spans	de,ja,zh	5	0	1	2	5
+single_word_term	task	de,ja,zh	10	6	57	0	4
+single_word_term	attention	de,ja,zh	5	1	21	0	4
+single_word_term	dependency	de,ja,zh	5	1	1	2	4
+single_word_term	encoder	de,ja,zh	5	1	26	1	4
+single_word_term	multilingual	de,ja,zh	5	1	10	0	4
+single_word_term	retrieval	de,ja,zh	5	1	5	1	4
+single_word_term	compositionality	de,ja,zh	4	0	1	1	4
+single_word_term	contextualized	de,ja,zh	4	0	1	3	4
+single_word_term	document	de,ja,zh	4	0	10	1	4
+single_word_term	downstream	de,ja,zh	4	0	2	0	4
+single_word_term	labeled	de,ja,zh	4	0	3	0	4
+single_word_term	models	de,ja,zh	4	0	75	2	4
+single_word_term	augmented	de,ja,zh	4	1	1	0	3
+single_word_term	finetuning	de,ja,zh	3	0	5	1	3
+single_word_term	generalization	de,ja,zh	3	0	5	0	3
+single_word_term	paper	de,ja,zh	3	0	4	2	3
+single_word_term	tagger	de,ja,zh	3	0	0	0	3
+single_word_term	data	de,ja,zh	3	1	54	0	2
+single_word_term	aspect	de,ja,zh	2	0	2	2	2
+single_word_term	datasets	de,ja,zh	2	0	16	2	2
+single_word_term	Detecting	de,ja,zh	2	0	8	0	2
+single_word_term	graphs	de,ja,zh	2	0	4	0	2
+single_word_term	Modeling	de,ja,zh	2	0	7	0	2
+single_word_term	monolingual	de,ja,zh	2	0	1	0	2
+single_word_term	newswire	de,ja,zh	2	0	4	3	2
+single_word_term	parallel	de,ja,zh	2	0	2	1	2
+single_word_term	prediction	de,ja,zh	2	0	19	0	2
+single_word_term	qualitative	de,ja,zh	2	0	3	1	2
+single_word_term	relation	de,ja,zh	2	0	0	1	2
+single_word_term	relations	de,ja,zh	2	0	3	3	2
+single_word_term	semantically	de,ja,zh	2	0	5	2	2
+single_word_term	similarity	de,ja,zh	2	0	1	0	2
+single_word_term	unsupervised	de,ja,zh	2	0	1	0	2
+single_word_term	Wikipedia	de,ja,zh	2	0	4	0	2
+single_word_term	word	de,ja,zh	2	0	7	5	2
+single_word_term	model	de,ja,zh	5	4	136	2	1
+single_word_term	Semantic	de,ja,zh	5	4	11	7	1
+single_word_term	language	de,ja,zh	2	1	47	3	1
+single_word_term	linguistic	de,ja,zh	2	1	1	1	1
+single_word_term	regression	de,ja,zh	2	1	0	3	1
+single_word_term	weights	de,ja,zh	2	1	1	2	1
+single_word_term	analysis	de,ja,zh	1	0	4	0	1
+single_word_term	annotations	ja,zh	1	0	0	1	1
+single_word_term	assessing	de,ja,zh	1	0	2	0	1
+single_word_term	automatic	de,ja,zh	1	0	2	0	1
+single_word_term	binary	de,ja,zh	1	0	2	0	1
+single_word_term	computation	de,ja,zh	1	0	4	0	1
+single_word_term	conversational	de,ja,zh	1	0	1	1	1
+single_word_term	corresponding	de,ja,zh	1	0	3	1	1
+single_word_term	decoding	de,ja,zh	1	0	2	0	1
+single_word_term	domain	de,ja,zh	1	0	20	0	1
+single_word_term	encode	de,ja,zh	1	0	3	3	1
+single_word_term	English	de,ja,zh	1	0	24	1	1
+single_word_term	event	de,ja,zh	1	0	6	1	1
+single_word_term	generated	de,ja,zh	1	0	16	1	1
+single_word_term	generating	de,ja,zh	1	0	11	1	1
+single_word_term	generation	de,ja,zh	1	0	19	0	1
+single_word_term	gradient	de,ja,zh	1	0	4	1	1
+single_word_term	languages	de,ja,zh	1	0	40	0	1
+single_word_term	learning	de,ja,zh	1	0	4	2	1
+single_word_term	methods	de,ja,zh	1	0	3	2	1
+single_word_term	noun	de,ja,zh	1	0	4	1	1
+single_word_term	pretraining	de,ja,zh	1	0	1	1	1
+single_word_term	quality	de,ja,zh	1	0	4	1	1
+single_word_term	queries	de,zh	1	0	2	5	1
+single_word_term	query	de,ja,zh	1	0	0	10	1
+single_word_term	reasoning	de,ja,zh	1	0	2	0	1
+single_word_term	representations	de,ja,zh	1	0	7	0	1
+single_word_term	robustness	de,ja,zh	1	0	2	0	1
+single_word_term	sentiment	de,ja,zh	1	0	2	0	1
+single_word_term	source	de,ja,zh	1	0	8	0	1
+single_word_term	speech	de,ja,zh	1	0	0	15	1
+single_word_term	syntactic	de,ja,zh	1	0	2	0	1
+single_word_term	syntax	de,ja,zh	1	0	2	0	1
+single_word_term	tagging	de,ja,zh	1	0	2	0	1
+single_word_term	transformers	de,ja,zh	1	0	1	1	1
+single_word_term	utterances	ja,zh	1	0	0	1	1
+single_word_term	verbs	de,ja,zh	1	0	2	0	1
+single_word_term	vocabulary	de,ja,zh	1	0	4	0	1
+single_word_term	input	de,ja,zh	3	3	50	0	0
+single_word_term	information	de,ja,zh	2	2	24	1	0
+single_word_term	text	de,ja,zh	2	2	42	2	0
+single_word_term	corpus	de,ja,zh	1	1	10	0	0
+single_word_term	parser	de,ja,zh	1	1	25	0	0
+single_word_term	research	de,ja,zh	1	1	8	0	0
+single_word_term	ablation	de,ja,zh	0	0	3	0	0
+single_word_term	algorithms	de,ja,zh	0	0	3	0	0
+single_word_term	annotation	de,ja,zh	0	0	3	0	0
+single_word_term	biases	de,ja,zh	0	0	1	2	0
+single_word_term	bidirectional	de,ja,zh	0	0	3	0	0
+single_word_term	classification	de,ja,zh	0	0	7	0	0
+single_word_term	contexts	de,ja,zh	0	0	6	0	0
+single_word_term	corpora	de,ja,zh	0	0	2	1	0
+single_word_term	correlations	de,ja,zh	0	0	2	1	0
+single_word_term	dependencies	de,ja,zh	0	0	3	0	0
+single_word_term	Dialogue	de,ja,zh	0	0	4	2	0
+single_word_term	domains	de,ja,zh	0	0	3	0	0
+single_word_term	embedding	de,ja,zh	0	0	3	3	0
+single_word_term	entities	de,ja,zh	0	0	3	0	0
+single_word_term	features	de,ja,zh	0	0	6	12	0
+single_word_term	grammar	de,ja,zh	0	0	3	0	0
+single_word_term	heuristic	de,ja,zh	0	0	4	1	0
+single_word_term	inference	de,ja,zh	0	0	8	0	0
+single_word_term	knowledge	ja,zh	0	0	2	0	0
+single_word_term	linear	de,ja,zh	0	0	5	0	0
+single_word_term	linguistics	de,ja,zh	0	0	2	1	0
+single_word_term	morphologically	de,ja,zh	0	0	5	4	0
+single_word_term	nodes	de,ja,zh	0	0	18	0	0
+single_word_term	nouns	de,ja,zh	0	0	3	0	0
+single_word_term	number	de,ja,zh	0	0	0	10	0
+single_word_term	oracle	de,ja,zh	0	0	0	3	0
+single_word_term	parameter	de,ja,zh	0	0	3	0	0
+single_word_term	predicate	de,ja,zh	0	0	24	0	0
+single_word_term	predicates	de,ja,zh	0	0	6	0	0
+single_word_term	pronouns	ja,zh	0	0	2	0	0
+single_word_term	propose	de,ja,zh	0	0	15	0	0
+single_word_term	Representation	de,ja,zh	0	0	14	2	0
+single_word_term	retrieved	de,ja,zh	0	0	2	1	0
+single_word_term	search	de,ja,zh	0	0	3	0	0
+single_word_term	sequences	de,ja,zh	0	0	3	0	0
+single_word_term	structure	de,ja,zh	0	0	6	0	0
+single_word_term	summarization	de,ja,zh	0	0	2	1	0
+single_word_term	systems	de,ja,zh	0	0	3	0	0
+single_word_term	target	de,ja,zh	0	0	3	0	0
+single_word_term	texts	de,ja,zh	0	0	5	1	0
+single_word_term	translation	de,ja,zh	0	0	8	0	0
+single_word_term	translations	de,ja,zh	0	0	9	0	0
+single_word_term	unseen	de,ja,zh	0	0	2	1	0
+single_word_term	compared	de,ja,zh	2	3	7	3	-1
+single_word_term	method	de,ja,zh	2	3	7	3	-1
+single_word_term	augmentation	de,ja,zh	1	2	18	1	-1
+single_word_term	previous	de,ja,zh	1	2	8	2	-1
+single_word_term	detection	de,ja,zh	0	1	15	1	-1
+single_word_term	edit	de,ja,zh	0	1	3	2	-1
+single_word_term	evaluation	de,ja,zh	0	1	9	1	-1
+single_word_term	extracting	de,ja,zh	0	1	7	1	-1
+single_word_term	generalize	de,ja,zh	0	1	0	2	-1
+single_word_term	metrics	de,ja,zh	0	1	1	1	-1
+single_word_term	problem	de,ja,zh	0	1	11	1	-1
+single_word_term	sequence	de,ja,zh	0	1	10	1	-1
+single_word_term	vector	de,ja,zh	0	1	4	0	-1
+single_word_term	Online	de,ja,zh	1	3	34	0	-2
+single_word_term	algorithm	de,ja,zh	0	2	9	0	-2
+single_word_term	approach	de,ja,zh	0	2	16	3	-2
+single_word_term	computational	de,ja,zh	0	2	6	1	-2
+single_word_term	context	de,ja,zh	0	2	18	0	-2
+single_word_term	decoder	de,ja,zh	0	2	7	1	-2
+single_word_term	news	de,ja,zh	0	2	10	0	-2
+single_word_term	resources	de,ja,zh	0	2	3	1	-2
+single_word_term	softmax	de,ja,zh	0	2	2	2	-2
+single_word_term	tasks	de,ja,zh	0	2	20	2	-2
+single_word_term	user	de,ja,zh	0	2	31	0	-2
+single_word_term	vectors	de,ja,zh	0	2	4	0	-2
+single_word_term	baselines	de,ja,zh	0	3	11	1	-3
+single_word_term	system	de,ja,zh	0	3	30	0	-3
