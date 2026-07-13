@@ -44,6 +44,44 @@ class EvalMainResultScopeTest(unittest.TestCase):
         with self.assertRaisesRegex(EVAL.RasstError, "asset_validation_scope"):
             EVAL.asset_validation_cells(data, [])
 
+    def test_partial_manifest_accepts_one_cell(self) -> None:
+        data = {
+            "metadata": {
+                "cell_validation_scope": "partial",
+                "common_eval_config": {},
+                "cells": [
+                    {
+                        "domain": "acl_tagged_raw",
+                        "lang": "ja",
+                        "lm": 1,
+                        "model_asset": "model",
+                        "input_asset": "input",
+                        "glossary_asset": "glossary",
+                    }
+                ],
+            }
+        }
+        EVAL.validate_manifest_shape(data, REPO_ROOT)
+
+    def test_full_manifest_still_requires_24_cells(self) -> None:
+        data = {
+            "metadata": {
+                "common_eval_config": {},
+                "cells": [
+                    {
+                        "domain": "acl_tagged_raw",
+                        "lang": "ja",
+                        "lm": 1,
+                        "model_asset": "model",
+                        "input_asset": "input",
+                        "glossary_asset": "glossary",
+                    }
+                ],
+            }
+        }
+        with self.assertRaisesRegex(EVAL.RasstError, "exactly 24"):
+            EVAL.validate_manifest_shape(data, REPO_ROOT)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -472,8 +472,16 @@ def canonical_table_rows(manifest: Mapping[str, Any], root: Path) -> Dict[Tuple[
 
 def validate_manifest_shape(manifest: Mapping[str, Any], root: Path) -> None:
     cells = all_cells(manifest)
-    if len(cells) != 24:
+    validation_scope = str(metadata(manifest).get("cell_validation_scope", "full"))
+    if validation_scope not in {"full", "partial"}:
+        raise RasstError(
+            "metadata.cell_validation_scope must be 'full' or 'partial', "
+            f"got {validation_scope!r}."
+        )
+    if validation_scope == "full" and len(cells) != 24:
         raise RasstError(f"Expected exactly 24 cells, found {len(cells)}")
+    if validation_scope == "partial" and not cells:
+        raise RasstError("Partial manifest must contain at least one cell")
     seen = set()
     has_table = has_canonical_table(manifest)
     canonical = canonical_table_rows(manifest, root) if has_table else {}
@@ -495,10 +503,11 @@ def validate_manifest_shape(manifest: Mapping[str, Any], root: Path) -> None:
         seen.add(key)
         if has_table and key not in canonical:
             raise RasstError(f"Canonical table missing {canonical_method(manifest)} row for {key}")
-    expected = {(d, l, lm) for d in DOMAINS for l in LANGS for lm in LMS}
-    missing = sorted(expected - seen)
-    if missing:
-        raise RasstError(f"Missing cells: {missing}")
+    if validation_scope == "full":
+        expected = {(d, l, lm) for d in DOMAINS for l in LANGS for lm in LMS}
+        missing = sorted(expected - seen)
+        if missing:
+            raise RasstError(f"Missing cells: {missing}")
 
 
 def manifest_path_for_event(root: Path, event_id: str) -> Path:
@@ -1495,7 +1504,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     run_root_arg = rel_or_abs(root, args.run_root) if args.run_root else None
 
     if args.validate_only:
-        print(f"status=validated cells=24 selected={len(cells)} manifest={manifest_path}")
+        print(
+            f"status=validated cells={len(all_cells(manifest))} "
+            f"selected={len(cells)} manifest={manifest_path}"
+        )
         return 0
     if args.compare_output:
         compare_root = rel_or_abs(root, args.compare_output)
@@ -1503,7 +1515,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         write_comparison(manifest, root, cells, compare_root, strict_metrics=args.strict_metrics)
         return 0
     if args.dry_run:
-        print(f"status=dry_run cells=24 selected={len(cells)} manifest={manifest_path}")
+        print(
+            f"status=dry_run cells={len(all_cells(manifest))} "
+            f"selected={len(cells)} manifest={manifest_path}"
+        )
         print_dry_run(manifest, root, cells, run_root=run_root_arg)
         return 0
 
