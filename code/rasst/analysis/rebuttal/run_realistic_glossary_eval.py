@@ -360,8 +360,6 @@ def build_run_manifest(args: argparse.Namespace) -> Dict[str, Any]:
                 str(args.text_lora_rank),
                 "--text-lora-alpha",
                 str(args.text_lora_alpha),
-                "--text-model-id",
-                TEXT_MODEL_ID,
             ]
             finalize_command = [
                 str(python_bin),
@@ -375,6 +373,8 @@ def build_run_manifest(args: argparse.Namespace) -> Dict[str, Any]:
                 str(builder),
                 "--glossary-tag",
                 glossary_tag,
+                "--text-model-id",
+                TEXT_MODEL_ID,
                 "--text-lora-rank",
                 str(args.text_lora_rank),
                 "--text-lora-alpha",
