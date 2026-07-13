@@ -31,6 +31,17 @@ def _record(path: Path) -> dict[str, object]:
 
 
 class RunRealisticGlossaryEvalTest(unittest.TestCase):
+    def test_required_paths_preserve_host_qualified_symlink(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            physical = root / "physical"
+            physical.mkdir()
+            alias = root / "host-qualified"
+            alias.symlink_to(physical, target_is_directory=True)
+            artifact = _write(alias / "artifact.txt")
+            self.assertEqual(MODULE._require_file(artifact), artifact.absolute())
+            self.assertIn("host-qualified", str(MODULE._require_file(artifact)))
+
     def _prepared_fixture(self, root: Path) -> tuple[Path, dict[str, object]]:
         files = {
             "source_list": _write(root / "prepared/inputs/zh/paper.one/source.list", "/audio/paper.one.wav\n"),
@@ -180,7 +191,7 @@ print(json.dumps({'index_path': path, 'manifest_path': path + '.manifest.json', 
             self.assertNotIn("--fbk-fairseq-root", offline_command)
             self.assertEqual(
                 offline_command[offline_command.index("--mwer-segmenter") + 1],
-                str(mwer.resolve()),
+                str(mwer.absolute()),
             )
 
     def test_plan_can_select_only_default_lm2(self) -> None:
