@@ -53,6 +53,20 @@ def write_jsonl(path: Path, rows: list[dict]) -> None:
 
 
 class SlmLatencyCurriculumTest(unittest.TestCase):
+    def test_absolute_paths_do_not_resolve_symlink_aliases(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir_raw:
+            root = Path(temp_dir_raw)
+            target = root / "target"
+            target.mkdir()
+            alias = root / "alias"
+            alias.symlink_to(target, target_is_directory=True)
+
+            selected_path = SELECT.absolute_without_symlink_resolution(alias / "data.jsonl")
+            assembled_path = ASSEMBLE.absolute_without_symlink_resolution(alias / "data.jsonl")
+
+            self.assertIn("/alias/data.jsonl", str(selected_path))
+            self.assertEqual(selected_path, assembled_path)
+
     def test_selects_only_all_lm1_rows_and_records_provenance(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir_raw:
             root = Path(temp_dir_raw)
