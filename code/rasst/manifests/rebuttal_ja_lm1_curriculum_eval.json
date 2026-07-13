@@ -69,6 +69,8 @@
         "runner": "serial_simuleval",
         "expected_instance_rows": 5,
         "overrides": {
+          "CONDA_BASE": "/mnt/taurus/home/jiaxuanluo/miniconda3",
+          "CONDA_ENV_NAME": "spaCyEnv",
           "MAX_NEW_TOKENS_OVERRIDE": 40,
           "VLLM_LIMIT_AUDIO_OVERRIDE": 128,
           "VLLM_MAX_MODEL_LEN_OVERRIDE": 12288,
