@@ -9,12 +9,12 @@
     {
       "key": "eval_density_driver",
       "type": "shell",
-      "local_path": "code/legacy/documents/code/simuleval/eval_density_unified.sh"
+      "local_path": "code/rasst/eval/eval_density_unified.sh"
     },
     {
       "key": "batch_vllm_driver",
       "type": "shell",
-      "local_path": "code/legacy/documents/code/simuleval/launchers/2026/05/20260524__batched_vllm_rag_eval.sh"
+      "local_path": "code/rasst/eval/launchers/20260524__batched_vllm_rag_eval.sh"
     },
     {
       "key": "retriever_hn1024",
