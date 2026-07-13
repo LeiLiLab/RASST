@@ -110,34 +110,33 @@ both hypotheses and references, RASST remains higher in **10/12** ACL cells by
 **+0.992 BLEU** on average (regular-BLEU delta: **+1.911**). We present masking
 as a diagnostic, not a causal decomposition.
 
-**Which terminology types benefit, and which terms remain difficult.** We classified all
-3,266 ACL gold-term occurrences at the fixed `lm=2` point using a reproducible
-English surface-form taxonomy:
+**Which terminology types benefit, and which remain difficult.** We classified
+all 3,266 ACL gold-term occurrences at both `lm=1` (shortest latency) and
+`lm=2` using a reproducible English surface-form taxonomy:
 
-| Term type | Occurrences | RASST exact | InfiniSST exact | Delta |
-| --- | ---: | ---: | ---: | ---: |
-| Acronym / symbolic name | 343 | **88.05%** | 53.06% | **+34.99 pp** |
-| Multiword expression | 192 | **84.90%** | 55.21% | **+29.69 pp** |
-| Single-word term | 2,731 | **86.56%** | 74.33% | **+12.23 pp** |
+| Type (N) | `lm=1`: RASST / InfiniSST (delta) | `lm=2`: RASST / InfiniSST (delta) | `lm=1` gain / loss / both-wrong |
+| --- | ---: | ---: | ---: |
+| Acronym/symbolic (343) | **84.55 / 48.69 (+35.86 pp)** | **88.05 / 53.06 (+34.99 pp)** | 39.36 / 3.50 / 11.95% |
+| Multiword (192) | **79.69 / 50.52 (+29.17 pp)** | **84.90 / 55.21 (+29.69 pp)** | 31.77 / 2.60 / **17.71%** |
+| Single-word (2,731) | **85.35 / 70.71 (+14.65 pp)** | **86.56 / 74.33 (+12.23 pp)** | 18.67 / 4.03 / 10.62% |
 
-The strongest gains therefore occur for rare acronyms/symbolic names
-(`KinyaBERT`, `RGF`, `BiLSTM-CRF`, `BETO`, `FLR`) that the baseline often
-corrupts phonetically, and for multiword expressions (`morphological analyzer`,
-`question generation`, `named entity recognition`, `masked language model`)
-whose components the baseline may omit or paraphrase generically. This pattern
-holds separately in all three languages.
+The pattern holds separately in all three languages and at both latencies.
+Benefits are largest for rare names/acronyms (`KinyaBERT`, `RGF`, `FLR`) that
+the baseline corrupts phonetically and for multiword expressions
+(`morphological analyzer`, `pretrained language`, `named entity recognition`)
+that it partially omits or paraphrases. At `lm=1`, multiword expressions have
+the highest both-wrong rate (17.71%, falling to 10.42% at `lm=2`), indicating
+that compositional terms remain hardest with minimal context.
 
-Conversely, 109/127 raw exact losses are single-word terms. Our audit finds
-that 71/127 are actually valid paraphrases, morphology/orthography variants, or
-streaming-boundary shifts, leaving 56 genuine losses (34 omissions and 22 wrong
-translations), of which 45 are single-word terms. Genuine difficulty
-concentrates in short, generic/polysemous entries such as `question`, `graph`,
-`input`, and `context`; acoustically confusable rare names
-(`ICLR -> ACL`, `LinCE -> LINTEX`, `BLEU -> Blue`); and overlapping entries
-that require contextual disambiguation (e.g., Japanese `text classification`
-being pulled toward `context -> 文脈`, yielding `文脈分類`). We will add this
-type-level table and representative successes/failures, while separating exact
-metric false negatives from genuine errors.
+Short latency does not increase reverse exact losses overall: both settings
+have 127/3,266 losses. At `lm=1`, 110/127 losses are single-word terms; their
+per-occurrence loss rate is 4.03%, versus 3.50% for acronyms and 2.60% for
+multiword terms. Difficult cases concentrate in generic/polysemous entries
+(`input`, `dataset`, `context`), acoustically confusable names
+(`LinCE -> LINTEX`, `BLEU -> Blue`), and overlapping entries requiring
+contextual disambiguation. For the audited `lm=2` losses, 71/127 are valid
+paraphrase/form/boundary variants rather than genuine errors. We will add the
+type-level table and representative successes/failures.
 <!-- RESPONSE:OKTU:END -->
 
 ## 3. Reviewer gbii
@@ -237,9 +236,9 @@ ESO/Medicine.
 - **oktu:** glossary-entry operational definition；ACL dataset-provided human
   annotations 的官方 qualification（source technical terms 经 domain expert
   check；target 由母语 professional post-editor + second reviewer）；12/12
-  TERM_ACC win；masked BLEU；三语 term-type taxonomy（acronym/symbolic
-  `+34.99 pp`、multiword `+29.69 pp`、single-word `+12.23 pp`）；benefit/loss
-  的真实例子与 exact-metric false-negative 分解。
+  TERM_ACC win；masked BLEU；`lm=1/2` 三语 term-type taxonomy（最短 latency
+  acronym/symbolic `+35.86 pp`、multiword `+29.17 pp`、single-word
+  `+14.65 pp`）；gain/loss/both-wrong 比例和真实例子。
 - **gbii:** same-checkpoint largest-window end-to-end control；no-tag control；固定 hint
   count/compute 的 degradation；术语 token share 与 masked BLEU；定量 failure chain。
 
@@ -287,8 +286,9 @@ ESO/Medicine.
   reported-vs-pooled aggregation kept separate.
 - `origin/main@4446ad8`: compact retrieval-degradation rebuttal table.
 - `origin/main@ae24301`: En-Zh target-tag ablation.
-- `docs/results/rebuttal_2026/term_type_analysis_acl_lm2.md`: ACL-only
-  `lm=2` terminology-type gains/losses, audit split, and reproducible taxonomy.
+- `docs/results/rebuttal_2026/term_type_analysis_acl_lm1_lm2.md`: ACL-only
+  `lm=1/2` terminology-type gains/losses/both-wrong proportions, latency
+  comparison, examples, and reproducible taxonomy.
 - `origin/main@06afe4d`: validated ACL xCOMET paired results.
 - `origin/main@7277d08`: masked BLEU and term-prevalence diagnostics.
 - `origin/main`: multi-scale end-to-end ablation under

@@ -1,13 +1,13 @@
-language	term_type	exact_losses	genuine_errors	metric_or_boundary_false_negatives	wrong_translation	omitted_term	valid_paraphrase	valid_morphology	valid_compound_or_orthography	valid_alignment_boundary
-de	acronym_or_symbolic_name	4	2	2	1	1	0	0	2	0
-de	multiword_expression	2	0	2	0	0	0	1	0	1
-de	single_word_term	37	8	29	4	4	14	2	10	3
-zh	acronym_or_symbolic_name	3	2	1	1	1	0	0	0	1
-zh	multiword_expression	5	4	1	3	1	0	0	0	1
-zh	single_word_term	30	13	17	7	6	5	0	0	12
-ja	acronym_or_symbolic_name	2	2	0	2	0	0	0	0	0
-ja	multiword_expression	2	1	1	1	0	0	0	0	1
-ja	single_word_term	42	24	18	3	21	6	0	0	12
-all	acronym_or_symbolic_name	9	6	3	4	2	0	0	2	1
-all	multiword_expression	9	5	4	4	1	0	1	0	3
-all	single_word_term	109	45	64	14	31	25	2	10	27
+language	term_type	exact_losses	genuine_errors	metric_or_boundary_false_negatives	wrong_translation	omitted_term	valid_paraphrase	valid_morphology	valid_compound_or_orthography	valid_alignment_boundary	unlabeled
+de	acronym_or_symbolic_name	4	2	2	1	1	0	0	2	0	0
+de	multiword_expression	2	0	2	0	0	0	1	0	1	0
+de	single_word_term	37	8	29	4	4	14	2	10	3	0
+zh	acronym_or_symbolic_name	3	2	1	1	1	0	0	0	1	0
+zh	multiword_expression	5	4	1	3	1	0	0	0	1	0
+zh	single_word_term	30	13	17	7	6	5	0	0	12	0
+ja	acronym_or_symbolic_name	2	2	0	2	0	0	0	0	0	0
+ja	multiword_expression	2	1	1	1	0	0	0	0	1	0
+ja	single_word_term	42	24	18	3	21	6	0	0	12	0
+all	acronym_or_symbolic_name	9	6	3	4	2	0	0	2	1	0
+all	multiword_expression	9	5	4	4	1	0	1	0	3	0
+all	single_word_term	109	45	64	14	31	25	2	10	27	0

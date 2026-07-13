@@ -1,0 +1,13 @@
+language	term_type	exact_losses	genuine_errors	metric_or_boundary_false_negatives	wrong_translation	omitted_term	valid_paraphrase	valid_morphology	valid_compound_or_orthography	valid_alignment_boundary	unlabeled
+de	acronym_or_symbolic_name	4	0	0	0	0	0	0	0	0	4
+de	multiword_expression	1	0	0	0	0	0	0	0	0	1
+de	single_word_term	42	0	0	0	0	0	0	0	0	42
+zh	acronym_or_symbolic_name	5	0	0	0	0	0	0	0	0	5
+zh	multiword_expression	2	0	0	0	0	0	0	0	0	2
+zh	single_word_term	22	0	0	0	0	0	0	0	0	22
+ja	acronym_or_symbolic_name	3	0	0	0	0	0	0	0	0	3
+ja	multiword_expression	2	0	0	0	0	0	0	0	0	2
+ja	single_word_term	46	0	0	0	0	0	0	0	0	46
+all	acronym_or_symbolic_name	12	0	0	0	0	0	0	0	0	12
+all	multiword_expression	5	0	0	0	0	0	0	0	0	5
+all	single_word_term	110	0	0	0	0	0	0	0	0	110
