@@ -972,6 +972,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     aggregate_parser.add_argument("--run-manifest", required=True, type=Path)
     aggregate_parser.add_argument("--resume", action="store_true")
 
+    index_parser = subparsers.add_parser(
+        "index", help="Build or verify only the frozen runtime glossary indices."
+    )
+    index_parser.add_argument("--run-manifest", required=True, type=Path)
+
     args = parser.parse_args(argv)
     if args.command == "plan":
         if args.run_manifest.exists():
@@ -1022,6 +1027,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "aggregate":
         manifest = _validate_run_manifest(_require_file(args.run_manifest))
         _run_aggregate_tasks(manifest, resume=args.resume)
+        return 0
+    if args.command == "index":
+        manifest = _validate_run_manifest(_require_file(args.run_manifest))
+        _run_index_tasks(manifest)
         return 0
     raise AssertionError(args.command)
 
