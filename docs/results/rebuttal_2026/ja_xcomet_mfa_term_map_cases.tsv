@@ -1,0 +1,25 @@
+case_id	talk_id	local_sentence_id	global_sentence_id	xcomet_delta	source_start_sec	source_end_sec	prompt_chunk_idx	prompt_audio_end_sec	timing	term_map
+acl268_83	2022.acl-long.268	83	83	-0.8159	565.004	570.015	293	564.48	pre_sentence	EMPTY
+acl268_83	2022.acl-long.268	83	83	-0.8159	565.004	570.015	294	566.40	on_time	EMPTY
+acl268_83	2022.acl-long.268	83	83	-0.8159	565.004	570.015	295	568.32	on_time	models->モデル@0.951921; crf->CRF@0.840604; model->モデル@0.806566
+acl268_83	2022.acl-long.268	83	83	-0.8159	565.004	570.015	296	570.24	late	model->モデル@0.844328
+acl268_83	2022.acl-long.268	83	83	-0.8159	565.004	570.015	297	572.16	late	EMPTY
+acl367_16	2022.acl-long.367	16	123	-0.7747	146.157	150.739	75	145.92	pre_sentence	EMPTY
+acl367_16	2022.acl-long.367	16	123	-0.7747	146.157	150.739	76	147.84	on_time	input->入力@0.962595
+acl367_16	2022.acl-long.367	16	123	-0.7747	146.157	150.739	77	149.76	on_time	sentence->文章@0.972203; model->モデル@0.814049; input->入力@0.800721
+acl367_16	2022.acl-long.367	16	123	-0.7747	146.157	150.739	78	151.68	late	document->文章@0.972590; sentence->文章@0.969511
+acl367_16	2022.acl-long.367	16	123	-0.7747	146.157	150.739	79	153.60	late	document->文章@0.812417
+acl110_81	2022.acl-long.110	81	336	-0.8046	502.582	510.997	260	501.12	pre_sentence	model->モデル@0.928986
+acl110_81	2022.acl-long.110	81	336	-0.8046	502.582	510.997	261	503.04	on_time	training data->訓練データ@0.959019; data->データ@0.953332; training->訓練@0.903465; dataset->データセット@0.791637; pretraining->事前訓練@0.786089
+acl110_81	2022.acl-long.110	81	336	-0.8046	502.582	510.997	262	504.96	on_time	parser->パーサー@0.948605
+acl110_81	2022.acl-long.110	81	336	-0.8046	502.582	510.997	263	506.88	on_time	parser->パーサー@0.936875; data->データ@0.889230
+acl110_81	2022.acl-long.110	81	336	-0.8046	502.582	510.997	264	508.80	on_time	data->データ@0.913144
+acl110_81	2022.acl-long.110	81	336	-0.8046	502.582	510.997	265	510.72	on_time	model->モデル@0.940631; parser->パーサー@0.873821; online->オンライン@0.824356; parsing->構文解析@0.785313
+acl110_81	2022.acl-long.110	81	336	-0.8046	502.582	510.997	266	512.64	late	EMPTY
+acl110_81	2022.acl-long.110	81	336	-0.8046	502.582	510.997	267	514.56	late	EMPTY
+acl117_70	2022.acl-long.117	70	433	-0.7932	451.399	457.716	234	451.20	pre_sentence	baselines->ベースライン@0.864589; data augmentation->データ拡張@0.801744
+acl117_70	2022.acl-long.117	70	433	-0.7932	451.399	457.716	235	453.12	on_time	baselines->ベースライン@0.865321
+acl117_70	2022.acl-long.117	70	433	-0.7932	451.399	457.716	236	455.04	on_time	generation->生成@0.960162; question generation->質問生成@0.942248; answer->応答@0.929344; question answering->質問に回答する@0.838273; question->質問@0.821402
+acl117_70	2022.acl-long.117	70	433	-0.7932	451.399	457.716	237	456.96	on_time	data->データ@0.962973; relation->リレーション@0.961430; question generation->質問生成@0.924798; generation->生成@0.895622; datasets->データセット@0.812430; relations->relations@0.805072; dataset->データセット@0.784887
+acl117_70	2022.acl-long.117	70	433	-0.7932	451.399	457.716	238	458.88	late	question->質問@0.951672; parser->パーサー@0.789605; questions->質問@0.785168
+acl117_70	2022.acl-long.117	70	433	-0.7932	451.399	457.716	239	460.80	late	answer->応答@0.832352
