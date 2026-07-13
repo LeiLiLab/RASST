@@ -186,6 +186,12 @@ print(json.dumps({'index_path': path, 'manifest_path': path + '.manifest.json', 
             self.assertEqual(run["eval_tasks"][0]["cache_chunks"], 30)
             self.assertEqual(run["eval_tasks"][1]["lms"], [3, 4])
             self.assertEqual(run["eval_tasks"][1]["cache_chunks"], 20)
+            self.assertNotIn("--text-model-id", run["index_tasks"][0]["build_command"])
+            finalize_command = run["index_tasks"][0]["finalize_command"]
+            self.assertEqual(
+                finalize_command[finalize_command.index("--text-model-id") + 1],
+                MODULE.TEXT_MODEL_ID,
+            )
             offline_command = run["aggregate_tasks"][0]["offline_command"]
             self.assertIn("--mwer-segmenter", offline_command)
             self.assertNotIn("--fbk-fairseq-root", offline_command)
