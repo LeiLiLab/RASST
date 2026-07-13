@@ -20,6 +20,10 @@ class LatencySelectionError(RuntimeError):
     """Raised when latency rows cannot be selected without guessing."""
 
 
+def absolute_without_symlink_resolution(path: Path) -> Path:
+    return Path(os.path.abspath(path.expanduser()))
+
+
 def iter_jsonl(path: Path) -> Iterable[Tuple[int, Dict[str, Any]]]:
     with path.open("r", encoding="utf-8") as handle:
         for line_number, line in enumerate(handle, start=1):
@@ -104,7 +108,7 @@ def matches(values: Sequence[int], focus: int, policy: str) -> bool:
 
 
 def atomic_write(path: Path, text: str) -> None:
-    path = path.resolve()
+    path = absolute_without_symlink_resolution(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     temp_path: Path | None = None
     try:
@@ -127,9 +131,9 @@ def atomic_write(path: Path, text: str) -> None:
 
 
 def run(args: argparse.Namespace) -> Dict[str, Any]:
-    input_path = args.input_jsonl.resolve()
-    output_path = args.output_jsonl.resolve()
-    stats_path = args.stats_json.resolve()
+    input_path = absolute_without_symlink_resolution(args.input_jsonl)
+    output_path = absolute_without_symlink_resolution(args.output_jsonl)
+    stats_path = absolute_without_symlink_resolution(args.stats_json)
     if not input_path.is_file():
         raise LatencySelectionError(f"Input JSONL is not a file: {input_path}")
     if output_path in {input_path, stats_path} or stats_path == input_path:

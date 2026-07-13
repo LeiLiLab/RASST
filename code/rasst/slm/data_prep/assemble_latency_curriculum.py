@@ -19,6 +19,10 @@ class CurriculumError(RuntimeError):
     """Raised when a curriculum dataset cannot be assembled safely."""
 
 
+def absolute_without_symlink_resolution(path: Path) -> Path:
+    return Path(os.path.abspath(path.expanduser()))
+
+
 def iter_jsonl(path: Path) -> Iterable[Tuple[int, Dict[str, Any]]]:
     with path.open("r", encoding="utf-8") as handle:
         for line_number, line in enumerate(handle, start=1):
@@ -61,7 +65,7 @@ def validate_row(row: Mapping[str, Any], path: Path, line_number: int) -> None:
 
 
 def atomic_write(path: Path, text: str) -> None:
-    path = path.resolve()
+    path = absolute_without_symlink_resolution(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     temp_path: Path | None = None
     try:
@@ -101,10 +105,12 @@ def source_signature(row: Mapping[str, Any]) -> str:
 
 
 def run(args: argparse.Namespace) -> Dict[str, Any]:
-    base_path = args.base_jsonl.resolve()
-    supplement_paths = [path.resolve() for path in args.supplement_jsonl]
-    output_path = args.output_jsonl.resolve()
-    stats_path = args.stats_json.resolve()
+    base_path = absolute_without_symlink_resolution(args.base_jsonl)
+    supplement_paths = [
+        absolute_without_symlink_resolution(path) for path in args.supplement_jsonl
+    ]
+    output_path = absolute_without_symlink_resolution(args.output_jsonl)
+    stats_path = absolute_without_symlink_resolution(args.stats_json)
     protected = {base_path, *supplement_paths}
     if not base_path.is_file() or any(not path.is_file() for path in supplement_paths):
         raise CurriculumError("Every base/supplement input must be a file")
