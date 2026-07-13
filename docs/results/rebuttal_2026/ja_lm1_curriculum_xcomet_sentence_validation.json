@@ -1,0 +1,89 @@
+{
+  "expected_counts": {
+    "pairs": 1,
+    "segments": 1404,
+    "systems": 3
+  },
+  "pairs": [
+    {
+      "dataset": "acl_tagged_raw",
+      "delta_rasst_minus_infinisst": -0.021318770913232084,
+      "infinisst_method": "InfiniSST",
+      "infinisst_wins": 251,
+      "infinisst_xcomet_mean": 0.6325607458845928,
+      "lang": "ja",
+      "lm": "1",
+      "paired_delta_stddev": 0.3151974483248659,
+      "paired_segments": 468,
+      "paired_talks": 5,
+      "rasst_method": "RASST-lm1-curriculum",
+      "rasst_wins": 209,
+      "rasst_xcomet_mean": 0.6112419749713607,
+      "ties": 8
+    }
+  ],
+  "paths": {
+    "manifest": "/data/RASST_rebuttal_20260710/results/xcomet_ja_lm1_curriculum_sentence_20260713/manifest.tsv",
+    "paired_tsv": "/data/RASST_rebuttal_20260710/results/xcomet_ja_lm1_curriculum_sentence_20260713/paired.tsv",
+    "segments_jsonl": "/data/RASST_rebuttal_20260710/results/xcomet_ja_lm1_curriculum_sentence_20260713/segments.jsonl",
+    "summary_tsv": "/data/RASST_rebuttal_20260710/results/xcomet_ja_lm1_curriculum_sentence_20260713/summary.tsv"
+  },
+  "run_identity": {
+    "model_id": "Unbabel/XCOMET-XXL",
+    "model_revision": "873bac1b1c461e410c4a6e379f6790d3d1c7c214",
+    "scoring_config_sha256": "8961483dc640efc17d87ad5c26231ed6bf46e73bc07820f5236039a957c853fe"
+  },
+  "schema_version": "rasst-xcomet-validation-v1",
+  "sha256": {
+    "manifest": "7f77d2e4561d511d6d567094abed46b2074f30cbdd49bf8cb55e9c938c2e9f26",
+    "paired_tsv": "b0ddaeecc934e5e64fd1d08beb1eb49d7e784123e7c890e7b272a76989b504c4",
+    "segments_jsonl": "6ea75fd94d72dba025b8fb16c7c16ec93011018e2642b836d3c3c30505a130d0",
+    "summary_tsv": "5e84ff05e78ceeb336a51f18f3a6dc0bfbd835c79e2086e496dc0d94e58b513b"
+  },
+  "status": "ok",
+  "systems": [
+    {
+      "dataset": "acl_tagged_raw",
+      "lang": "ja",
+      "lm": "1",
+      "method": "InfiniSST",
+      "segments": 468,
+      "talks": 5,
+      "xcomet_mean": 0.6325607458845928,
+      "xcomet_mean_x100": 63.25607458845928,
+      "xcomet_talk_macro_mean": 0.63277618762666
+    },
+    {
+      "dataset": "acl_tagged_raw",
+      "lang": "ja",
+      "lm": "1",
+      "method": "RASST",
+      "segments": 468,
+      "talks": 5,
+      "xcomet_mean": 0.5915267931578012,
+      "xcomet_mean_x100": 59.15267931578012,
+      "xcomet_talk_macro_mean": 0.5894978307026773
+    },
+    {
+      "dataset": "acl_tagged_raw",
+      "lang": "ja",
+      "lm": "1",
+      "method": "RASST-lm1-curriculum",
+      "segments": 468,
+      "talks": 5,
+      "xcomet_mean": 0.6112419749713607,
+      "xcomet_mean_x100": 61.124197497136066,
+      "xcomet_talk_macro_mean": 0.60645837675135
+    }
+  ],
+  "tolerances": {
+    "tie": 1e-12,
+    "tsv_absolute": 1e-09
+  },
+  "validated_counts": {
+    "manifest_systems": 3,
+    "pairs": 1,
+    "segments": 1404,
+    "summary_systems": 3
+  }
+}

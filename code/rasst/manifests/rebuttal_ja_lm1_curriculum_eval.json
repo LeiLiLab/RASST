@@ -4,7 +4,7 @@
   "event_type": "simuleval",
   "family": "main_result",
   "variant": "ja_lm1_curriculum_seed43",
-  "status": "planned",
+  "status": "completed",
   "artifacts": [
     {
       "key": "eval_density_driver",
@@ -85,6 +85,44 @@
       "rows": 13548,
       "all_lm1_rows": 2096,
       "all_lm1_rate": 0.15470918216710955
+    },
+    "completed_results": {
+      "training": {
+        "run_path": "/mnt/aries/data6/jiaxuanluo/RASST_release_runs/ja_lm1_curriculum_20260713/checkpoints/keep1.0_r32/v3-20260713-114017",
+        "completed_steps": 573,
+        "eval_lm_loss": 0.29417345,
+        "hf_export_path": "/mnt/aries/data6/jiaxuanluo/RASST_release_runs/ja_lm1_curriculum_20260713/checkpoints/keep1.0_r32/v3-20260713-114017-hf",
+        "hf_config_sha256": "e63c4cc3acc787d38ae818a416a53fcff684d60e8db497b30328e1f85bbd6401",
+        "hf_index_sha256": "03ffe9a54efe9007ceb788c2b036f5c589094918c4582add4e92bc17e1cba838"
+      },
+      "acl_ja_lm1": {
+        "run_path": "/mnt/aries/data6/jiaxuanluo/RASST_release_runs/ja_lm1_curriculum_20260713/eval_acl_ja_lm1/cells/acl_tagged_raw__ja__lm1/ja/drasst_main_result_acl_tagged_raw_ja_lm1_lm1_k10_th0.78_gacl6060_tagged_gt_raw_min_norm2",
+        "bleu": 23.892923864689116,
+        "masked_terms_bleu": 20.424150161457373,
+        "stream_laal_ms": 1522.4505785846513,
+        "stream_laal_ca_ms": 2286.170651611981,
+        "term_acc": 0.7777,
+        "term_correct": 731,
+        "term_total": 940,
+        "eval_results_sha256": "73ccbeb5eae456b139286dace647d7673ef6ebd25057a85a647f97e288a932c4",
+        "instances_sha256": "a754df2c09327bc822fc4d8e6c6afbc207e3961c39e75d1783ddc5c61b3abdb8",
+        "instances_strip_term_sha256": "59d9ddaed5a55b0c2caa62a03fc446d72b0190b0f2c14a821db51c4f3627b0aa"
+      },
+      "sentence_xcomet": {
+        "sentences_per_segment": 1,
+        "systems": 3,
+        "segments": 1404,
+        "model_revision": "873bac1b1c461e410c4a6e379f6790d3d1c7c214",
+        "infinisst_x100": 63.25607458845928,
+        "original_rasst_x100": 59.15267931578012,
+        "curriculum_rasst_x100": 61.124197497136066,
+        "curriculum_minus_original_points": 1.971518181355946,
+        "curriculum_minus_infinisst_points": -2.131877091323212,
+        "validation_status": "ok",
+        "segments_sha256": "6ea75fd94d72dba025b8fb16c7c16ec93011018e2642b836d3c3c30505a130d0",
+        "validation_sha256": "0e3a6f3e79e312324835592d05a04ac5bb01dadb1fd2b3875f1844d12750f30a"
+      },
+      "artifact_upload_status": "pending_authorized_hugging_face_credentials"
     }
   }
 }

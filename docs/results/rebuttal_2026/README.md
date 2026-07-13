@@ -7,13 +7,14 @@ glossary 原始响应不进入 Git。
 
 ## 当前结论
 
-- **xCOMET streaming pairing 已修复。** 旧 ACL sentence-level `+0.1158` 依赖
-  逐句 mWER resegmentation；MFA/raw-chunk audit 证实它会生成错配的
-  `src/mt/ref` 个例，因此不再推荐作为 rebuttal claim。固定 5-sentence blocks 的
-  ACL 重跑为 24 systems / 12 cells / 2,304 blocks，cell-macro 差值 `-0.8699`
-  xCOMET points（乘以 100）。它修复了四个 Ja 极端负例中的三个，但没有逆转
-  aggregate。协议、结果和提交建议见
-  [`xcomet_acl_block5_report.md`](xcomet_acl_block5_report.md)。
+- **最终 xCOMET 口径按作者要求使用逐句 segment。** 每个 source/reference
+  sentence 对应一个 mWER-resegmented hypothesis，`sentences_per_segment=1`；
+  block-aware 结果只保留为历史 boundary-sensitivity audit，不进入最终表。新增 Ja
+  `lm=1` curriculum checkpoint 的逐句 xCOMET 为 `61.124`，相对原 RASST
+  `59.153` 提升 `+1.972` points，并把对 InfiniSST `63.256` 的差距从
+  `-4.103` 缩小到 `-2.132`。同时 BLEU 提升 `+1.231`，TERM_ACC 下降
+  `3.93 pp`；完整结果见
+  [`ja_lm1_curriculum_retrain_eval.md`](ja_lm1_curriculum_retrain_eval.md)。
 - **Masked BLEU 已完成并全量复算。** 排除 ESO En-Zh/En-Ja 后，RASST 相对
   InfiniSST 的 target-term-masked BLEU 在 12/16 cells 为正，平均差值
   `+0.6927`；ACL 12 cells 的平均差值为 `+0.9919`，ESO En-De 4 cells 的
@@ -91,11 +92,11 @@ glossary 原始响应不进入 Git。
 
 ## xCOMET
 
-状态：**已完成；旧 sentence-level ACL 口径已被 block-aware 诊断取代。**
+状态：**已完成；最终 rebuttal table 使用 sentence-level ACL 口径。**
 
-- 当前推荐诊断是 ACL En-Zh/De/Ja 的 fixed 5-sentence blocks：24 system rows /
-  12 cells / 2,304 blocks。旧 ACL 与 ESO En-De sentence-level artifacts 保留作
-  provenance，但不能再和 block scores 合并成一个 16-cell macro。
+- 最终协议固定 `sentences_per_segment=1`。Fixed 5-sentence blocks 仍作为
+  streaming-boundary sensitivity artifact 保留，但不与最终逐句分数混用，也不进入
+  rebuttal table。
 - Metric：`Unbabel/XCOMET-XXL`，revision
   `873bac1b1c461e410c4a6e379f6790d3d1c7c214`。
 - Encoder tokenizer/config：`facebook/xlm-roberta-xxl`，revision
@@ -106,14 +107,22 @@ glossary 原始响应不进入 Git。
   [`xcomet_paper_exact_eso_de_input_provenance.tsv`](xcomet_paper_exact_eso_de_input_provenance.tsv)，
   corrected portable manifest 见
   [`xcomet_paper_exact_eso_de_manifest.portable.tsv`](xcomet_paper_exact_eso_de_manifest.portable.tsv)。
-- 旧 ACL sentence-level 12-cell macro 为 `+0.1158`，但 case audit 证实逐句
-  mWER 会把 delayed output 配到错误 source/reference，因此该值只保留为历史诊断，
-  不应进入 rebuttal。固定 5-sentence block 重跑为 RASST `57.8310`、InfiniSST
-  `58.7009`，差值 `-0.8699`；完整结果见
+- ACL sentence-level 12-cell macro 为 `+0.1158`。Case audit 证实个别 delayed
+  output 对逐句 mWER boundary 敏感，因此最终文字应明确协议，不把 segment-level
+  error span 直接解释成模型对单个 source sentence 的因果错误。固定 5-sentence
+  block sensitivity 为 RASST `57.8310`、InfiniSST `58.7009`，差值 `-0.8699`；
+  它只作为历史 audit，完整结果见
   [`xcomet_acl_block5_report.md`](xcomet_acl_block5_report.md)、
   [`xcomet_acl_block5_summary.tsv`](xcomet_acl_block5_summary.tsv)、
   [`xcomet_acl_block5_paired.tsv`](xcomet_acl_block5_paired.tsv) 和
   [`xcomet_acl_block5_validation.json`](xcomet_acl_block5_validation.json)。
+- Ja `lm=1` curriculum 的最终逐句结果为 InfiniSST `63.256`、原 RASST
+  `59.153`、新 RASST `61.124`；validator 核对 3 systems / 1,404 segments，
+  status `ok`。轻量结果见
+  [`ja_lm1_curriculum_xcomet_sentence_summary.tsv`](ja_lm1_curriculum_xcomet_sentence_summary.tsv)、
+  [`ja_lm1_curriculum_xcomet_sentence_paired.tsv`](ja_lm1_curriculum_xcomet_sentence_paired.tsv)
+  和
+  [`ja_lm1_curriculum_xcomet_sentence_validation.json`](ja_lm1_curriculum_xcomet_sentence_validation.json)。
 - New InfiniSST × paper-exact RASST 的 ESO En-De 4 cells 为 RASST `75.9398`、
   InfiniSST `77.3245`，平均差值 `-1.3848`，0/4 cells 为正。这是 sentence-level
   历史结果，不与 ACL block-aware 分数求 macro。

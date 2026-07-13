@@ -1,0 +1,4 @@
+dataset	method	lang	lm	bleu	masked_bleu	stream_laal_ms	stream_laal_ca_ms	term_acc	term_correct	term_total	xcomet_sentence_x100	provenance
+acl_tagged_raw	InfiniSST	ja	1	24.4002	21.7166	1613.0120	2058.9259	0.6245	587	940	63.2560745885	verified ACL baseline plus same-run sentence xCOMET
+acl_tagged_raw	RASST-original	ja	1	22.6615330283	19.4429	1477.7076928968	2089.3117298861	0.8170	768	940	59.1526793158	paper-canonical RASST plus same-run sentence xCOMET
+acl_tagged_raw	RASST-lm1-curriculum	ja	1	23.8929238647	20.4241501615	1522.4505785847	2286.1706516120	0.7777	731	940	61.1241974971	20260713 retrain and canonical post-eval
