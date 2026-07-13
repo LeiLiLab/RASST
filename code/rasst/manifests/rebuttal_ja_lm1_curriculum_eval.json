@@ -24,7 +24,7 @@
     {
       "key": "model_ja_lm1_curriculum",
       "type": "hf_model_dir",
-      "local_path": "/mnt/aries/data6/jiaxuanluo/RASST_release_runs/ja_lm1_curriculum_20260713/checkpoints/keep1.0_r32/v2-20260713-112228-hf"
+      "local_path": "/mnt/aries/data6/jiaxuanluo/RASST_release_runs/ja_lm1_curriculum_20260713/checkpoints/keep1.0_r32/v3-20260713-114017-hf"
     },
     {
       "key": "glossary_acl_tagged_raw",
