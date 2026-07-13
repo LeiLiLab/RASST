@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Score talk-level SimulEval outputs with sentence-aligned xCOMET.
+"""Score talk-level SimulEval outputs with block-aligned xCOMET.
 
 The input manifest is either TSV or JSONL.  Each row describes one system and
 must contain these fields::
@@ -9,8 +9,14 @@ must contain these fields::
 Paths may be absolute or relative to the manifest.  ``source_text`` and
 ``reference`` are sentence-aligned text files; ``audio_yaml`` assigns every
 sentence to a talk through its ``wav`` field.  Every talk in ``instances_log``
-is mapped to those sentences and resegmented with an explicitly supplied
-``mwerSegmenter`` executable before xCOMET sees it.
+is mapped to those sentences, consecutive sentences are grouped into fixed
+blocks, and the prediction is resegmented against those blocks with an
+explicitly supplied ``mwerSegmenter`` executable before xCOMET sees it.
+
+Grouping is important for streaming output: a sentence-level minimum-WER
+boundary can move delayed words into a neighbouring hypothesis while source
+and reference rows remain fixed. Scoring fixed multi-sentence blocks absorbs
+local boundary drift without changing or dropping any generated text.
 
 The model checkpoint is always local.  The model id and immutable revision are
 still required so the resulting artifact records what that checkpoint claims
@@ -39,7 +45,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, Iterator, List, Mapping, MutableMapping, Optional, Sequence, Tuple
 
 
-SCHEMA_VERSION = "rasst-xcomet-segments-v1"
+SCHEMA_VERSION = "rasst-xcomet-segments-v2"
 MANIFEST_FIELDS = (
     "dataset",
     "method",
@@ -626,6 +632,26 @@ def segment_prediction_by_references(
     return segments
 
 
+def group_talk_sentence_indices(
+    sentence_indices: Sequence[int],
+    sentences_per_segment: int,
+) -> List[List[int]]:
+    """Return consecutive, non-overlapping sentence-index blocks for one talk."""
+    if sentences_per_segment <= 0:
+        raise XCometScoringError("sentences_per_segment must be positive")
+    if not sentence_indices:
+        raise XCometScoringError("Cannot group a talk with zero sentences")
+    indices = [int(index) for index in sentence_indices]
+    if any(right != left + 1 for left, right in zip(indices, indices[1:])):
+        raise XCometScoringError(
+            f"Talk sentence rows must be globally consecutive, got {indices!r}"
+        )
+    return [
+        indices[start : start + sentences_per_segment]
+        for start in range(0, len(indices), sentences_per_segment)
+    ]
+
+
 def prepare_system(
     manifest: ManifestRow,
     *,
@@ -636,6 +662,7 @@ def prepare_system(
     segmenter: Path,
     segmenter_sha256: str,
     output_tags: Sequence[str],
+    sentences_per_segment: int,
     timeout_seconds: float,
     file_hasher: FileHasher,
 ) -> PreparedSystem:
@@ -673,7 +700,14 @@ def prepare_system(
             )
         raw_prediction = str(instance.get("prediction") or "")
         clean_prediction = strip_explicit_output_tags(raw_prediction, output_tags)
-        talk_references = [references[index] for index in sentence_indices]
+        sentence_groups = group_talk_sentence_indices(
+            sentence_indices,
+            sentences_per_segment,
+        )
+        talk_references = [
+            " ".join(references[index].strip() for index in group)
+            for group in sentence_groups
+        ]
         talk_hypotheses = segment_prediction_by_references(
             executable=segmenter,
             prediction=clean_prediction,
@@ -682,11 +716,19 @@ def prepare_system(
             timeout_seconds=timeout_seconds,
         )
         raw_instance_index = instance.get("index", instance_order)
-        for talk_sentence_index, (sentence_index, hypothesis) in enumerate(
-            zip(sentence_indices, talk_hypotheses)
+        for talk_segment_index, (sentence_group, hypothesis) in enumerate(
+            zip(sentence_groups, talk_hypotheses)
         ):
-            source = sources[sentence_index]
-            reference = references[sentence_index]
+            source = " ".join(sources[index].strip() for index in sentence_group)
+            reference = " ".join(
+                references[index].strip() for index in sentence_group
+            )
+            first_sentence_index = sentence_group[0]
+            last_sentence_index = sentence_group[-1]
+            talk_first_sentence_index = talk_segment_index * sentences_per_segment
+            talk_last_sentence_index = (
+                talk_first_sentence_index + len(sentence_group) - 1
+            )
             segments.append(
                 {
                     "schema_version": SCHEMA_VERSION,
@@ -698,8 +740,14 @@ def prepare_system(
                     "instances_line": line_number,
                     "instance_index": raw_instance_index,
                     "talk_id": talk_id,
-                    "talk_sentence_index": talk_sentence_index,
-                    "sentence_index": sentence_index,
+                    "talk_sentence_index": talk_segment_index,
+                    "talk_segment_index": talk_segment_index,
+                    "talk_first_sentence_index": talk_first_sentence_index,
+                    "talk_last_sentence_index": talk_last_sentence_index,
+                    "sentence_index": first_sentence_index,
+                    "first_sentence_index": first_sentence_index,
+                    "last_sentence_index": last_sentence_index,
+                    "sentence_count": len(sentence_group),
                     "source": source,
                     "hypothesis": hypothesis,
                     "reference": reference,
@@ -1145,6 +1193,7 @@ def write_segment_jsonl(
     segmenter: Path,
     devices: Sequence[int],
     output_tags: Sequence[str],
+    sentences_per_segment: int,
     scoring_config_sha256: str,
 ) -> None:
     lines: List[str] = []
@@ -1161,6 +1210,7 @@ def write_segment_jsonl(
                 "mwersegmenter": str(segmenter),
                 "latency_unit": system.manifest.latency_unit,
                 "stripped_output_tags": list(output_tags),
+                "sentences_per_segment": sentences_per_segment,
             }
             record["provenance_hashes"] = {
                 **system.provenance_hashes,
@@ -1191,7 +1241,7 @@ def validate_output_paths(paths: Sequence[Path], protected_inputs: Sequence[Path
 
 def build_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Resegment every talk and score sentence-aligned RASST systems with local xCOMET."
+        description="Resegment every talk and score fixed sentence blocks with local xCOMET."
     )
     parser.add_argument("--manifest", type=Path, required=True, help="System manifest (.tsv or .jsonl).")
     parser.add_argument("--mwer-segmenter", type=Path, required=True, help="Executable mwerSegmenter path.")
@@ -1230,6 +1280,16 @@ def build_argument_parser() -> argparse.ArgumentParser:
         help="Per-talk mwerSegmenter timeout.",
     )
     parser.add_argument(
+        "--sentences-per-segment",
+        type=int,
+        default=1,
+        help=(
+            "Number of consecutive sentences joined into each xCOMET segment. "
+            "Use a value greater than one for streaming outputs so local mWER "
+            "boundary drift stays inside the scored pair."
+        ),
+    )
+    parser.add_argument(
         "--strip-output-tag",
         action="append",
         default=[],
@@ -1260,6 +1320,8 @@ def run(args: argparse.Namespace) -> None:
         raise XCometScoringError("batch_size must be positive")
     if args.num_workers < 0:
         raise XCometScoringError("num_workers must be non-negative")
+    if args.sentences_per_segment <= 0:
+        raise XCometScoringError("sentences_per_segment must be positive")
     recovery = resolve_recovery_config(
         prediction_gather_dir=args.prediction_gather_dir,
         inference_runner_sha256=args.inference_runner_sha256,
@@ -1303,6 +1365,7 @@ def run(args: argparse.Namespace) -> None:
         "batch_size": args.batch_size,
         "num_workers": args.num_workers,
         "output_tags": list(output_tags),
+        "sentences_per_segment": args.sentences_per_segment,
     }
     scoring_config_sha256 = _canonical_json_sha256(scoring_config)
 
@@ -1319,6 +1382,7 @@ def run(args: argparse.Namespace) -> None:
                 segmenter=segmenter,
                 segmenter_sha256=segmenter_sha256,
                 output_tags=output_tags,
+                sentences_per_segment=args.sentences_per_segment,
                 timeout_seconds=args.segmenter_timeout_seconds,
                 file_hasher=file_hasher,
             )
@@ -1404,6 +1468,7 @@ def run(args: argparse.Namespace) -> None:
         segmenter=segmenter,
         devices=devices,
         output_tags=output_tags,
+        sentences_per_segment=args.sentences_per_segment,
         scoring_config_sha256=scoring_config_sha256,
     )
     print(f"[DONE] summary={args.summary_tsv}", flush=True)

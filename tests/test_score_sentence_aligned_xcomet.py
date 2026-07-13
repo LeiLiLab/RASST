@@ -155,6 +155,7 @@ class SentenceAlignedXCometTest(unittest.TestCase):
                 segmenter=segmenter,
                 segmenter_sha256=hasher.sha256(segmenter),
                 output_tags=["term"],
+                sentences_per_segment=1,
                 timeout_seconds=5.0,
                 file_hasher=hasher,
             )
@@ -210,9 +211,82 @@ class SentenceAlignedXCometTest(unittest.TestCase):
                     segmenter=segmenter,
                     segmenter_sha256=hasher.sha256(segmenter),
                     output_tags=[],
+                    sentences_per_segment=1,
                     timeout_seconds=5.0,
                     file_hasher=hasher,
                 )
+
+    def test_prepare_system_groups_streaming_pairs_before_mwer(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir_raw:
+            temp_dir = Path(temp_dir_raw)
+            source = temp_dir / "source.txt"
+            reference = temp_dir / "reference.txt"
+            audio_yaml = temp_dir / "audio.yaml"
+            instances = temp_dir / "instances.log"
+            segmenter = temp_dir / "mwerSegmenter"
+            source.write_text(
+                "source 0\nsource 1\nsource 2\nsource 3\nsource 4\nsource 5\n",
+                encoding="utf-8",
+            )
+            reference.write_text(
+                "ref 0\nref 1\nref 2\nref 3\nref 4\nref 5\n",
+                encoding="utf-8",
+            )
+            audio_yaml.write_text(
+                json.dumps([{"wav": "talk-a.wav"}] * 6),
+                encoding="utf-8",
+            )
+            instances.write_text(
+                json.dumps(
+                    {
+                        "source": ["talk-a.wav"],
+                        "prediction": "hypotheses 0 through 4|||hypothesis 5",
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            _write_fake_segmenter(segmenter)
+            manifest = MODULE.ManifestRow(
+                "acl6060",
+                "RASST",
+                "ja",
+                "2",
+                instances,
+                source,
+                reference,
+                audio_yaml,
+                "word",
+                2,
+            )
+            hasher = MODULE.FileHasher()
+            prepared = MODULE.prepare_system(
+                manifest,
+                manifest_sha256="a" * 64,
+                runner_sha256="b" * 64,
+                checkpoint_sha256="c" * 64,
+                checkpoint_hparams_sha256="d" * 64,
+                segmenter=segmenter,
+                segmenter_sha256=hasher.sha256(segmenter),
+                output_tags=[],
+                sentences_per_segment=5,
+                timeout_seconds=5.0,
+                file_hasher=hasher,
+            )
+
+            self.assertEqual(len(prepared.segments), 2)
+            first, second = prepared.segments
+            self.assertEqual(
+                first["source"],
+                "source 0 source 1 source 2 source 3 source 4",
+            )
+            self.assertEqual(first["reference"], "ref 0 ref 1 ref 2 ref 3 ref 4")
+            self.assertEqual(first["first_sentence_index"], 0)
+            self.assertEqual(first["last_sentence_index"], 4)
+            self.assertEqual(first["sentence_count"], 5)
+            self.assertEqual(second["first_sentence_index"], 5)
+            self.assertEqual(second["last_sentence_index"], 5)
+            self.assertEqual(second["sentence_count"], 1)
 
     def test_extract_xcomet_scores_and_spans(self) -> None:
         output = FakePrediction(
