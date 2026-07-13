@@ -12,6 +12,7 @@ MCORE_MODEL="/mnt/gemini/data2/jiaxuanluo/Qwen3-Omni-30B-A3B-Instruct-v2/"
 BASE_MODEL_HOST="/mnt/gemini/data2/jiaxuanluo/Qwen3-Omni-30B-A3B-Instruct"
 SAVE_BASE="${RUN_ROOT}/checkpoints"
 TRAIN_LOG_DIR="${RUN_ROOT}/logs/train"
+WANDB_DIR="${RUN_ROOT}/wandb"
 HF_EXPORT_STAGE_ROOT="none"
 HF_EXPORT_LOCAL_CACHE_ROOT="none"
 HF_EXPORT_LOCAL_LATEST_LINK="none"
@@ -46,7 +47,7 @@ for path in "${WRAPPER}" "${DATASET_PATH}" "${VAL_DATASET}" "${MCORE_MODEL}" "${
   [[ -e "${path}" ]] || { echo "[ERROR] Missing required path: ${path}" >&2; exit 3; }
 done
 
-mkdir -p "${SAVE_BASE}" "${TRAIN_LOG_DIR}"
+mkdir -p "${SAVE_BASE}" "${TRAIN_LOG_DIR}" "${WANDB_DIR}"
 
 # note (luojiaxuan): The legacy Megatron/Swift wrapper receives its complete,
 # Git-tracked recipe through explicit assignments here. LOCAL_RUN_MOUNT keeps
@@ -87,6 +88,8 @@ TORCH_NCCL_ENABLE_MONITORING=0 \
 TORCH_NCCL_HEARTBEAT_TIMEOUT_SEC=1800 \
 CUDA_DEVICE_MAX_CONNECTIONS=1 \
 WANDB_PROJECT="sst_omni" \
+WANDB_MODE="offline" \
+WANDB_DIR="${WANDB_DIR}" \
 WANDB_EXP_PREFIX="speech-llm-ja-lm1-curriculum-r32a32-ep1-${COMPUTE_LABEL}" \
 WANDB_TAGS="family:speech_llm_tcm_termmap,task:train,data:ja_lm1_curriculum,variant:lm1x2_seed43,status:running,compute:${COMPUTE_LABEL}" \
 WANDB_NOTES="$(<"${NOTES_FILE}")" \

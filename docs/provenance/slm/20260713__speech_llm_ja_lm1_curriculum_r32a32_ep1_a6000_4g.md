@@ -32,6 +32,8 @@ the model to another short-chunk retrieval context.
 - Validation set: the original 355-row Ja cap16 denoise-budget `<t>` dev set.
 - HF conversion: direct single-copy export beside the MCore adapter checkpoint;
   staged and cache duplicates are disabled to avoid tripling the 66 GB export.
+- W&B mode: offline; standalone logs and verified checkpoint/eval artifacts are
+  authoritative for this run.
 
 The A6000 recipe is retained for direct comparability and data locality: the
 verified MCore/HF bases and speech inputs are already available under
