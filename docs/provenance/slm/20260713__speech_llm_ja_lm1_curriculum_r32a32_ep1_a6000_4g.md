@@ -41,6 +41,11 @@ verified MCore/HF bases and speech inputs are already available under
 190 GB plus the audio corpus. The launcher records the selected host explicitly
 and places checkpoints and exports on a local `/mnt/<host>/data*` disk.
 
+For the Aries run, the 60 GB MCore base is staged once to local `/mnt/data3`.
+Direct loading from shared `/mnt/gemini` left all four GPUs at 0% with a
+per-rank ETA up to 50 minutes; local staging removes that repeated-read
+bottleneck. The larger HF export remains on local `/mnt/data6`.
+
 ## Required evaluation
 
 Evaluate the new model on the frozen ACL Japanese `lm=1` cell and report:

@@ -8,7 +8,7 @@ RUN_ROOT="${3:-}"
 COMPUTE_LABEL="${4:-}"
 DATASET_PATH="${RUN_ROOT}/data/train_s_ja_cap16_denoise_ttag_lm1x2_seed43.jsonl"
 VAL_DATASET="/mnt/gemini/data1/jiaxuanluo/speech_llm_ja_cap16_denoise_budget_20260525/ja/hn1024_tau078_cap16_denoise_budget_ttag_v1/dev_s_ja_retriever_hn1024_tau078_cap16_denoise_budget_ttag_exactboundary_first355.jsonl"
-MCORE_MODEL="/mnt/gemini/data2/jiaxuanluo/Qwen3-Omni-30B-A3B-Instruct-v2/"
+MCORE_MODEL="${5:-}"
 BASE_MODEL_HOST="/mnt/gemini/data2/jiaxuanluo/Qwen3-Omni-30B-A3B-Instruct"
 SAVE_BASE="${RUN_ROOT}/checkpoints"
 TRAIN_LOG_DIR="${RUN_ROOT}/logs/train"
@@ -20,8 +20,8 @@ NOTES_FILE="${ROOT_DIR}/../../docs/provenance/slm/20260713__speech_llm_ja_lm1_cu
 
 ALLOCATED_GPUS="${1:-}"
 CONTAINER_NAME="${2:-}"
-if [[ -z "${ALLOCATED_GPUS}" || -z "${CONTAINER_NAME}" || -z "${RUN_ROOT}" || -z "${COMPUTE_LABEL}" ]]; then
-  echo "Usage: $0 <gpu_csv> <container_name> <absolute_run_root> <compute_label>" >&2
+if [[ -z "${ALLOCATED_GPUS}" || -z "${CONTAINER_NAME}" || -z "${RUN_ROOT}" || -z "${COMPUTE_LABEL}" || -z "${MCORE_MODEL}" ]]; then
+  echo "Usage: $0 <gpu_csv> <container_name> <absolute_run_root> <compute_label> <mcore_model>" >&2
   exit 2
 fi
 if [[ "${RUN_ROOT}" != /* ]]; then
@@ -42,6 +42,11 @@ if [[ -z "${LOCAL_RUN_MOUNT}" || "${LOCAL_RUN_MOUNT}" != /* ]]; then
   echo "[ERROR] Could not resolve filesystem mount for run_root: ${RUN_ROOT}" >&2
   exit 2
 fi
+LOCAL_MCORE_MOUNT="$(df --output=target "${MCORE_MODEL}" | tail -n 1 | xargs)"
+if [[ -z "${LOCAL_MCORE_MOUNT}" || "${LOCAL_MCORE_MOUNT}" != /* ]]; then
+  echo "[ERROR] Could not resolve filesystem mount for mcore_model: ${MCORE_MODEL}" >&2
+  exit 2
+fi
 
 for path in "${WRAPPER}" "${DATASET_PATH}" "${VAL_DATASET}" "${MCORE_MODEL}" "${BASE_MODEL_HOST}" "${NOTES_FILE}"; do
   [[ -e "${path}" ]] || { echo "[ERROR] Missing required path: ${path}" >&2; exit 3; }
@@ -55,7 +60,7 @@ mkdir -p "${SAVE_BASE}" "${TRAIN_LOG_DIR}" "${WANDB_DIR}"
 BASE_MODEL_HOST="${BASE_MODEL_HOST}" \
 HOST_GPU_DEVICES="${ALLOCATED_GPUS}" \
 DOCKER_CONTAINER_NAME="${CONTAINER_NAME}" \
-MOUNT_ROOTS="/mnt/gemini /mnt/taurus /mnt/aries ${LOCAL_RUN_MOUNT}" \
+MOUNT_ROOTS="/mnt/gemini /mnt/taurus /mnt/aries ${LOCAL_RUN_MOUNT} ${LOCAL_MCORE_MOUNT}" \
 NPROC_PER_NODE=4 \
 EXPERT_MODEL_PARALLEL_SIZE=2 \
 TENSOR_MODEL_PARALLEL_SIZE=2 \
