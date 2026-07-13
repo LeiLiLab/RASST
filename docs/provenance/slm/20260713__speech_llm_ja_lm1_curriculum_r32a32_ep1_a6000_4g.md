@@ -30,6 +30,8 @@ the model to another short-chunk retrieval context.
 - Sequence length: 3072.
 - Epochs: 1.
 - Validation set: the original 355-row Ja cap16 denoise-budget `<t>` dev set.
+- HF conversion: direct single-copy export beside the MCore adapter checkpoint;
+  staged and cache duplicates are disabled to avoid tripling the 66 GB export.
 
 The A6000 recipe is retained for direct comparability and data locality: the
 verified MCore/HF bases and speech inputs are already available under

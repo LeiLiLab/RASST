@@ -12,9 +12,9 @@ MCORE_MODEL="/mnt/gemini/data2/jiaxuanluo/Qwen3-Omni-30B-A3B-Instruct-v2/"
 BASE_MODEL_HOST="/mnt/gemini/data2/jiaxuanluo/Qwen3-Omni-30B-A3B-Instruct"
 SAVE_BASE="${RUN_ROOT}/checkpoints"
 TRAIN_LOG_DIR="${RUN_ROOT}/logs/train"
-HF_EXPORT_STAGE_ROOT="${RUN_ROOT}/hf_export_stage"
-HF_EXPORT_LOCAL_CACHE_ROOT="${RUN_ROOT}/model_hf"
-HF_EXPORT_LOCAL_LATEST_LINK="${RUN_ROOT}/latest-hf"
+HF_EXPORT_STAGE_ROOT="none"
+HF_EXPORT_LOCAL_CACHE_ROOT="none"
+HF_EXPORT_LOCAL_LATEST_LINK="none"
 NOTES_FILE="${ROOT_DIR}/../../docs/provenance/slm/20260713__speech_llm_ja_lm1_curriculum_r32a32_ep1_a6000_4g.md"
 
 ALLOCATED_GPUS="${1:-}"
@@ -41,7 +41,7 @@ for path in "${WRAPPER}" "${DATASET_PATH}" "${VAL_DATASET}" "${MCORE_MODEL}" "${
   [[ -e "${path}" ]] || { echo "[ERROR] Missing required path: ${path}" >&2; exit 3; }
 done
 
-mkdir -p "${SAVE_BASE}" "${TRAIN_LOG_DIR}" "${HF_EXPORT_STAGE_ROOT}" "${HF_EXPORT_LOCAL_CACHE_ROOT}"
+mkdir -p "${SAVE_BASE}" "${TRAIN_LOG_DIR}"
 
 # note (luojiaxuan): The legacy Megatron/Swift wrapper receives its complete,
 # Git-tracked recipe through explicit assignments here; callers only select the
@@ -67,7 +67,7 @@ MICRO_BATCH_SIZE=1 \
 GLOBAL_BATCH_SIZE=4 \
 MAX_LENGTH=3072 \
 HF_EXPORT_STAGE_ROOT="${HF_EXPORT_STAGE_ROOT}" \
-HF_EXPORT_MIN_FREE_GB=90 \
+HF_EXPORT_MIN_FREE_GB=70 \
 HF_EXPORT_LOCAL_CACHE_ROOT="${HF_EXPORT_LOCAL_CACHE_ROOT}" \
 HF_EXPORT_LOCAL_LATEST_LINK="${HF_EXPORT_LOCAL_LATEST_LINK}" \
 HF_EXPORT_SWIFT_EXTRA_ARGS="--device_map auto" \
