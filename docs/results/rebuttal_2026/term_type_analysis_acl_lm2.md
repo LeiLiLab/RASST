@@ -1,5 +1,9 @@
 # ACL `lm=2` terminology-type outcome analysis
 
+> `lm=1/2` 的当前合并分析见
+> [`term_type_analysis_acl_lm1_lm2.md`](term_type_analysis_acl_lm1_lm2.md)。本文件保留
+> `lm=2` 的审计细节与历史 provenance。
+
 状态：**自动统计完成；term taxonomy 是可复算的 English surface-form taxonomy；
 loss 的语义标签沿用 De/Zh/Ja exact-miss author-diagnostic draft。**
 
