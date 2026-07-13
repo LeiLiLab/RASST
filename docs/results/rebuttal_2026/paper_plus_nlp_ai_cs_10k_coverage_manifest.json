@@ -1,0 +1,68 @@
+{
+  "counts": {
+    "global_source_overlap": 68,
+    "paper_entries_total": 50245,
+    "paper_unique_sources": 10225,
+    "raw_unique_sources": 238
+  },
+  "dataset": "acl_tagged_raw",
+  "inputs": {
+    "audio_yaml": {
+      "path": "outputs/rebuttal_2026/realistic_glossary_coverage/inputs/audio.yaml",
+      "sha256": "60c3c999cd6c4fcd80565269367f92fa65e3171a8598d0859fb87ac22be9dfaa"
+    },
+    "paper_glossaries": {
+      "2022.acl-long.110": {
+        "path": "outputs/rebuttal_2026/paper_plus_nlp_ai_cs_10k_glossaries/glossaries/extracted_glossary__2022.acl-long.110.json",
+        "sha256": "a2e61dcc0882735624902842f8954904cbcabac863db73c2db6c51def321873d"
+      },
+      "2022.acl-long.117": {
+        "path": "outputs/rebuttal_2026/paper_plus_nlp_ai_cs_10k_glossaries/glossaries/extracted_glossary__2022.acl-long.117.json",
+        "sha256": "37bd9fddcb53ef14ab6f3bfeb01f2d1870f513069bc29e6891e96230ad68707d"
+      },
+      "2022.acl-long.268": {
+        "path": "outputs/rebuttal_2026/paper_plus_nlp_ai_cs_10k_glossaries/glossaries/extracted_glossary__2022.acl-long.268.json",
+        "sha256": "0c33c13e6a388a0d4736bb28d692eb453cbda6da33ccba6e6b6e1dd72fa50566"
+      },
+      "2022.acl-long.367": {
+        "path": "outputs/rebuttal_2026/paper_plus_nlp_ai_cs_10k_glossaries/glossaries/extracted_glossary__2022.acl-long.367.json",
+        "sha256": "85b573bb1be360d93d9f1a8bab35af9e128ece44a22c27e89d22e6236a6e1f39"
+      },
+      "2022.acl-long.590": {
+        "path": "outputs/rebuttal_2026/paper_plus_nlp_ai_cs_10k_glossaries/glossaries/extracted_glossary__2022.acl-long.590.json",
+        "sha256": "0b9d8bf5732d095be4787a9c80cab9719026bde6b92d9558b7373b540fe4e8a6"
+      }
+    },
+    "raw_glossary": {
+      "path": "outputs/rebuttal_2026/realistic_glossary_coverage/inputs/raw_glossary.json",
+      "sha256": "f9f171c6475c4bb19250f5f93063a5ef034cbdcc1f8a995c593647718cf9a5b6"
+    },
+    "references": {
+      "de": {
+        "path": "outputs/rebuttal_2026/realistic_glossary_coverage/inputs/de_ref.txt",
+        "sha256": "fd6b1de66cd0aa5a9219a79aebaedc15d5117dff5339cd9cf7613e951a311160"
+      },
+      "ja": {
+        "path": "outputs/rebuttal_2026/realistic_glossary_coverage/inputs/ja_ref.txt",
+        "sha256": "960056c518e3bb4ec779d1c37b56a2782f02927e0ee42670bbd196beca62607e"
+      },
+      "zh": {
+        "path": "outputs/rebuttal_2026/realistic_glossary_coverage/inputs/zh_ref.txt",
+        "sha256": "0b1e32490472b7ff98c8a3d0a83092d10b633283ebc7b4daf1888e3a344f4f72"
+      }
+    },
+    "source": {
+      "path": "outputs/rebuttal_2026/realistic_glossary_coverage/inputs/de_source.txt",
+      "sha256": "aa37f443c0e1c6d23fac0ef285230c29e9a25e7941d45cb796c622a5c15452d1"
+    }
+  },
+  "normalization": {
+    "gold_occurrence": "source boundary match and exact raw-gold target substring in reference",
+    "source": "Unicode NFKC, whitespace collapse, casefold, exact equality",
+    "target": "Unicode NFKC, whitespace collapse, exact equality"
+  },
+  "outputs": {
+    "per_paper": "docs/results/rebuttal_2026/paper_plus_nlp_ai_cs_10k_coverage_per_paper.tsv",
+    "summary": "docs/results/rebuttal_2026/paper_plus_nlp_ai_cs_10k_coverage.tsv"
+  }
+}
