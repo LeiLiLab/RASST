@@ -172,13 +172,13 @@ def prepare(
         "runtime_glossary_policy": runtime_glossary_policy,
         "runtime_glossary_tag": runtime_glossary_tag,
         "runtime_glossary_build_manifest": {
-            "path": str(runtime_glossary_build_manifest_path.resolve()),
+            "path": str(runtime_glossary_build_manifest_path.absolute()),
             "sha256": sha256_file(runtime_glossary_build_manifest_path),
         },
         "source_runtime_glossaries": {
             paper_id: _file_record(source_glossaries[paper_id]) for paper_id in paper_ids
         },
-        "release_data_root": str(release_data_root.resolve()),
+        "release_data_root": str(release_data_root.absolute()),
         "release_inputs": release_records,
         "fixed_raw_gold_eval_glossary": gold_record,
         "separation_policy": {
@@ -229,7 +229,7 @@ def main() -> int:
         runtime_glossary_policy=args.runtime_glossary_policy,
         runtime_glossary_tag=args.runtime_glossary_tag,
     )
-    print(json.dumps({"prepared_manifest": str(manifest_path.resolve())}, sort_keys=True))
+    print(json.dumps({"prepared_manifest": str(manifest_path.absolute())}, sort_keys=True))
     return 0
 
 

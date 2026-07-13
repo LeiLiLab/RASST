@@ -135,7 +135,7 @@ def _file_record(path: Path) -> Dict[str, Any]:
     if not path.is_file() or path.stat().st_size <= 0:
         raise FileNotFoundError(f"Missing or empty file: {path}")
     return {
-        "path": str(path.resolve()),
+        "path": str(path.absolute()),
         "sha256": sha256_file(path),
         "bytes": path.stat().st_size,
     }
@@ -254,7 +254,7 @@ def _validate_gold_glossary(path: Path, languages: Sequence[str]) -> Dict[str, A
     missing = [language for language, count in seen.items() if count == 0]
     if missing:
         raise ValueError(f"Gold glossary has no translations for: {missing}")
-    return {"path": str(path.resolve()), "sha256": sha256_file(path), "translation_rows": seen}
+    return {"path": str(path.absolute()), "sha256": sha256_file(path), "translation_rows": seen}
 
 
 def _release_language_inputs(release_root: Path, language: str) -> Dict[str, Path]:
@@ -305,7 +305,7 @@ def _prepare_language_shards(
         full_audio = audio_root / f"{paper_id}.wav"
         if not full_audio.is_file() or full_audio.stat().st_size <= 0:
             raise FileNotFoundError(f"Missing full-talk audio: {full_audio}")
-        full_audio_by_paper[paper_id] = full_audio.resolve()
+        full_audio_by_paper[paper_id] = full_audio.absolute()
 
     indices_by_paper: Dict[str, List[int]] = defaultdict(list)
     rewritten_audio: List[Dict[str, Any]] = []
@@ -441,13 +441,13 @@ def prepare(
         "languages": list(languages),
         "gemini_model": expected_model,
         "extraction_manifest": {
-            "path": str(extraction_manifest_path.resolve()),
+            "path": str(extraction_manifest_path.absolute()),
             "sha256": sha256_file(extraction_manifest_path),
             "prompt_sha256": extraction_manifest.get("prompt_sha256"),
             "sdk": extraction_manifest.get("sdk"),
             "sdk_version": extraction_manifest.get("sdk_version"),
         },
-        "release_data_root": str(release_data_root.resolve()),
+        "release_data_root": str(release_data_root.absolute()),
         "release_inputs": release_records,
         "fixed_raw_gold_eval_glossary": gold_record,
         "separation_policy": {
@@ -499,7 +499,7 @@ def main() -> int:
         languages=args.languages,
         expected_model=args.expected_model,
     )
-    print(json.dumps({"prepared_manifest": str(manifest_path.resolve())}, sort_keys=True))
+    print(json.dumps({"prepared_manifest": str(manifest_path.absolute())}, sort_keys=True))
     return 0
 
 
