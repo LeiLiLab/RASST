@@ -36,6 +36,11 @@ if [[ ! "${CONTAINER_NAME}" =~ ^sglang-omni-jaxan-[0-9]{8}$ ]]; then
   echo "[ERROR] Container name must match sglang-omni-jaxan-MMDDHHMM" >&2
   exit 2
 fi
+LOCAL_RUN_MOUNT="$(df --output=target "${RUN_ROOT}" | tail -n 1 | xargs)"
+if [[ -z "${LOCAL_RUN_MOUNT}" || "${LOCAL_RUN_MOUNT}" != /* ]]; then
+  echo "[ERROR] Could not resolve filesystem mount for run_root: ${RUN_ROOT}" >&2
+  exit 2
+fi
 
 for path in "${WRAPPER}" "${DATASET_PATH}" "${VAL_DATASET}" "${MCORE_MODEL}" "${BASE_MODEL_HOST}" "${NOTES_FILE}"; do
   [[ -e "${path}" ]] || { echo "[ERROR] Missing required path: ${path}" >&2; exit 3; }
@@ -44,12 +49,12 @@ done
 mkdir -p "${SAVE_BASE}" "${TRAIN_LOG_DIR}"
 
 # note (luojiaxuan): The legacy Megatron/Swift wrapper receives its complete,
-# Git-tracked recipe through explicit assignments here; callers only select the
-# preflight-approved GPU ids and ownership-compliant container name.
+# Git-tracked recipe through explicit assignments here. LOCAL_RUN_MOUNT keeps
+# host-qualified /mnt/<host>/data* symlinks valid inside the training container.
 BASE_MODEL_HOST="${BASE_MODEL_HOST}" \
 HOST_GPU_DEVICES="${ALLOCATED_GPUS}" \
 DOCKER_CONTAINER_NAME="${CONTAINER_NAME}" \
-MOUNT_ROOTS="/mnt/gemini /mnt/taurus /mnt/aries" \
+MOUNT_ROOTS="/mnt/gemini /mnt/taurus /mnt/aries ${LOCAL_RUN_MOUNT}" \
 NPROC_PER_NODE=4 \
 EXPERT_MODEL_PARALLEL_SIZE=2 \
 TENSOR_MODEL_PARALLEL_SIZE=2 \
