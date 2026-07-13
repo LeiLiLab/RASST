@@ -105,3 +105,10 @@ Raw output 为 `モデルへの入力は、文章または文章です。`。这
 > the allegedly hallucinated phrase; the discrepancy arose primarily from
 > streaming commitment and mWER sentence resegmentation. We therefore do not
 > attribute the En-Ja xCOMET decrease wholesale to retrieval noise.
+
+## Block-aware 回归
+
+固定 5-sentence block 的重新评分已验证上述诊断：前三例的 paired delta 变为
+`+0.0341/-0.0023/+0.1507`，而真实 collision case ACL 367:16 仍为
+`-0.2776`。详细协议与 artifacts 见
+[`xcomet_acl_block5_report.md`](xcomet_acl_block5_report.md)。

@@ -167,6 +167,13 @@ commitment 和 mWER sentence resegmentation，而不是错误 hint。
 [`ja_xcomet_mfa_term_map_cases.md`](ja_xcomet_mfa_term_map_cases.md) 和
 [`ja_xcomet_mfa_term_map_cases.tsv`](ja_xcomet_mfa_term_map_cases.tsv)。
 
+随后用固定 5-sentence blocks 重跑 xCOMET：ACL 268:83、110:81、117:70 的
+paired delta 分别从 `-0.8159/-0.8046/-0.7932` 变为
+`+0.0341/-0.0023/+0.1507`；ACL 367:16 仍为 `-0.2776`。这验证了前三例的
+sentence-boundary diagnosis，但 Ja `lm=2` aggregate block delta 仍为
+`-3.0956` points，不能把总体下降归因于 mWER。完整证据见
+[`xcomet_acl_block5_report.md`](xcomet_acl_block5_report.md)。
+
 ## 4. Term-noise 假设：存在，但不是 raw FCR 显示的规模
 
 最初的 raw `term_map_false_copy` 很像支持 term-noise 假设：De 的 44 个 flagged

@@ -10,17 +10,17 @@ Thank you for the careful review and for recognizing the reproducibility,
 ablations, efficiency, and terminology improvements. We have addressed each of
 your evaluation and presentation concerns.
 
-**Translation quality beyond BLEU.** We added `Unbabel/XCOMET-XXL` evaluation
-for all 12 strictly paired ACL 60/60 cells (En-Zh/De/Ja x four latency
-settings). Reporting xCOMET multiplied by 100 and averaging cells equally,
-RASST scores **78.704** versus **78.588** for InfiniSST (**+0.116**) and is
-higher in **8/12** cells. Thus, the large terminology gains do not incur an
-aggregate contextual-quality loss on ACL. We also add a target-term-masked
-BLEU diagnostic: after removing every annotated target-term string from both
-hypothesis and reference, RASST remains higher in **10/12** ACL cells by
-**+0.992 BLEU on average** (regular-BLEU delta: +1.911). The average BLEU
-advantage therefore persists after direct target-term matches are removed. We
-will add both metrics and their protocols.
+**Translation quality beyond BLEU.** We ran `Unbabel/XCOMET-XXL`, but an audit
+found that sentence-level minimum-WER resegmentation can pair delayed streaming
+output with a neighboring source/reference. We therefore repeated all 12 ACL
+cells using fixed five-sentence blocks, which absorb local boundary drift. The
+result is mixed and does not support a general-quality gain: the cell-macro
+RASST-minus-InfiniSST difference is **-0.870 xCOMET points**. We accordingly
+narrow our claim to terminology handling. As a separate diagnostic, after
+removing every annotated target-term string from both hypothesis and reference,
+RASST remains higher in **10/12** ACL cells by **+0.992 masked BLEU** on average
+(regular-BLEU delta: +1.911). We will report the protocol and limitation rather
+than present xCOMET as a win.
 
 **German morphology.** We agree that the current metric is a strict
 surface-form test. We will rename it **exact-form terminology accuracy**, state
@@ -100,14 +100,15 @@ we do not conflate source-term expertise with target-translation review.
 
 **Contextual translation quality.** Following your suggestion, we evaluated
 all 12 paired ACL cells (En-Zh/De/Ja x four latency settings) with xCOMET-XXL.
-RASST scores **78.704**, versus **78.588** for the same-backbone InfiniSST
-baseline (**+0.116**, higher in **8/12** cells), while exact-form terminology
-accuracy improves by **12.4-21.4 points in every cell**. Thus, xCOMET does not
-show an aggregate contextual-quality cost on ACL, although we will not claim a
-large universal gain in general quality. As a complementary diagnostic, after
-masking raw-gold target terms in both hypotheses and references, RASST remains
-higher in **10/12** ACL cells by **+0.992 BLEU** on average (regular-BLEU delta:
-**+1.911**). We present masking as a diagnostic, not a causal decomposition.
+An audit showed that sentence-level mWER can assign delayed streaming output to
+a neighboring source/reference, so we repeated the metric on fixed
+five-sentence blocks. The block-aware cell-macro difference is **-0.870 xCOMET
+points**; we therefore do not claim a general translation-quality gain. Exact-
+form terminology accuracy nevertheless improves by **12.4-21.4 points in every
+cell**. As a complementary diagnostic, after masking raw-gold target terms in
+both hypotheses and references, RASST remains higher in **10/12** ACL cells by
+**+0.992 BLEU** on average (regular-BLEU delta: **+1.911**). We present masking
+as a diagnostic, not a causal decomposition.
 
 **Which cases benefit, and which remain difficult.** We traced every gold
 occurrence at the fixed intermediate operating point (`lm=2`) over the five ACL
@@ -209,12 +210,12 @@ ESO/Medicine.
 
 ### 明显 win，建议正式写
 
-- **Mzub:** ACL xCOMET、masked BLEU、ESO Zh/Ja reference-based quality metric
+- **Mzub:** masked BLEU、ESO Zh/Ja reference-based quality metric
   removal、target-tag ablation、所有 notation/typo 修正。
 - **oktu:** glossary-entry operational definition；ACL dataset-provided human
   annotations 的官方 qualification（source technical terms 经 domain expert
   check；target 由母语 professional post-editor + second reviewer）；12/12
-  TERM_ACC win；xCOMET/masked BLEU；三语 timing conditionals；`LinCE`、
+  TERM_ACC win；masked BLEU；三语 timing conditionals；`LinCE`、
   `BiLSTM-CRF`、`masked language model` 成功例与三类困难例。
 - **gbii:** same-checkpoint largest-window end-to-end control；no-tag control；固定 hint
   count/compute 的 degradation；术语 token share 与 masked BLEU；定量 failure chain。
@@ -245,10 +246,13 @@ ESO/Medicine.
 ### 不建议写
 
 - LLM-as-a-judge pilot/full-run、Gemini quota/key/status。
+- block-aware ACL xCOMET 的完整负 breakdown；它应保留为内部诊断，除非 reviewer
+  追问 streaming output 的 pairing protocol。若提及，必须报 `-0.870`，不能复用
+  旧 sentence-level `+0.116`。
 - 宽语义 audit（De 96.91%、Zh/Ja 语义修正数）和 Codex-assisted 标签。
 - ESO En-De 或 Ja `lm=2` 的负 xCOMET、完整 mixed xCOMET breakdown。
 - raw false-copy/FCR、small-n harmful-adoption 分析，以及 no-tag 较低 FCR。
-- 声称 xCOMET 显著提升、三语 paper-derived glossary 都提升，或已加入新的外部
+- 声称 xCOMET 提升、三语 paper-derived glossary 都提升，或已加入新的外部
   matched-compute biasing baseline。
 - 把 ESO hard-term inventory 称为 fully human-authored、professional-translator
   verified 或 domain-expert annotation。

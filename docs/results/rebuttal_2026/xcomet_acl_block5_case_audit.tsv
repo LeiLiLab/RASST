@@ -1,0 +1,5 @@
+case	global_sentence_index	old_sentence_delta	block_first_sentence_index	block_last_sentence_index	rasst_xcomet	infinisst_xcomet	block_delta	assessment
+ACL 268:83	83	-0.8159	80	84	0.426441	0.392382	0.034059	sentence-level mWER boundary artifact removed
+ACL 110:81	336	-0.8046	335	339	0.454926	0.457178	-0.002252	sentence-level mWER boundary artifact removed
+ACL 117:70	433	-0.7932	433	437	0.599576	0.448842	0.150734	sentence-level mWER boundary artifact removed
+ACL 367:16	123	-0.7747	122	126	0.239051	0.516669	-0.277618	remaining real translation and term-map failure
