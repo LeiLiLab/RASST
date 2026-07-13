@@ -1,0 +1,39 @@
+{
+  "analysis_script": {
+    "path": "code/rasst/analysis/rebuttal/analyze_term_failure_chain.py",
+    "staged_sha256": "bbf8451a67acb6fc7ed90323509cc112eed97cb387e2de96ffeb4a625b6fe20e"
+  },
+  "dataset": "acl_tagged_raw",
+  "languages": {
+    "de": {
+      "occurrences_sha256": "3d2169577b3ec0ff6431bfcae721770c84ed6bc443c12dc5e6174b26a726f0bc",
+      "runtime_log_sha256": "af954438b90854fd77422d94b4cf0cef73f06d49f6bbe665f16393a121d10821",
+      "term_adoption_sha256": "d748d4956fc4ed507ddb9abb417b2d33e50684fcda997c0d0bb684f3dda4c29a"
+    },
+    "ja": {
+      "occurrences_sha256": "bc23831836a42d31bb6bd023bb4d73bbf2375989034a118cf46bcc91901eea2d",
+      "runtime_log_sha256": "cc8a06f7614a8c577f01c7f0238c6dab86904996aa63b9053750c7bbcdf9da96",
+      "term_adoption_sha256": "0f44dcb95a9d634f61ac389b92110c88e80a406afacfbac9507d9c0878dab5c9"
+    },
+    "zh": {
+      "occurrences_sha256": "218e776da053bc6a4a3211ea7a34d32bd11a990714064d5b22a5310ad2858431",
+      "runtime_log_sha256": "b018a570316af4b7263bc9261909db0d642897046000c5a5bcf2e9c21b984beb",
+      "term_adoption_sha256": "8fcfc6100bd75ec3baf18008b0bab535fcf7c446e4602e697efa5250b06f8f1e"
+    }
+  },
+  "lm": 1,
+  "notes": [
+    "The xCOMET bundle is used only as the validated paired sentence-hypothesis carrier; xCOMET scores are not used in the term-type aggregates.",
+    "The analysis contains only the five ACL talks and excludes Medicine/ESO.",
+    "The semantic audit_label field is empty for lm=1; all reported lm=1 gain/loss/both-wrong categories are automatic exact-form transitions."
+  ],
+  "shared_inputs": {
+    "audio_yaml_sha256": "60c3c999cd6c4fcd80565269367f92fa65e3171a8598d0859fb87ac22be9dfaa",
+    "xcomet_paired_hypotheses_sha256": "43b5581bc79e8c389383e6fb84b684f4f7207334c114a0cc0b8b19d47d2a459b"
+  },
+  "staging_root": "/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/rebuttal_term_type_lm1_20260712",
+  "upload_status": {
+    "hugging_face_dataset": "gavinlaw/rasst-rebuttal-term-failure-analysis-acl",
+    "status": "pending"
+  }
+}
