@@ -136,7 +136,9 @@ class SlmLatencyCurriculumTest(unittest.TestCase):
             self.assertAlmostEqual(summary["focus_row_rate_before"], 0.5)
             self.assertAlmostEqual(summary["focus_row_rate_after"], 2 / 3)
             rows = [json.loads(line) for line in output.read_text().splitlines()]
-            self.assertEqual(rows[-1]["latency_curriculum"]["role"], "supplement")
+            self.assertNotIn("latency_multiplier_selection", rows[-1])
+            self.assertNotIn("latency_curriculum", rows[-1])
+            self.assertEqual(set(rows[0]), set(rows[-1]))
 
     def test_rejects_supplement_without_selection_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir_raw:

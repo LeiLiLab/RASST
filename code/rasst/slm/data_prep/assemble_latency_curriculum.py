@@ -122,21 +122,25 @@ def run(args: argparse.Namespace) -> Dict[str, Any]:
     lines: list[str] = []
     source_signatures: set[str] = set()
     base_rows = supplement_rows = repeated_sources = 0
+    base_columns: set[str] | None = None
     for line_number, row in iter_jsonl(base_path):
         validate_row(row, base_path, line_number)
+        columns = set(row)
+        if base_columns is None:
+            base_columns = columns
+        elif columns != base_columns:
+            raise CurriculumError(
+                f"Base JSONL has inconsistent columns at {base_path}:{line_number}"
+            )
         signature = source_signature(row)
         source_signatures.add(signature)
-        row["latency_curriculum"] = {
-            "schema_version": SCHEMA_VERSION,
-            "role": "base",
-            "source_jsonl": str(base_path),
-            "source_line_number": line_number,
-            "focus_multiplier": args.focus_multiplier,
-        }
         lines.append(json.dumps(row, ensure_ascii=False, sort_keys=True))
         base_rows += 1
 
-    for variant_index, path in enumerate(supplement_paths, start=1):
+    if base_columns is None:
+        raise CurriculumError(f"Base JSONL is empty: {base_path}")
+
+    for path in supplement_paths:
         for line_number, row in iter_jsonl(path):
             validate_row(row, path, line_number)
             selection = row.get("latency_multiplier_selection")
@@ -151,15 +155,14 @@ def run(args: argparse.Namespace) -> Dict[str, Any]:
             signature = source_signature(row)
             repeated_sources += int(signature in source_signatures)
             source_signatures.add(signature)
-            row["latency_curriculum"] = {
-                "schema_version": SCHEMA_VERSION,
-                "role": "supplement",
-                "variant_index": variant_index,
-                "source_jsonl": str(path),
-                "source_line_number": line_number,
-                "focus_multiplier": args.focus_multiplier,
-                "selection": dict(selection),
-            }
+            del row["latency_multiplier_selection"]
+            if set(row) != base_columns:
+                missing = sorted(base_columns - set(row))
+                extra = sorted(set(row) - base_columns)
+                raise CurriculumError(
+                    f"Supplement columns differ from base at {path}:{line_number}: "
+                    f"missing={missing} extra={extra}"
+                )
             lines.append(json.dumps(row, ensure_ascii=False, sort_keys=True))
             supplement_rows += 1
 
@@ -192,7 +195,12 @@ def run(args: argparse.Namespace) -> Dict[str, Any]:
         "focus_row_rate_before": args.base_focus_rows / base_rows,
         "focus_row_rate_after": focus_rows / total_rows,
         "repeated_source_signatures": repeated_sources,
-        "note": "Repeated source signatures are intentional; term-map denoise seeds differ.",
+        "training_columns": sorted(base_columns),
+        "note": (
+            "Repeated source signatures are intentional; term-map denoise seeds differ. "
+            "Row-level selection metadata is stripped from the training JSONL and retained "
+            "in the selected supplement and sidecar manifests."
+        ),
     }
     atomic_write(stats_path, json.dumps(summary, ensure_ascii=False, indent=2) + "\n")
     return summary
