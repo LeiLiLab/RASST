@@ -534,14 +534,32 @@ def validate_input_files(input_root: Path, asset: Mapping[str, Any]) -> None:
             raise RasstError(f"Input artifact {asset.get('key')} missing {name}: {path}")
 
 
-def validate_assets(manifest: Mapping[str, Any], root: Path) -> None:
+def asset_validation_cells(
+    manifest: Mapping[str, Any], selected: Sequence[Mapping[str, Any]]
+) -> List[Mapping[str, Any]]:
+    scope = str(metadata(manifest).get("asset_validation_scope", "all"))
+    if scope == "all":
+        return list(all_cells(manifest))
+    if scope == "selected":
+        return list(selected)
+    raise RasstError(
+        f"Unsupported metadata.asset_validation_scope={scope!r}; expected 'all' or 'selected'."
+    )
+
+
+def validate_assets(
+    manifest: Mapping[str, Any],
+    root: Path,
+    cells: Optional[Sequence[Mapping[str, Any]]] = None,
+) -> None:
     assets = artifact_map(manifest)
+    validated_cells = list(cells) if cells is not None else list(all_cells(manifest))
     used_assets = {"eval_density_driver", "batch_vllm_driver"}
     if rag_mode(manifest) != "none":
         used_assets.add("retriever_hn1024")
     has_table = has_canonical_table(manifest)
     canonical = canonical_table_rows(manifest, root) if has_table else {}
-    for cell in all_cells(manifest):
+    for cell in validated_cells:
         key_tuple = (str(cell["domain"]), str(cell["lang"]), str(cell["lm"]))
         used_assets.add(str(cell["model_asset"]))
         used_assets.add(str(cell["input_asset"]))
@@ -1406,7 +1424,25 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     os.environ.setdefault("RASST_MAIN_RESULT_MANIFEST", str(manifest_path))
     manifest = load_json(manifest_path)
     validate_manifest_shape(manifest, root)
-    validate_assets(manifest, root)
+    lm_list = parse_lm_list(args.lm_list)
+    if lm_list and args.lm != "all":
+        raise RasstError("Use either --lm or --lm-list, not both.")
+    initially_selected_cells = [
+        cell
+        for cell in selected_cells(
+            manifest, domain=args.domain, lang=args.lang, lm=args.lm
+        )
+        if lm_list is None or str(cell["lm"]) in lm_list
+    ]
+    if not initially_selected_cells:
+        raise RasstError(
+            f"No cells selected after --lm-list filtering: {args.lm_list}"
+        )
+    validate_assets(
+        manifest,
+        root,
+        cells=asset_validation_cells(manifest, initially_selected_cells),
+    )
     cell_overrides = parse_cell_overrides(args.cell_override)
     if args.physical_gpu_ids:
         gpu_ids = [item.strip() for item in args.physical_gpu_ids.split(",")]
@@ -1446,15 +1482,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
     cache_seconds = parse_cache_seconds(args.cache_seconds)
     cache_chunks_by_lm = parse_cache_chunks_by_lm(args.cache_chunks_by_lm)
-    lm_list = parse_lm_list(args.lm_list)
-    if lm_list and args.lm != "all":
-        raise RasstError("Use either --lm or --lm-list, not both.")
     cells = apply_runtime_cell_overrides(
-        [
-            cell
-            for cell in selected_cells(manifest, domain=args.domain, lang=args.lang, lm=args.lm)
-            if lm_list is None or str(cell["lm"]) in lm_list
-        ],
+        initially_selected_cells,
         force_runner=args.force_runner,
         cell_overrides=cell_overrides,
         fixed_cache_window_sec=args.fixed_cache_window_sec,
@@ -1463,8 +1492,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         cache_seconds_rounding=args.cache_seconds_rounding,
         max_new_tokens_per_lm=args.max_new_tokens_per_lm,
     )
-    if not cells:
-        raise RasstError(f"No cells selected after --lm-list filtering: {args.lm_list}")
     run_root_arg = rel_or_abs(root, args.run_root) if args.run_root else None
 
     if args.validate_only:
