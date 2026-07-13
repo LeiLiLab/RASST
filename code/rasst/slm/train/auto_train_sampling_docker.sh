@@ -15,6 +15,7 @@ DEFAULT_DOCKER_IMAGE="modelscope-registry.us-west-1.cr.aliyuncs.com/modelscope-r
 DEFAULT_DOCKER_SHM_SIZE="16g"
 DEFAULT_DOCKER_IPC_MODE="host"
 DEFAULT_DOCKER_GPU_FLAG="all"
+DEFAULT_DOCKER_CONTAINER_NAME=""
 
 # GPU selection:
 # - If HOST_GPU_DEVICES is set (e.g., "4,5,6,7"), the container will ONLY see those physical GPUs.
@@ -42,6 +43,7 @@ DOCKER_IMAGE="${DOCKER_IMAGE:-${DEFAULT_DOCKER_IMAGE}}"
 DOCKER_SHM_SIZE="${DOCKER_SHM_SIZE:-${DEFAULT_DOCKER_SHM_SIZE}}"
 DOCKER_IPC_MODE="${DOCKER_IPC_MODE:-${DEFAULT_DOCKER_IPC_MODE}}"
 DOCKER_GPU_FLAG="${DOCKER_GPU_FLAG:-${DEFAULT_DOCKER_GPU_FLAG}}"
+DOCKER_CONTAINER_NAME="${DOCKER_CONTAINER_NAME:-${DEFAULT_DOCKER_CONTAINER_NAME}}"
 HOST_GPU_DEVICES="${HOST_GPU_DEVICES:-${DEFAULT_HOST_GPU_DEVICES}}"
 CONTAINER_WORKDIR="${CONTAINER_WORKDIR:-${DEFAULT_CONTAINER_WORKDIR}}"
 INNER_SCRIPT_REL="${INNER_SCRIPT_REL:-${DEFAULT_INNER_SCRIPT_REL}}"
@@ -213,6 +215,7 @@ echo "ROOT_DIR=${ROOT_DIR}"
 echo "CONTAINER_WORKDIR=${CONTAINER_WORKDIR}"
 echo "INNER_SCRIPT_REL=${INNER_SCRIPT_REL}"
 echo "HOST_GPU_DEVICES=${HOST_GPU_DEVICES:-<empty>}"
+echo "DOCKER_CONTAINER_NAME=${DOCKER_CONTAINER_NAME:-<empty>}"
 
 docker_gpu_arg=("--gpus" "${DOCKER_GPU_FLAG}")
 if [[ -n "${HOST_GPU_DEVICES}" ]]; then
@@ -224,7 +227,13 @@ if [[ -n "${HOST_GPU_DEVICES}" ]]; then
   unset NVIDIA_VISIBLE_DEVICES || true
 fi
 
+container_name_arg=()
+if [[ -n "${DOCKER_CONTAINER_NAME}" ]]; then
+  container_name_arg=("--name" "${DOCKER_CONTAINER_NAME}")
+fi
+
 docker run --rm \
+  "${container_name_arg[@]}" \
   "${docker_gpu_arg[@]}" \
   --ipc="${DOCKER_IPC_MODE}" \
   --shm-size="${DOCKER_SHM_SIZE}" \
