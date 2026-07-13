@@ -1,0 +1,4 @@
+comparison	bleu_delta	masked_bleu_delta	stream_laal_delta_ms	stream_laal_ca_delta_ms	term_acc_delta_pp	term_correct_delta	xcomet_sentence_delta_points
+RASST-lm1-curriculum_minus_RASST-original	1.2313908364	0.9812501615	44.7428856879	196.8589217259	-3.93	-37	1.9715181813
+RASST-lm1-curriculum_minus_InfiniSST	-0.5072761353	-1.2924498385	-90.5614214153	227.2447516120	15.32	144	-2.1318770914
+RASST-original_minus_InfiniSST	-1.7386669717	-2.2737	-135.3043071032	30.3858298861	19.25	181	-4.1033952727
