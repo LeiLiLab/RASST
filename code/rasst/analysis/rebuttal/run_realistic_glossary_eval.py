@@ -83,13 +83,13 @@ def _read_jsonl(path: Path) -> List[Dict[str, Any]]:
 def _require_file(path: Path) -> Path:
     if not path.is_file() or path.stat().st_size <= 0:
         raise FileNotFoundError(f"Missing or empty file: {path}")
-    return path.resolve()
+    return path.absolute()
 
 
 def _require_dir(path: Path) -> Path:
     if not path.is_dir():
         raise FileNotFoundError(f"Missing directory: {path}")
-    return path.resolve()
+    return path.absolute()
 
 
 def _safe_tag(value: str) -> str:
@@ -120,9 +120,9 @@ def _directory_signature(path: Path) -> Dict[str, Any]:
     if not index_candidates or not shard_paths:
         raise FileNotFoundError(f"Model directory lacks safetensor index or shards: {path}")
     return {
-        "path": str(path.resolve()),
+        "path": str(path.absolute()),
         "config_sha256": sha256_file(config),
-        "safetensors_index": str(index_candidates[0].resolve()),
+        "safetensors_index": str(index_candidates[0].absolute()),
         "safetensors_index_sha256": sha256_file(index_candidates[0]),
         "shards": [
             {"name": shard.name, "bytes": shard.stat().st_size}
@@ -311,8 +311,8 @@ def build_run_manifest(args: argparse.Namespace) -> Dict[str, Any]:
     offline_evaluator = _require_file(
         analysis_root / "analysis/rebuttal/score_merged_realistic_glossary.py"
     )
-    index_cache_dir = args.index_cache_dir.resolve()
-    output_dir = args.output_dir.resolve()
+    index_cache_dir = args.index_cache_dir.absolute()
+    output_dir = args.output_dir.absolute()
     index_cache_dir.mkdir(parents=True, exist_ok=True)
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -904,7 +904,7 @@ def run_worker(run_manifest_path: Path, *, resume: bool) -> None:
         completion_path,
         {
             "completed_at_utc": datetime.now(timezone.utc).isoformat(),
-            "run_manifest": str(run_manifest_path.resolve()),
+            "run_manifest": str(run_manifest_path.absolute()),
             "run_manifest_sha256": sha256_file(run_manifest_path),
             "index_tasks": len(manifest["index_tasks"]),
             "eval_tasks": len(manifest["eval_tasks"]),
@@ -978,7 +978,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             raise FileExistsError(f"Run manifest already exists: {args.run_manifest}")
         manifest = build_run_manifest(args)
         _write_json(args.run_manifest, manifest)
-        print(json.dumps({"run_manifest": str(args.run_manifest.resolve())}, sort_keys=True))
+        print(json.dumps({"run_manifest": str(args.run_manifest.absolute())}, sort_keys=True))
         return 0
     if args.command == "start":
         run_manifest = _require_file(args.run_manifest)
@@ -989,7 +989,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         manifest = _validate_run_manifest(run_manifest)
         command = [
             manifest["python_bin"],
-            str(Path(__file__).resolve()),
+            str(Path(__file__).absolute()),
             "worker",
             "--run-manifest",
             str(run_manifest),
