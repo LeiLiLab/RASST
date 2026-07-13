@@ -14,28 +14,27 @@ revise the paper accordingly.
 
 ### Contextual translation quality beyond BLEU
 
-We evaluate every sentence-aligned RASST and InfiniSST hypothesis with xCOMET,
-a contextual neural metric that also provides error-span information
+We evaluate RASST and InfiniSST with xCOMET, a contextual neural metric that
+also provides error-span information
 ([Guerreiro et al., 2024](https://aclanthology.org/2024.tacl-1.54/)). The
 comparison covers all four latency settings for ACL 60/60 En-Zh/De/Ja and ESO
-En-De, i.e., 16 strictly paired RASST--InfiniSST cells. We exclude ESO En-Zh and
-En-Ja for the reference-provenance reason discussed below.
+En-De. The block-aware correction below covers the 12 ACL cells; we do not
+combine it with sentence-level ESO scores. We exclude ESO En-Zh and En-Ja for
+the reference-provenance reason discussed below.
 
 Using `Unbabel/XCOMET-XXL` at immutable revision
-`873bac1b1c461e410c4a6e379f6790d3d1c7c214`, we score 22,728
-sentence-level system hypotheses, each aligned to its source and reference. We
-report xCOMET multiplied by 100 and average
-the paired cells equally. On ACL, RASST scores **78.704** versus **78.588** for
-InfiniSST, a mean paired difference of **+0.116**, with RASST higher in **8/12**
-cells. The language-level differences are **+0.636** for En-Zh, **+0.005** for
-En-De, and **-0.293** for En-Ja. On human-reference ESO En-De, using the exact
-submitted-paper RASST outputs and newly reproduced InfiniSST baseline, RASST
-scores **75.940** versus **77.325**, a difference of **-1.385**; RASST is lower
-in all four cells. Across all 16 retained cells, the cell-macro difference is
-**-0.259** and 8/16 cells are positive. Thus, the contextual-metric evidence is
-mixed: it does not support a claim of uniformly improved overall translation
-quality, and we will narrow the main claim to terminology handling rather than
-general quality improvement. We make no significance claim for this analysis.
+`873bac1b1c461e410c4a6e379f6790d3d1c7c214`, our first sentence-level audit
+revealed that minimum-WER resegmentation can pair delayed streaming output with
+a neighboring fixed source/reference. We therefore regroup each ACL talk into
+fixed, non-overlapping five-sentence blocks before resegmentation and score
+2,304 verified blocks over the 24 ACL systems. Reporting xCOMET multiplied by
+100 and averaging the 12 paired cells equally, RASST scores **57.831** versus
+**58.701** for InfiniSST, a difference of **-0.870**. The language-level
+differences are **-0.336** for En-Zh, **-1.056** for En-De, and **-1.217** for
+En-Ja. The contextual-metric evidence therefore does not support a general
+translation-quality improvement, and we narrow the main claim to terminology
+handling. Because block and sentence scores have different granularity, their
+absolute values are not directly comparable. We make no significance claim.
 
 As a complementary diagnostic, we recomputed BLEU after removing every raw-gold
 target-term string from both the aligned hypothesis and reference. This asks
@@ -131,8 +130,8 @@ across ACL sentences but remains a minority of target tokens (10.66--18.06%),
 and it is especially sparse in ESO En-De (2.20%). A large change in exact
 terminology accuracy therefore need not translate into a similarly large
 corpus-BLEU change. This is an explanation of metric sensitivity, not evidence
-that overall translation quality improves dramatically; the xCOMET and masked
-BLEU results provide the direct quality checks.
+that overall translation quality improves dramatically; block-aware xCOMET is
+mixed-negative, while masked BLEU provides a complementary lexical diagnostic.
 
 ### ESO reference provenance and corrected presentation
 
@@ -160,10 +159,9 @@ ablations, and efficiency, and for identifying several places where the
 evaluation and notation need correction.
 
 **Translation-quality metric.** We agree that BLEU alone is insufficient. We
-add xCOMET on the 16 retained paired cells and the target-term-masked BLEU
-diagnostic summarized above. ACL is nearly unchanged on average under xCOMET
-(+0.116 points; 8/12 cells positive), whereas ESO En-De decreases by 1.385
-points in all four cells. We will report this negative result and temper the
+add an alignment-aware xCOMET diagnostic and target-term-masked BLEU. ACL
+decreases by 0.870 xCOMET points across the 12 cells, so we do not use it to
+claim general-quality improvement. We report the protocol and temper the
 quality claim accordingly.
 
 **Morphology and exact matching.** We agree that exact-form terminology
@@ -372,10 +370,10 @@ Before submission, the revision will:
   are positive.
 - **Do not present masked BLEU as a causal decomposition.** Removing strings
   changes length and neighboring n-grams.
-- **Do not describe xCOMET as uniformly positive.** ACL averages +0.116 points
-  with 8/12 positive cells, but En-Ja averages -0.293 and ESO En-De averages
-  -1.385 with 0/4 positive cells; the 16-cell macro average is -0.259. The old
-  ESO values -3.172 and -2.101 used superseded output/baseline combinations.
+- **Do not describe xCOMET as positive.** The corrected ACL block diagnostic
+  averages -0.870 points; En-Zh/De/Ja language macros are all negative. Do not
+  combine it with sentence-level ESO scores because the granularities differ.
+  The old ACL +0.116 is retained only as a sentence-boundary diagnostic.
 - **Do not report paper-derived glossary numbers until fresh artifacts have
   been generated and validated.** Those fields remain deliberate placeholders.
 - **Do not reuse the legacy `acl_paper_extracted` cells as fresh evidence.** The
