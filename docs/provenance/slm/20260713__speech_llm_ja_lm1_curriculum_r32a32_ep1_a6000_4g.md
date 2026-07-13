@@ -25,16 +25,17 @@ the model to another short-chunk retrieval context.
 
 - Base model: `Qwen3-Omni-30B-A3B-Instruct-v2` MCore export.
 - LoRA: rank 32, alpha 32.
-- Topology: 4 Taurus A6000 GPUs, TP=2, EP=2.
+- Topology: 4 A6000 GPUs, TP=2, EP=2.
 - Batch: micro batch 1, global batch 4.
 - Sequence length: 3072.
 - Epochs: 1.
 - Validation set: the original 355-row Ja cap16 denoise-budget `<t>` dev set.
 
-Taurus is retained for direct comparability and data locality: the verified
-MCore/HF bases and speech inputs are already available under `/mnt/gemini`,
-whereas moving them to B200 storage would require copying roughly 190 GB plus
-the audio corpus.
+The A6000 recipe is retained for direct comparability and data locality: the
+verified MCore/HF bases and speech inputs are already available under
+`/mnt/gemini`, whereas moving them to B200 storage would require copying roughly
+190 GB plus the audio corpus. The launcher records the selected host explicitly
+and places checkpoints and exports on a local `/mnt/<host>/data*` disk.
 
 ## Required evaluation
 
@@ -45,6 +46,6 @@ Evaluate the new model on the frozen ACL Japanese `lm=1` cell and report:
 - the corresponding original RASST and InfiniSST values under the same scoring
   protocol.
 
-The generated training data and model are staged under
-`/mnt/taurus/data1/jiaxuanluo/RASST_release_runs/ja_lm1_curriculum_20260713/`.
-Their Hugging Face destinations and revisions must be recorded after upload.
+The actual host-qualified run path, generated training-data hash, and model
+artifact location are recorded after the run. Their Hugging Face destinations
+and revisions must be recorded after upload.

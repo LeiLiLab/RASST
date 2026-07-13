@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="/mnt/taurus/data1/jiaxuanluo/RASST_release_runs/ja_lm1_curriculum_20260713/code/code/rasst"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 RAW_INPUT="/mnt/gemini/data1/jiaxuanluo/speech_llm_deja_termmap_ablation_cap16_exactboundary_20260525/ja/retriever_hn1024_tau078_cap16_exactboundary/train_s_ja_retriever_results_hn1024_tau078.jsonl"
 BASE_TRAIN="/mnt/gemini/data1/jiaxuanluo/speech_llm_ja_cap16_denoise_budget_20260525/ja/hn1024_tau078_cap16_denoise_budget_ttag_v1/train_s_ja_retriever_hn1024_tau078_cap16_denoise_budget_ttag_exactboundary.jsonl"
-OUTPUT_DIR="/mnt/taurus/data1/jiaxuanluo/RASST_release_runs/ja_lm1_curriculum_20260713/data"
+OUTPUT_DIR="${1:-}"
+if [[ -z "${OUTPUT_DIR}" || "${OUTPUT_DIR}" != /* ]]; then
+  echo "Usage: $0 <absolute_output_dir>" >&2
+  exit 2
+fi
 
 SELECTED_RAW="${OUTPUT_DIR}/train_s_ja_all_lm1_raw.jsonl"
 SELECT_STATS="${OUTPUT_DIR}/train_s_ja_all_lm1_select_stats.json"

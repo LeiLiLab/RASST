@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="/mnt/taurus/data1/jiaxuanluo/RASST_release_runs/ja_lm1_curriculum_20260713/code/code/rasst"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 WRAPPER="${ROOT_DIR}/slm/train/auto_train_sampling_docker.sh"
-RUN_ROOT="/mnt/taurus/data1/jiaxuanluo/RASST_release_runs/ja_lm1_curriculum_20260713"
+RUN_ROOT="${3:-}"
+COMPUTE_LABEL="${4:-}"
 DATASET_PATH="${RUN_ROOT}/data/train_s_ja_cap16_denoise_ttag_lm1x2_seed43.jsonl"
 VAL_DATASET="/mnt/gemini/data1/jiaxuanluo/speech_llm_ja_cap16_denoise_budget_20260525/ja/hn1024_tau078_cap16_denoise_budget_ttag_v1/dev_s_ja_retriever_hn1024_tau078_cap16_denoise_budget_ttag_exactboundary_first355.jsonl"
 MCORE_MODEL="/mnt/gemini/data2/jiaxuanluo/Qwen3-Omni-30B-A3B-Instruct-v2/"
@@ -13,12 +15,16 @@ TRAIN_LOG_DIR="${RUN_ROOT}/logs/train"
 HF_EXPORT_STAGE_ROOT="${RUN_ROOT}/hf_export_stage"
 HF_EXPORT_LOCAL_CACHE_ROOT="${RUN_ROOT}/model_hf"
 HF_EXPORT_LOCAL_LATEST_LINK="${RUN_ROOT}/latest-hf"
-NOTES_FILE="${ROOT_DIR}/../../../docs/provenance/slm/20260713__speech_llm_ja_lm1_curriculum_r32a32_ep1_taurus4.md"
+NOTES_FILE="${ROOT_DIR}/../../docs/provenance/slm/20260713__speech_llm_ja_lm1_curriculum_r32a32_ep1_a6000_4g.md"
 
 ALLOCATED_GPUS="${1:-}"
 CONTAINER_NAME="${2:-}"
-if [[ -z "${ALLOCATED_GPUS}" || -z "${CONTAINER_NAME}" ]]; then
-  echo "Usage: $0 <gpu_csv> <container_name>" >&2
+if [[ -z "${ALLOCATED_GPUS}" || -z "${CONTAINER_NAME}" || -z "${RUN_ROOT}" || -z "${COMPUTE_LABEL}" ]]; then
+  echo "Usage: $0 <gpu_csv> <container_name> <absolute_run_root> <compute_label>" >&2
+  exit 2
+fi
+if [[ "${RUN_ROOT}" != /* ]]; then
+  echo "[ERROR] run_root must be absolute: ${RUN_ROOT}" >&2
   exit 2
 fi
 IFS=',' read -r -a GPU_ARRAY <<< "${ALLOCATED_GPUS}"
@@ -76,8 +82,8 @@ TORCH_NCCL_ENABLE_MONITORING=0 \
 TORCH_NCCL_HEARTBEAT_TIMEOUT_SEC=1800 \
 CUDA_DEVICE_MAX_CONNECTIONS=1 \
 WANDB_PROJECT="sst_omni" \
-WANDB_EXP_PREFIX="speech-llm-ja-lm1-curriculum-r32a32-ep1-taurus4" \
-WANDB_TAGS="family:speech_llm_tcm_termmap,task:train,data:ja_lm1_curriculum,variant:lm1x2_seed43,status:running,compute:taurus4" \
+WANDB_EXP_PREFIX="speech-llm-ja-lm1-curriculum-r32a32-ep1-${COMPUTE_LABEL}" \
+WANDB_TAGS="family:speech_llm_tcm_termmap,task:train,data:ja_lm1_curriculum,variant:lm1x2_seed43,status:running,compute:${COMPUTE_LABEL}" \
 WANDB_NOTES="$(<"${NOTES_FILE}")" \
 ENABLE_MD_UPDATE=0 \
 bash "${WRAPPER}"
