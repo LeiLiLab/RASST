@@ -152,6 +152,21 @@ Ja 更进一步：term-gain 句的正收益 `+6.110` 被 tie 句 `-11.450` 和 t
 term gain/loss 本身仍受 morphology 与 paraphrase 影响，所以这是描述性分组，
 不是因果分解。
 
+### 3a. 四个 En-Ja 强负 xCOMET case 的 MFA term-map 复核
+
+我们进一步把 ACL 268:83、110:81、117:70、367:16 的 MFA source-sentence
+时间边界与实际 `llm_input.references` 逐 chunk 对齐。四例中只有 ACL 367:16
+能直接归因于 harmful term-map collision：`sentence→文章` 与
+`document→文章` 导致 `文章または文章`。ACL 268:83 的 term-map 没有
+`BiLSTM-CRF`、`Flair` 或 `BPE`，但 raw source-time output 正确生成前两者；
+ACL 110:81 从未收到 `prefix data` hint；ACL 117:70 的 raw chunks 实际包含完整
+`1つ目のベースライン`。后三例的强负 xCOMET hypothesis 主要来自 streaming
+commitment 和 mWER sentence resegmentation，而不是错误 hint。
+
+完整逐 prompt term-map、分数、MFA 边界与 raw chunk 核对见
+[`ja_xcomet_mfa_term_map_cases.md`](ja_xcomet_mfa_term_map_cases.md) 和
+[`ja_xcomet_mfa_term_map_cases.tsv`](ja_xcomet_mfa_term_map_cases.tsv)。
+
 ## 4. Term-noise 假设：存在，但不是 raw FCR 显示的规模
 
 最初的 raw `term_map_false_copy` 很像支持 term-noise 假设：De 的 44 个 flagged

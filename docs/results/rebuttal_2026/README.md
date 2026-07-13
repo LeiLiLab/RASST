@@ -53,6 +53,10 @@ glossary 原始响应不进入 Git。
   streaming boundary，不应直接称为 term noise。完整结论、真实 cases 与提交限制见
   [`term_failure_analysis_acl_lm2.md`](term_failure_analysis_acl_lm2.md)。三语语义
   标签当前仍是 Codex 辅助的非专家 draft，作者 sign-off 前不能称为人工专业评测。
+  对四个 En-Ja 强负 xCOMET cases 的 MFA-aligned term-map 复核进一步发现：只有
+  ACL 367:16 可直接归因于 `sentence/document→文章` 的 target collision；另外三例
+  主要是 streaming commitment / mWER resegmentation。逐 chunk 证据见
+  [`ja_xcomet_mfa_term_map_cases.md`](ja_xcomet_mfa_term_map_cases.md)。
 - **Retrieval degradation sensitivity 已完成。** 在 ACL 三语 `lm=2` 固定
   hint count 与 compute，将 sentence-relevant correct hints 按 `25% / 50%`
   概率替换为同域 distractors。En-Zh/De TERM_ACC 相对各自 `0%` 分别下降
