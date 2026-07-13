@@ -28,6 +28,7 @@ METRIC_OR_BOUNDARY_LABELS = {
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--occurrences-root", type=Path, required=True)
+    parser.add_argument("--lm", type=int, default=2)
     parser.add_argument("--summary-out", type=Path, required=True)
     parser.add_argument("--loss-audit-out", type=Path, required=True)
     parser.add_argument("--term-outcomes-out", type=Path, required=True)
@@ -71,6 +72,7 @@ def classify_outcome(row: Mapping[str, str]) -> str:
 
 def load_occurrences(
     root: Path,
+    lm: int,
 ) -> tuple[List[Dict[str, str]], Dict[str, Dict[str, str]]]:
     rows: List[Dict[str, str]] = []
     hashes: Dict[str, Dict[str, str]] = {}
@@ -84,7 +86,7 @@ def load_occurrences(
         if not language_rows:
             raise ValueError(f"No occurrence rows in {path}")
         for row in language_rows:
-            if row["dataset"] != "acl_tagged_raw" or row["lm"] != "2":
+            if row["dataset"] != "acl_tagged_raw" or row["lm"] != str(lm):
                 raise ValueError(f"Unexpected dataset/lm row in {path}: {row}")
             if row["lang"] != language:
                 raise ValueError(f"Unexpected language row in {path}: {row['lang']}")
@@ -111,6 +113,7 @@ def build_summary(rows: List[Dict[str, str]]) -> List[Dict[str, object]]:
     output: List[Dict[str, object]] = []
     for language in (*LANGUAGES, "all"):
         language_rows = rows if language == "all" else [row for row in rows if row["lang"] == language]
+        language_outcomes = Counter(row["outcome"] for row in language_rows)
         for term_type in TERM_TYPES:
             selected = [row for row in language_rows if row["term_type"] == term_type]
             outcomes = Counter(row["outcome"] for row in selected)
@@ -127,6 +130,19 @@ def build_summary(rows: List[Dict[str, str]]) -> List[Dict[str, object]]:
                     "baseline_correct": baseline_correct,
                     "baseline_accuracy_pct": f"{100.0 * baseline_correct / total:.4f}",
                     "delta_percentage_points": f"{100.0 * (rasst_correct - baseline_correct) / total:.4f}",
+                    "gain_rate_pct": f"{100.0 * outcomes['gain'] / total:.4f}",
+                    "loss_rate_pct": f"{100.0 * outcomes['loss'] / total:.4f}",
+                    "both_wrong_rate_pct": f"{100.0 * outcomes['both_wrong'] / total:.4f}",
+                    "share_of_language_gains_pct": (
+                        f"{100.0 * outcomes['gain'] / language_outcomes['gain']:.4f}"
+                        if language_outcomes["gain"]
+                        else "0.0000"
+                    ),
+                    "share_of_language_losses_pct": (
+                        f"{100.0 * outcomes['loss'] / language_outcomes['loss']:.4f}"
+                        if language_outcomes["loss"]
+                        else "0.0000"
+                    ),
                     **{outcome: outcomes[outcome] for outcome in OUTCOMES},
                 }
             )
@@ -158,6 +174,7 @@ def build_loss_audit(rows: List[Dict[str, str]]) -> List[Dict[str, object]]:
                         "valid_compound_or_orthography"
                     ],
                     "valid_alignment_boundary": labels["valid_alignment_boundary"],
+                    "unlabeled": labels["unlabeled"],
                 }
             )
     return output
@@ -194,7 +211,7 @@ def build_term_outcomes(rows: List[Dict[str, str]]) -> List[Dict[str, object]]:
 
 def main() -> None:
     args = parse_args()
-    rows, hashes = load_occurrences(args.occurrences_root)
+    rows, hashes = load_occurrences(args.occurrences_root, args.lm)
     summary = build_summary(rows)
     loss_audit = build_loss_audit(rows)
     term_outcomes = build_term_outcomes(rows)
@@ -210,6 +227,11 @@ def main() -> None:
             "baseline_correct",
             "baseline_accuracy_pct",
             "delta_percentage_points",
+            "gain_rate_pct",
+            "loss_rate_pct",
+            "both_wrong_rate_pct",
+            "share_of_language_gains_pct",
+            "share_of_language_losses_pct",
             *OUTCOMES,
         ),
         summary,
@@ -228,6 +250,7 @@ def main() -> None:
             "valid_morphology",
             "valid_compound_or_orthography",
             "valid_alignment_boundary",
+            "unlabeled",
         ),
         loss_audit,
     )
@@ -249,7 +272,7 @@ def main() -> None:
     manifest = {
         "dataset": "acl_tagged_raw",
         "languages": list(LANGUAGES),
-        "lm": 2,
+        "lm": args.lm,
         "taxonomy": {
             "acronym_or_symbolic_name": (
                 "contains an all-caps token, internal capitalization, or a digit"

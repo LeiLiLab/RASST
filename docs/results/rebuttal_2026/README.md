@@ -54,15 +54,16 @@ glossary 原始响应不进入 Git。
   streaming boundary，不应直接称为 term noise。完整结论、真实 cases 与提交限制见
   [`term_failure_analysis_acl_lm2.md`](term_failure_analysis_acl_lm2.md)。三语语义
   标签当前仍是 Codex 辅助的非专家 draft，作者 sign-off 前不能称为人工专业评测。
-- **ACL `lm=2` term-type outcome analysis 已完成。** 对三语 3,266 个 gold
-  occurrences 使用可复算 English surface taxonomy：acronym/symbolic names 的
-  RASST/InfiniSST exact accuracy 为 `88.05/53.06%`（`+34.99 pp`），multiword
-  expressions 为 `84.90/55.21%`（`+29.69 pp`），single-word terms 为
-  `86.56/74.33%`（`+12.23 pp`）。127 个 reverse exact losses 中 109 个是
-  single-word terms；逐条 audit 显示 71 个是 paraphrase、形态/表记或 boundary
-  false negatives，剩余 56 个 genuine losses 中 45 个仍是 single-word terms。
-  完整定义、三语一致性、examples 和限制见
-  [`term_type_analysis_acl_lm2.md`](term_type_analysis_acl_lm2.md)。
+- **ACL `lm=1/2` term-type outcome analysis 已完成。** 对三语 3,266 个 gold
+  occurrences 使用可复算 English surface taxonomy。最短延迟 `lm=1` 下，
+  acronym/symbolic、multiword、single-word 的 RASST/InfiniSST exact delta 分别为
+  `+35.86/+29.17/+14.65 pp`；`lm=2` 为 `+34.99/+29.69/+12.23 pp`，排序稳定。
+  `lm=1` 的 gain/loss/both-wrong 类内比例分别为 acronym
+  `39.36/3.50/11.95%`、multiword `31.77/2.60/17.71%`、single-word
+  `18.67/4.03/10.62%`。两档均有 127 个 reverse exact losses；最低 latency
+  主要增加的是 both-wrong，尤其 multiword，而不是 term-map reverse loss。
+  完整定义、三语结果、examples、BLEU trade-off 和限制见
+  [`term_type_analysis_acl_lm1_lm2.md`](term_type_analysis_acl_lm1_lm2.md)。
   对四个 En-Ja 强负 xCOMET cases 的 MFA-aligned term-map 复核进一步发现：只有
   ACL 367:16 可直接归因于 `sentence/document→文章` 的 target collision；另外三例
   主要是 streaming commitment / mWER resegmentation。逐 chunk 证据见
@@ -289,7 +290,8 @@ canonical artifact。
 
 按 Reviewer Mzub、oktu、gbii 顺序整理的精简 OpenReview 单评论稿位于
 [`../../rebuttal_2026_openreview_responses.md`](../../rebuttal_2026_openreview_responses.md)。
-三段正文分别为 `3730 / 4585 / 4751` characters，均低于 5000-character 上限；该稿
+三段 canonical response 正文分别为 `3730 / 4724 / 4751` characters，均低于
+5000-character 上限；该稿
 只使用已验证的 main/rebuttal-experiments 结果，并明确排除 LLM-as-a-judge 与宽语义
 audit。文末的内部取舍和 evidence SoT 不应提交到 OpenReview。
 
