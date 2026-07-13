@@ -1,0 +1,10 @@
+scope	language	denominator	source_match	source_match_pct	source_target_pair_match	source_target_pair_match_pct	extracted_entry_count	extracted_unique_source_count
+global_unique_raw_entries	zh	238	68	28.5714	53	22.2689	50245	10225
+talk_aware_gold_occurrences	zh	1173	348	29.6675	289	24.6377	50245	10225
+talk_aware_unique_gold_pairs	zh	370	91	24.5946	76	20.5405	50245	10225
+global_unique_raw_entries	ja	238	68	28.5714	47	19.7479	50245	10225
+talk_aware_gold_occurrences	ja	1126	326	28.9520	242	21.4920	50245	10225
+talk_aware_unique_gold_pairs	ja	371	91	24.5283	63	16.9811	50245	10225
+global_unique_raw_entries	de	238	68	28.5714	43	18.0672	50245	10225
+talk_aware_gold_occurrences	de	971	302	31.1020	253	26.0556	50245	10225
+talk_aware_unique_gold_pairs	de	340	85	25.0000	57	16.7647	50245	10225

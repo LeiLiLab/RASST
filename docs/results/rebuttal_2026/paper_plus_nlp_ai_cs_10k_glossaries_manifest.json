@@ -1,0 +1,53 @@
+{
+  "base_glossary": {
+    "path": "outputs/rebuttal_2026/realistic_glossary_coverage/inputs/wiki_glossary_nlp_ai_cs_enriched.json",
+    "sha256": "a20c126097049a8e627b9a8616d91d6a564faa148cff6e2c378009cda53b6ee0",
+    "unique_terms": 10000
+  },
+  "kind": "rasst_paper_plus_nlp_ai_cs_10k_glossaries",
+  "merge_policy": "paper-specific source term overrides the base entry",
+  "outputs": {
+    "2022.acl-long.110": {
+      "base_terms": 10000,
+      "final_terms": 10050,
+      "paper_overrides": 6,
+      "paper_terms": 56,
+      "path": "outputs/rebuttal_2026/paper_plus_nlp_ai_cs_10k_glossaries/glossaries/extracted_glossary__2022.acl-long.110.json",
+      "sha256": "a2e61dcc0882735624902842f8954904cbcabac863db73c2db6c51def321873d"
+    },
+    "2022.acl-long.117": {
+      "base_terms": 10000,
+      "final_terms": 10058,
+      "paper_overrides": 8,
+      "paper_terms": 66,
+      "path": "outputs/rebuttal_2026/paper_plus_nlp_ai_cs_10k_glossaries/glossaries/extracted_glossary__2022.acl-long.117.json",
+      "sha256": "37bd9fddcb53ef14ab6f3bfeb01f2d1870f513069bc29e6891e96230ad68707d"
+    },
+    "2022.acl-long.268": {
+      "base_terms": 10000,
+      "final_terms": 10052,
+      "paper_overrides": 6,
+      "paper_terms": 58,
+      "path": "outputs/rebuttal_2026/paper_plus_nlp_ai_cs_10k_glossaries/glossaries/extracted_glossary__2022.acl-long.268.json",
+      "sha256": "0c33c13e6a388a0d4736bb28d692eb453cbda6da33ccba6e6b6e1dd72fa50566"
+    },
+    "2022.acl-long.367": {
+      "base_terms": 10000,
+      "final_terms": 10036,
+      "paper_overrides": 7,
+      "paper_terms": 43,
+      "path": "outputs/rebuttal_2026/paper_plus_nlp_ai_cs_10k_glossaries/glossaries/extracted_glossary__2022.acl-long.367.json",
+      "sha256": "85b573bb1be360d93d9f1a8bab35af9e128ece44a22c27e89d22e6236a6e1f39"
+    },
+    "2022.acl-long.590": {
+      "base_terms": 10000,
+      "final_terms": 10049,
+      "paper_overrides": 14,
+      "paper_terms": 63,
+      "path": "outputs/rebuttal_2026/paper_plus_nlp_ai_cs_10k_glossaries/glossaries/extracted_glossary__2022.acl-long.590.json",
+      "sha256": "0b9d8bf5732d095be4787a9c80cab9719026bde6b92d9558b7373b540fe4e8a6"
+    }
+  },
+  "paper_glossary_dir": "data/glossaries/acl_paper_extracted",
+  "schema_version": 1
+}
