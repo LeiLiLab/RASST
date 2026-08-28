@@ -8,21 +8,23 @@
 \section{Problem Formulation}
 \label{sec:problem_formulation}
 
-Let $\vs = (s_1, s_2, \dots, s_T) \in \mathbb{R}^T$ denote the source speech waveform, and let the glossary $\mathcal{G}=\{(e_j,e_j^\text{trans})\}_{k=1}^{|\mathcal{G}|}$, where $e_j$ is a term in the source language and $e_j^\text{trans}$ is its translation. At each step $i$, a fixed-duration speech chunk is received
+\begin{crblock}
+Let $\vs=(s_1,\ldots,s_T)\in\mathbb{R}^{T}$ denote a waveform sampled at $f_s$ Hz. A bilingual glossary is $\mathcal{G}=\{(e_j,\tau_j)\}_{j=1}^{M}$, where $e_j$ is a source-language expression and $\tau_j$ is its prescribed target-language form. For a chunk duration $\ell$ seconds, let $L=\lfloor f_s\ell\rceil$ be the corresponding number of samples. At step $i\geq 1$, the system receives
 \begin{align}
-    \vs_i = \bigl(s_{i \cdot l + 1}, \dots, s_{(i+1) \cdot l}\bigr),
+    \vc_i = \bigl(s_{(i-1)L+1},\ldots,s_{\min(iL,T)}\bigr),
 \end{align}
-where $l$ is the chunk length.
+and has observed the prefix $\vs_{\leq i}=\bigl(s_1,\ldots,s_{\min(iL,T)}\bigr)$.
 
-Given the accumulated speech chunks $\vs_{1:i}$, the retriever $R_\phi$ selects a subset of relevant terminology entries
+The retriever $R_\phi$, parameterized by $\phi$, selects a step-local set of glossary entries
 \begin{align}
-    G_i = R_\phi(\vs_{1:i}, \mathcal{G}) \subseteq \mathcal{G} . \label{eqn:G_i}
+    G_i = R_\phi(\vs_{\leq i},\mathcal{G})\subseteq\mathcal{G}. \label{eqn:G_i}
 \end{align}
-Conditioned on the observed speech $\vs_{1:i}$, the previously generated translation tokens $\vy_{1:i-1}$, and the retrieved terminology context $G_{1:i}$, the model $\pi_\theta(\vs_{1:i}, \vy_{1:i-1}, G_{1:i})$ produces a partial translation $\vy_i$ at step $i$. The output $\vy_i = (y_1^i, \dots, y_{|\vy_i|}^i)$ may contain a variable number of tokens.
-
-If $|\vy_i| = 0$, the model chooses to wait for additional speech input without emitting any translation. Otherwise, when $|\vy_i| > 0$, the model outputs a partial translation. All tokens in $\vy_i$ are assigned an identical delay of $i \cdot l$, corresponding to the elapsed time when the speech chunk $\vs_i$ becomes available.
-
-Finally, translation quality and latency are evaluated with respect to the full source waveform $\vs$, the aggregated translation hypothesis $\vy$, the reference translation $\vy$, the source transcript $\vx$, and the delay associated with each generated token.
+Let $\hat{\vy}_i=(\hat{y}^{i}_1,\ldots,\hat{y}^{i}_{n_i})$ be the possibly empty target segment emitted at step $i$, and let $\hat{\vy}_{<i}=\hat{\vy}_1\oplus\cdots\oplus\hat{\vy}_{i-1}$ denote the previously emitted prefix. The generation policy is
+\begin{align}
+    \hat{\vy}_i \sim \pi_\theta\!\left(\cdot\mid \vs_{\leq i},\hat{\vy}_{<i},G_{1:i}\right).
+\end{align}
+If $n_i=0$, the policy waits; otherwise the segment is appended to the output. Every token emitted at step $i$ is assigned delay $\min(iL,T)/f_s$ seconds. The complete hypothesis is $\hat{\vy}=\hat{\vy}_1\oplus\cdots\oplus\hat{\vy}_I$, which is distinct from the reference translation $\vy^\star$. Quality and latency are evaluated using $\hat{\vy}$, $\vy^\star$, the source transcript $\vx^\star$, and the per-token delays.
+\end{crblock}
 
 \section{Retrieval-Augmented Simultaneous Speech Translation}
 \label{sec:method}
@@ -51,15 +53,15 @@ In this section, we first present an overview of RASST. We then describe the cro
 
 Figure \ref{fig:overview} presents an overview of \method. We adopt the interleaving SST formulation of InfiniSST~\citep{ouyang-etal-2025-infinisst}, which alternates between incoming speech chunks and incremental translation outputs, and \method augments this with a retrieval step:
 \begin{align}
-\vy_i &\sim \mathrm{SpeechLLM}(\vs_1, G_1, \vy_1, \ldots, \vs_i, G_i).
+\crchange{\hat{\vy}_i} &\crchange{\sim \mathrm{SpeechLLM}(\vc_1, G_1, \hat{\vy}_1, \ldots, \vc_i, G_i).}
 \end{align}
-After each chunk $\vs_i$ arrives, the retriever returns candidate terms $G_i$ likely to appear in it, and we append these terms along with their target-language translations to the chunk's representation. Conditioned on the speech context and the retrieved terms, the LLM then generates the next partial translation $\vy_i$.
+After each chunk \crchange{$\vc_i$} arrives, the retriever returns candidate terms $G_i$ likely to appear in it, and we append these terms along with their target-language translations to the chunk's representation. Conditioned on the speech context and the retrieved terms, the LLM then generates the next partial translation \crchange{$\hat{\vy}_i$}.
 
 \subsection{Cross-Modal Retriever}
 \label{sec:retriever}
 
 \paragraph{Architecture}
-We adopt a dual-encoder architecture. For text, we use the pre-trained BGE-M3 encoder~\citep{bge-m3} to map each source-language term $e_j$ to a feature vector $\vg_j\in\mathbb{R}^d$. For speech, we use the Audio Transformer of Qwen3-Omni~\citep{yang2025qwen3technicalreport} followed by a linear projection to the same dimension $d$. Since terms are typically short, the speech encoder reads only the current chunk $\vs_i$ together with a look-back window of duration $t_{lb}$, rather than the full history $\vs_{1:i}$ as in Equation \ref{eqn:G_i}. We denote this input as $\vs_i'$ and the resulting features as $\vf_i\in\mathbb{R}^{m\times d}$, with $m$ as the number of frames in $\vs_i'$.
+We adopt a dual-encoder architecture. For text, we use the pre-trained BGE-M3 encoder~\citep{bge-m3} to map each source-language term $e_j$ to a feature vector $\vg_j\in\mathbb{R}^d$. For speech, we use the Audio Transformer of Qwen3-Omni~\citep{yang2025qwen3technicalreport} followed by a linear projection to the same dimension $d$. Since terms are typically short, the speech encoder reads only the current chunk \crchange{$\vc_i$} together with a look-back window of duration $t_{lb}$, rather than the full history $\vs_{\leq i}$ as in Equation \ref{eqn:G_i}. We denote this input as \crchange{$\vc_i'$} and the resulting features as $\vf_i\in\mathbb{R}^{m\times d}$, with $m$ as the number of frames in \crchange{$\vc_i'$}.
 
 \begin{figure}
     \centering
@@ -73,15 +75,15 @@ Because terms vary in duration, representing the speech context with a single av
 \begin{equation}
   \vf_i^{u,v} = \text{AvgPool}(\vf_i^u,\ldots,\vf_i^v)\in\mathbb{R}^d.
 \end{equation}
-The similarity between the speech $\vs_i'$ and a term $e_j$ is then the maximum cosine similarity over all windows:
+The similarity between the speech \crchange{$\vc_i'$} and a term $e_j$ is then the maximum cosine similarity over all windows:
 \begin{equation}
-  \text{Sim}(\vs_i',e_j)
+  \text{Sim}(\crchange{\vc_i'},e_j)
   = \max_{1\leq u<v\leq m}
   \text{CosSim}(\vf_i^{u,v},\vg_j),
 \end{equation}
 and the retrieved terms are
 \begin{align}
-    G_i = \text{Top-}K_j\left(\text{Sim}(\vs_i',e_j)\right)\subseteq \mathcal{G}
+    G_i = \text{Top-}K_j\left(\text{Sim}(\crchange{\vc_i'},e_j)\right)\subseteq \mathcal{G}
 \end{align}
 
 In practice, we build a FAISS index~\citep{douze2024faiss} over the term vectors $\{\vg_j\}_{j=1}^{|\mathcal{G}|}$, then issue a Top-$K$ query for each window feature $\vf_i^{u,v}$, producing a candidate pool of size up to a multiple of $K$. We perform a second Top-$K$ selection over this pool by similarity score, keeping the highest score per term when duplicates occur, and finally discard any candidate whose similarity falls below a threshold $\tau$ to suppress noise.
@@ -95,7 +97,7 @@ For each term in the terminology database, we prompt Gemini-2.5-Flash\footnote{\
 \paragraph{Training} 
 Given paired data $(\vs', e_\text{pos})$, we train the retriever with the InfoNCE loss~\citep{oord2019representationlearningcontrastivepredictive}. In addition to in-batch negatives, we mine hard negatives by using the retriever checkpoint, which is updated every 50 training steps, to retrieve the Top-$N$ most similar terms from the entire training set for each positive $e_\text{pos}$.
 Let $E_\text{neg}$ be the negative set and $E_\text{all} = \{e_\text{pos}\} \cup E_\text{neg}$. The retriever loss $\mathcal{L}_{\mathrm{retriever}}$ is then \begin{equation} 
--\log \frac{ \exp(\text{Sim}(\vs_i',e_\text{pos})/\gamma) }{ \sum_{e\in E_\text{all}} \exp(\text{Sim}(\vs_i',e)/\gamma) }, 
+-\log \frac{ \exp(\text{Sim}(\crchange{\vc_i'},e_\text{pos})/\gamma) }{ \sum_{e\in E_\text{all}} \exp(\text{Sim}(\crchange{\vc_i'},e)/\gamma) },
 \end{equation} where $\gamma$ is the temperature. 
 Since the timestamp of $e_\text{pos}$ within $\vs'$ is known during training through MFA, we bypass the maximum over windows in $\text{Sim}(\cdot)$ and instead set $(u, v)$ to be the smallest window enclosing $e_\text{pos}$.
 
@@ -104,6 +106,6 @@ Since the timestamp of $e_\text{pos}$ within $\vs'$ is known during training thr
 \label{sec:rag_sst_generator}
 
 To teach the Speech LLM to effectively use the retrieved terms $G_i
-$ during simultaneous translation, we synthesize a corresponding training corpus. Given the speech chunks $\vs_{1:i}$, we follow InfiniSST's procedure to produce the translation segments $\vy_{1:i}$. The remaining piece beyond InfiniSST is the retrieved terms $G_{1:i}$. A naive approach is to reuse the noun-phrase terms from retriever training and always populate $G_i$ with the ground-truth term. This, however, would leave the model brittle to retriever mistakes at inference time. To reduce this training–inference mismatch, we build a glossary over all noun phrases in the training set and run the cross-modal retriever from Section~\ref{sec:retriever} on every speech chunk. Then we add the retrieved distractors in $G_i$ alongside the ground-truth term. The Speech LLM thus learns to translate in the presence of realistic retriever noise.
+$ during simultaneous translation, we synthesize a corresponding training corpus. Given the speech chunks \crchange{$\vc_{1:i}$}, we follow InfiniSST's procedure to produce the translation segments \crchange{$\hat{\vy}_{1:i}$}. The remaining piece beyond InfiniSST is the retrieved terms $G_{1:i}$. A naive approach is to reuse the noun-phrase terms from retriever training and always populate $G_i$ with the ground-truth term. This, however, would leave the model brittle to retriever mistakes at inference time. To reduce this training–inference mismatch, we build a glossary over all noun phrases in the training set and run the cross-modal retriever from Section~\ref{sec:retriever} on every speech chunk. Then we add the retrieved distractors in $G_i$ alongside the ground-truth term. The Speech LLM thus learns to translate in the presence of realistic retriever noise.
 
-A training example is shown in Figure \ref{fig:train_prompt_visual}. We wrap the ground-truth term's translation in a \texttt{\textless term\textgreater\ldots\textless/term\textgreater} tag, encouraging the Speech LLM to copy ground-truth term translations directly from $G_i$. We fine-tune with a standard cross-entropy objective applied only to translation tokens $\vy$. Because translations naturally lag behind speech in the training data, the model also receives implicit supervision for \emph{timing}: it observes when a term appears in the speech context and when its translation appears later in the target sequence.
+A training example is shown in Figure \ref{fig:train_prompt_visual}. We wrap the ground-truth term's translation in a \texttt{\textless term\textgreater\ldots\textless/term\textgreater} tag, encouraging the Speech LLM to copy ground-truth term translations directly from $G_i$. We fine-tune with a standard cross-entropy objective applied only to translation tokens \crchange{$\hat{\vy}$}. Because translations naturally lag behind speech in the training data, the model also receives implicit supervision for \emph{timing}: it observes when a term appears in the speech context and when its translation appears later in the target sequence.
