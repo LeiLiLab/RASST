@@ -1,0 +1,52 @@
+\section{Introduction}
+
+Simultaneous Speech Translation (SST) aims to generate translations incrementally as partial speech input is received. 
+It has wide applications in international conferences and cross-lingual conversations~\citep{ma-etal-2020-simulmt, ren-etal-2020-simulspeech}. 
+Recently, Large Language Models (LLMs) have shown strong potential as backbones for SST systems~\citep{wang-etal-2025-conversational, ouyang-etal-2025-infinisst, fu2025efficientadaptivesimultaneousspeech, cheng2025seedliveinterpret20endtoend}. 
+However, they still struggle to accurately translate domain-specific terminologies, including technical jargon, person and location names, and abbreviations.
+\begin{CJK*}{UTF8}{gkai}
+As shown in Table~\ref{tab:intro}, a plain SST system translates "Shinzo Abe" incorrectly as "新三·阿贝", which is a phonetic transliteration rather than the official translation of the politician's name. 
+\end{CJK*} % still need a better example here
+
+Human simultaneous interpreters often rely on external glossaries to translate specialized terminology in real time~\citep{jbp:/content/journals/10.1075/intp.15.1.04jia}, and retrieval augmentation has been explored widely in automatic speech recognition (ASR) and neural machine translation (NMT) to improve terminology handling as the glossary size grows~\citep{khandelwal2021nearest,9687898,jayanthi-etal-2023-retrieve,li-etal-2024-optimizing-rare,li-etal-2025-leveraging,wu-etal-2025-locate,gong25_interspeech,kong25_interspeech}. 
+However, retrieval-augmented SST poses unique challenges. Beyond requiring a cross-modal retriever that is fast and accurate under partial speech input, SST translations, unlike ASR transcripts which are time-aligned with the speech, lag behind the speech. The model must therefore decide not only whether to use a retrieved term, but also when to apply it during incremental translation.
+
+\begin{CJK*}{UTF8}{gkai}
+\begin{table}[t]
+    \centering
+    \small
+    \begin{tabularx}{\linewidth}{X}
+    \toprule
+        \textbf{Source:} \textcolor{blue!70!black}{Shinzo Abe} served as the Prime Minister of Japan. \\ \midrule
+        \textbf{Reference:} \textcolor{green!70!black}{安倍晋三}曾担任日本首相。\\\midrule
+        \textbf{Plain SST:} \textcolor{red}{新三·阿贝}曾担任日本首相。 \\ \midrule
+        \textbf{\method:} \textcolor{green!70!black}{安倍晋三}曾担任日本首相。\\ \bottomrule
+    \end{tabularx}
+    \caption{A case showing plain SST without retrieval fails to translate terminology correctly while SST with retrieval is able to do so. English (\textcolor{blue!70!black}{blue}), correct Chinese terms (\textcolor{green!70!black}{green}), and incorrect ones (\textcolor{red}{red}). }
+    \label{tab:intro}
+\end{table}
+\end{CJK*}
+
+% \begin{CJK*}{UTF8}{gkai}
+% \begin{table}[t]
+%     \centering
+%     \small
+%     \begin{tabularx}{\linewidth}{X}
+%     \toprule
+%         \textbf{Source Speech:} I am very glad to present our work on Online Semantic Parsing for Latency Reduction in \textcolor{green!70!black}{task-oriented dialogue}. \\ \midrule
+%         \textbf{Reference:} 我很高兴向大家介绍我们在在线语义解析用于减少\textcolor{blue!70!black}{面向任务的对话}中的延迟方面的工作。\\ \midrule
+%         \textbf{Plain SST:} 非常高兴向大家介绍我们关于\textcolor{red}{任务导向对话}中语义解析延迟减少的工作。 \\ \midrule
+%         \textbf{\method:} 我非常高兴能介绍我们关于\textcolor{blue!70!black}{面向任务的对话}中延迟降低的在线语… \\ \bottomrule
+%     \end{tabularx}
+%     \caption{A case showing existing SST without retrieved terms fails to translate correctly while SST with retrived terms is able to do so. English (\textcolor{green!70!black}{green}), correct Chinese terms (\textcolor{blue!70!black}{blue}), and incorrect ones (\textcolor{red}{red}).}
+%     \label{tab:intro_task_oriented_dialogue}
+% \end{table}
+% \end{CJK*}
+
+To address these challenges, we propose \textbf{R}etrieval-\textbf{A}ugmented \textbf{S}imultaneous \textbf{S}peech \textbf{T}ranslation (\method). \method trains a lightweight speech--text retriever on variable-duration speech contexts with a contrastive loss, and performs multi-scale inference for accurate retrieval under partial input. We further synthesize training data that teaches the Speech LLM to select relevant retrieved terms and decide when to introduce them during generation, conditioned on the prior speech context and previously generated translation. Experiments on the ACL 60/60 dev set and ESO test set show that \method improves terminology translation accuracy by nearly 40\% percent and BLEU by up to 3 points on three language directions (En$\rightarrow$Zh/De/Ja), while adding negligible computational overhead.
+
+% To address these challenges, we propose \textbf{R}etrieval-\textbf{A}ugmented \textbf{S}imultaneosu \textbf{S}peech \textbf{T}ranslation (\method), a method to effectively retrieve text terms based on streaming speech input and generate incremental translation. 
+% We train a cross-modal speech-text retriever with short audio context using contrastive loss. 
+% To reduce latency at inference time, we employ a sliding window mechanism to ensure both high recall and low computational overhead. 
+% We also carefully synthesize the training data to teach the Speech LLM to decide whether and when to use the retrieved terms at generation time, conditioned on streaming speech input and prior translated text. 
+% Our experiments on ACL 60/60 dev dataset show that our \method outperforms the prior strong baselines by at most 3 points in BLEU on three language directions (En-Zh/De/Ja) and improves terminology translation accuracy by at most 15\%, while introduces no more than 16\% additional computational overhead. 

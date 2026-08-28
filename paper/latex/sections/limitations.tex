@@ -1,0 +1,8 @@
+\section*{Limitations}
+
+This work has several limitations. 
+First, we focus exclusively on English as the source language. Whether \method's cross-modal retriever and multi-scale inference transfer to other source languages remains untested. 
+Second, our evaluation covers only two domains (academic talks and oncology training videos), leaving \method's effectiveness on other terminology-rich settings such as legal and financial domains uncharacterized. 
+Third, we rely on a fixed similarity threshold $\tau$ to suppress retrieval noise.
+Fourth, we do not explicitly model homophone confusion as in some prior contextual-biasing ASR work, since our focus is the integration of retrieval with an LLM-based simultaneous translation model, but it should be a natural extension. 
+Finally, all experiments use Qwen3-Omni as the Speech LLM backbone, and we have not yet verified that our findings generalize to other speech LLMs.

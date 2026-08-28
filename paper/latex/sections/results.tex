@@ -1,0 +1,55 @@
+
+\section{Results and Analysis}
+
+
+
+% \label{sec:main_results}
+% Table~\todo{Table X} compares Omni (No-RAG) and RAG-InfiniSST under matched SimulEval settings.
+% We report BLEU, StreamLAAL, StreamLAAL\_CA, and \textsc{TermAcc}.
+% \todo{Add Table X placeholder.}
+
+\subsection{Main Results}
+
+\paragraph{\method substantially improves terminology accuracy}
+As shown in the first row of Figures~\ref{fig:main_result_1} and~\ref{fig:main_result_2}, \method consistently improves terminology accuracy over the strong InfiniSST baseline, by at least 10\% on the ACL 60/60 dev set and nearly 40\% on the ESO test set. ESO sees a larger gain because its oncological terms are hard to recognize and translate, whereas many of the annotated terms in ACL 60/60 are everyday words like "words", "model", and "weights" which are easy to translate correctly. Notably, \method even surpasses the \textit{Offline} baseline, indicating that the problem cannot be solved simply by providing full speech context. A gap to \textit{Offline + GT Terms} remains because the retriever is imperfect, but it is typically under 5\%, underscoring \method's effectiveness.
+
+\paragraph{\method improves overall translation quality}
+As shown in the second row of Figures~\ref{fig:main_result_1} and~\ref{fig:main_result_2}, \method also improves overall translation quality over InfiniSST. The BLEU gains are smaller than the gains in terminology accuracy, which is expected since terms occur relatively infrequently in the speech.
+
+\paragraph{\method is robust to large glossary size}
+Figure~\ref{fig:ablation_glossary_bank} shows that \method remains competitive as the glossary scales to 10K terms. Going from 0.2K to 1K and then 10K terms gradually reduces terminology accuracy by less than 2\% and BLEU by less than 1 point, and \method still clearly outperforms the no-retrieval baseline.
+
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Chunk Size (s)} & 0.96 & 1.92 & 2.88 & 3.84 \\
+\midrule
+Wall-Clock Time (s)    & 0.036 & 0.042 & 0.042 & 0.043 \\
+\bottomrule
+\end{tabular}
+\caption{Retriever computation cost across speech chunk sizes. The retriever's overhead is negligible.}
+\label{tab:rag_compute_rtf}
+\vspace{-0.5cm}
+\end{table}
+
+\paragraph{\method is computationally efficient}
+Table~\ref{tab:rag_compute_rtf} reports the additional computational cost introduced by the retriever. We run evaluation on two NVIDIA RTX A6000 GPUs, serving the Speech LLM with vLLM at tensor parallelism 2 and \texttt{gpu\_memory\_utilization}{=}0.72, while the retriever encoder fits in the remaining GPU memory. The retriever's wall-clock time per chunk is at most $3.75\%$ of the chunk size, and becomes smaller as the chunk grows, which makes it negligible in practice.
+
+\subsection{Ablation Studies}
+\label{sec:ablations}
+
+\paragraph{Retriever hard negatives and threshold}
+We examine the effect of training-time hard negatives and the inference-time threshold $\tau$. In addition to the default retriever trained with $N{=}1024$ hard negatives, we train two variants with $N{=}256$ and $N{=}0$. We evaluate their precision and recall on the GigaSpeech dev set against three glossaries: a 1K glossary built from GigaSpeech noun phrases, and 10K and 100K extensions with Wikidata terms unseen during training. For each (retriever variant, glossary) pair, we sweep $\tau$ from $0$ to $1$ to obtain a precision-recall curve. 
+
+Figure~\ref{fig:ablation_hn_tau} shows the results. First, increasing $N$ yields clearly higher recall at the same precision, confirming the value of hard-negative mining. Second, recall degrades as the glossary grows. Based on these curves, we set $\tau{=}0.78$ at inference: it costs at most a 1\% drop in recall while roughly reducing the retrieval noise by half. Compared with $\tau=0$ in Figure \ref{fig:ablation_speechllm_tau}, $\tau=0.78$ achieves higher terminology accuracy. 
+
+\paragraph{Multi-Scale inference}
+We examine the contribution of multi-scale inference. As described in Section~\ref{sec:retriever}, \method's retriever queries with speech windows at multiple scales and keeps the terms with the highest similarities. We compare against two variants. The first reuses our retriever but queries with only the largest window at inference time, but this introduces a training–inference mismatch, since the retriever was trained with MFA-aligned windows around each term. The second variant removes this mismatch by training the retriever directly with the largest window, without MFA-based window localization. Results are shown in Figure \ref{fig:ablation_multiscale}. Multi-scale inference combined with MFA-localized training performs best: it loses less than 1\% in recall when scaling from 1K to 100K glossary, compared to drops of over 2\% and 5\% for the two variants.
+
+\paragraph{Speech LLM Training Data}
+We ablate the distractor-sampling strategy used to construct $G_i$ during Speech LLM training. Besides retriever mined distractors in \method, we train two variants: one with LLM-generated distractors, and one with no retrieved terms at all (equivalent to InfiniSST). At inference, all variants use the same retriever to populate $G_i$ from the speech chunk before the Speech LLM generates the translation. Results are shown in Figure \ref{fig:ablation_speechllm}. The model trained with LLM-generated distractors achieves slightly lower terminology accuracy and BLEU than \method. More surprisingly, \textit{InfiniSST + RAG}, which sees no retrieved terms during training but is given them at inference, matches \method's terminology accuracy but has much worse BLEU score. Inspecting its outputs, we find that it tends to copy retrieved terms verbatim without checking whether they actually appear in the source or inserting them at the right time.
+
+More ablations on retriever training data, encoder choice and context length can be found in Appendix \ref{sec:apdx_ablation}.
