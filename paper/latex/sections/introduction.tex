@@ -3,10 +3,14 @@
 Simultaneous Speech Translation (SST) aims to generate translations incrementally as partial speech input is received. 
 It has wide applications in international conferences and cross-lingual conversations~\citep{ma-etal-2020-simulmt, ren-etal-2020-simulspeech}. 
 Recently, Large Language Models (LLMs) have shown strong potential as backbones for SST systems~\citep{wang-etal-2025-conversational, ouyang-etal-2025-infinisst, fu2025efficientadaptivesimultaneousspeech, cheng2025seedliveinterpret20endtoend}. 
-However, they still struggle to accurately translate domain-specific terminologies, including technical jargon, person and location names, and abbreviations.
+However, they still struggle to accurately translate domain-specific \crchange{terminology}, including technical jargon, person and location names, and abbreviations.
 \begin{CJK*}{UTF8}{gkai}
 As shown in Table~\ref{tab:intro}, a plain SST system translates "Shinzo Abe" incorrectly as "新三·阿贝", which is a phonetic transliteration rather than the official translation of the politician's name. 
 \end{CJK*} % still need a better example here
+
+\begin{crblock}
+In this work, \emph{terminology} means a specialized word, phrase, or expression whose target form is specified by a task- or domain-specific bilingual glossary. Examples include technical concepts, method and dataset names, proper names, and acronyms. This operational definition makes the boundary with ordinary vocabulary explicit: an expression is evaluated as terminology only when it is designated by the supplied glossary; glossary construction is external to \method.
+\end{crblock}
 
 Human simultaneous interpreters often rely on external glossaries to translate specialized terminology in real time~\citep{jbp:/content/journals/10.1075/intp.15.1.04jia}, and retrieval augmentation has been explored widely in automatic speech recognition (ASR) and neural machine translation (NMT) to improve terminology handling as the glossary size grows~\citep{khandelwal2021nearest,9687898,jayanthi-etal-2023-retrieve,li-etal-2024-optimizing-rare,li-etal-2025-leveraging,wu-etal-2025-locate,gong25_interspeech,kong25_interspeech}. 
 However, retrieval-augmented SST poses unique challenges. Beyond requiring a cross-modal retriever that is fast and accurate under partial speech input, SST translations, unlike ASR transcripts which are time-aligned with the speech, lag behind the speech. The model must therefore decide not only whether to use a retrieved term, but also when to apply it during incremental translation.
@@ -43,7 +47,7 @@ However, retrieval-augmented SST poses unique challenges. Beyond requiring a cro
 % \end{table}
 % \end{CJK*}
 
-To address these challenges, we propose \textbf{R}etrieval-\textbf{A}ugmented \textbf{S}imultaneous \textbf{S}peech \textbf{T}ranslation (\method). \method trains a lightweight speech--text retriever on variable-duration speech contexts with a contrastive loss, and performs multi-scale inference for accurate retrieval under partial input. We further synthesize training data that teaches the Speech LLM to select relevant retrieved terms and decide when to introduce them during generation, conditioned on the prior speech context and previously generated translation. Experiments on the ACL 60/60 dev set and ESO test set show that \method improves terminology translation accuracy by nearly 40\% percent and BLEU by up to 3 points on three language directions (En$\rightarrow$Zh/De/Ja), while adding negligible computational overhead.
+To address these challenges, we propose \textbf{R}etrieval-\textbf{A}ugmented \textbf{S}imultaneous \textbf{S}peech \textbf{T}ranslation (\method). \method trains a lightweight speech--text retriever on variable-duration speech contexts with a contrastive loss, and performs multi-scale inference for accurate retrieval under partial input. We further synthesize training data that teaches the Speech LLM to select relevant retrieved terms and decide when to introduce them during generation, conditioned on the prior speech context and previously generated translation. \crchange{Across En$\rightarrow$Zh/De/Ja on ACL 60/60, \method improves exact-form terminology accuracy over InfiniSST in all 12 latency settings. BLEU improves in 10/12 settings and XCOMET in 8/12, showing that the strongest and most consistent benefit is terminology control rather than a universal gain in general translation quality. On ESO, we report only En$\rightarrow$De, for which the dataset provides a human reference.}
 
 % To address these challenges, we propose \textbf{R}etrieval-\textbf{A}ugmented \textbf{S}imultaneosu \textbf{S}peech \textbf{T}ranslation (\method), a method to effectively retrieve text terms based on streaming speech input and generate incremental translation. 
 % We train a cross-modal speech-text retriever with short audio context using contrastive loss. 
