@@ -7,6 +7,16 @@ glossary 原始响应不进入 Git。
 
 ## 当前结论
 
+- **Camera-ready form-aware TERM\_ACC 已完成。** 在既有 hypotheses 上复算
+  32 个 system rows / 27,296 个 occurrences；所有 28 个有 archived numerator /
+  denominator 的 rows 均复现原 exact count。`lm=2` 时 RASST exact/form-aware
+  分别为 ACL En-Zh `88.99/89.10`、En-Ja `84.57/84.57`、En-De
+  `82.99/87.38`、ESO En-De `78.21/82.23`。ACL En-De form-aware 相对
+  InfiniSST 仍有 `+12.94` points。ACL En-Zh InfiniSST 的四个早期
+  user-supplied aggregates 没有 archived counts，当前 artifacts 重算 exact 与主表
+  不完全一致，因此不用于新的 form-aware headline comparison。协议、完整表、依赖
+  版本、hash 与 `PENDING_HF_UPLOAD` 状态见
+  [`../camera_ready_2026/form_aware_term_accuracy/`](../camera_ready_2026/form_aware_term_accuracy/)。
 - **xCOMET-XXL 已完成，并修正为 new InfiniSST × paper-exact RASST。** ACL
   12 cells 的 cell-macro 差值为 `+0.1158` xCOMET points（乘以 100），8/12
   为正；ESO En-De 为 `-1.3848`，0/4 为正。16-cell macro 为 `-0.2593`，
