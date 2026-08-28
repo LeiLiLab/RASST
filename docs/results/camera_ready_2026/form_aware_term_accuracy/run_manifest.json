@@ -1,0 +1,40 @@
+{
+  "schema_version": "rasst_form_aware_term_accuracy_v1",
+  "manifest": "/mnt/taurus/data2/jiaxuanluo/RASST_worktrees/camera-ready-2026/docs/results/rebuttal_2026/xcomet_input_manifest.taurus.tsv",
+  "manifest_sha256": "e23516f1b6a718c6a08ba5c538b9027cd88628726a964060c619d44d54c4fb80",
+  "acl_glossary": "/mnt/taurus/data2/jiaxuanluo/RASST/data/glossaries/acl6060_tagged_gt_raw_min_norm2.json",
+  "acl_glossary_sha256": "f9f171c6475c4bb19250f5f93063a5ef034cbdcc1f8a995c593647718cf9a5b6",
+  "eso_glossary": "/mnt/taurus/data2/jiaxuanluo/RASST/data/glossaries/hard_medicine_glossary_raw_llm_judge_manual_zh215_unique212.json",
+  "eso_glossary_sha256": "382bf8d5ef8371b9e5a7cbf0b65c1f6db8be18cf8fb75ec2db8f9fad895f4bd9",
+  "expected_results": "/mnt/taurus/data2/jiaxuanluo/RASST_worktrees/camera-ready-2026/docs/results/main_result_global_cache30_30_20_20/main_result.tsv",
+  "expected_results_sha256": "1929cc8d7883c99f136d104adb6efe92199ca529d21a7f6b9bf683ab4f50f95b",
+  "dependency_info": {
+    "spacy_version": "3.8.5",
+    "pipeline": "de_core_news_sm",
+    "pipeline_version": "3.8.0",
+    "pipeline_sources": [
+      {
+        "name": "TIGER Corpus",
+        "author": "Brants, Sabine, Stefanie Dipper, Peter Eisenberg, Silvia Hansen, Esther König, Wolfgang Lezius, Christian Rohrer, George Smith, and Hans Uszkoreit",
+        "url": "https://www.ims.uni-stuttgart.de/forschung/ressourcen/korpora/tiger.html",
+        "license": "commercial (licensed by Explosion)"
+      },
+      {
+        "name": "Tiger2Dep",
+        "url": "https://www.ims.uni-stuttgart.de/forschung/ressourcen/werkzeuge/tiger2dep/",
+        "license": "Citation provided for reference, no code packaged with model",
+        "author": "Wolfgang Seeker"
+      },
+      {
+        "name": "WikiNER",
+        "url": "https://figshare.com/articles/Learning_multilingual_named_entity_recognition_from_Wikipedia/5462500",
+        "license": "CC BY 4.0",
+        "author": "Joel Nothman, Nicky Ringland, Will Radford, Tara Murphy, James R Curran"
+      }
+    ]
+  },
+  "system_count": 32,
+  "occurrence_rows": 27296,
+  "summary_sha256": "bca40eba543b008f9fa0fc36b1704600c80889b03394e0d0103dd34509eeb032",
+  "occurrences_sha256": "df45e6c038101dd0adaa4b3eed7769a3dbb866a998f259455fa261abf88338e5"
+}
