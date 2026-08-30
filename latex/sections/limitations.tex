@@ -5,4 +5,5 @@ First, we focus exclusively on English as the source language. Whether \method's
 Second, our evaluation covers only two domains (academic talks and oncology training videos), leaving \method's effectiveness on other terminology-rich settings such as legal and financial domains uncharacterized. 
 Third, we rely on a fixed similarity threshold $\tau$ to suppress retrieval noise.
 Fourth, we do not explicitly model homophone confusion as in some prior contextual-biasing ASR work, since our focus is the integration of retrieval with an LLM-based simultaneous translation model, but it should be a natural extension. 
+Fifth, retrieval can help only when the required entry is present in the supplied glossary. The paper-derived-glossary test covers 23.95\% of the human glossary and accordingly yields much smaller gains. 
 Finally, all experiments use Qwen3-Omni as the Speech LLM backbone, and we have not yet verified that our findings generalize to other speech LLMs.

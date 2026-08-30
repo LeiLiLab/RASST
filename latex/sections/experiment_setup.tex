@@ -4,7 +4,7 @@
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.9\linewidth]{latex/figures/new_main_result_tagged.pdf}
-\caption{Quality–latency trade-off of \method and baselines on the ACL 60/60 dev set. Quality is measured by both terminology accuracy and BLEU. Across all three language directions, \method improves terminology accuracy over InfiniSST by at least 10\% while also achieving higher translation quality.}
+\caption{Quality--latency trade-off on ACL 60/60. X-axis is latency measured by StreamLAAL in milisecond. Y-axis is quality measured by terminology accuracy (exact match), BLEU and XCOMET-XXL. \method improves terminology accuracy and BLEU in all three directions.}
 \label{fig:main_result_1}
 \vspace{-0.5cm}
 \end{figure*}
@@ -16,11 +16,13 @@
 
 For Wikidata, we extract candidate terms from the RDF truthy dump, keeping entities that have both an English \texttt{rdfs:label} and at least one \texttt{wdt:P31} triple. Full processing details are given in Appendix~\ref{sec:apdx_wikidata_proc}. For each retained term, we prompt Gemini-2.5-Flash to generate three natural utterances of 5--15 words containing the term (Figure \ref{fig:wikidata_utt_gen}). We then synthesize the utterances with CosyVoice 3\footnote{FunAudioLLM/Fun-CosyVoice3-0.5B-2512}, using speaker prompts randomly sampled from GigaSpeech. This results in 2.9M training pairs.
 
-\paragraph{Speehc LLM Training}
+\paragraph{Speech LLM Training}
 We synthesize the Speech LLM training data using the same GigaSpeech ASR dataset. The interleaved En-Zh/De/Ja translation data is synthesized similar to InfiniSST with details in Appendix \ref{sec:speechllm_data_synth}. 
 We subsample 12.5K instances for Speech LLM fine-tuning. We build a 140K glossary from GigaSpeech and Wikidata for distractor retrieval, and cap the size of $G_i$ at 20 terms.
 
-\paragraph{Evaluation} We evaluate on two datasets. The first is the ACL 60/60 dev set~\citep{salesky-etal-2023-evaluating}, which contains five English ACL talks translated into 10 target languages. We evaluate on the En-Zh/De/Ja directions, feeding the unsegmented talks directly to the model. This dataset includes human-annotated terminology, which we use to construct the glossary for the model to retrieve from. After deduplication, the glossary contains 238 unique terms. The second is the ESO test set~\citep{eso_dataset}, which consists of five long-form pre-recorded English oncology training videos provided by the European School of Oncology, with translations into French, Spanish, German, and Slovene. We use GPT-5.4\footnote{\url{https://developers.openai.com/api/docs/models/gpt-5.4}} to supplement the dataset with Chinese and Japanese translations, and to extract a candidate terminology list. After manual verification, the resulting glossary contains 217 terms. To test robustness under larger glossaries, we expand both glossaries to 1K and 10K terms using Wikidata terms from domains similar to ACL or oncology and ensure that all added terms are unseen during training.
+\paragraph{Evaluation} We evaluate on two datasets. The ACL 60/60 dev set~\citep{salesky-etal-2023-evaluating} contains five English ACL talks translated into 10 target languages. We evaluate En--Zh/De/Ja directions and feed each unsegmented talk directly to the model. Each talk comes with a technical term list annotated by domain experts. We use these human-curated terminology lists as the retrieval glossary and after source-side deduplication it contains 238 terms.
+
+The ESO test set~\citep{eso_dataset} comprises five long-form English oncology training videos with human translations into French, Spanish, German, and Slovene. We report En--De direction and use GPT-5.4\footnote{\url{https://developers.openai.com/api/docs/models/gpt-5.4}} to extract and filter domain-specific glossary candidates, including procedures, diagnoses, biomarkers, clinical-trial concepts, and acronyms, and manually verify the retained entries. The final glossary has 212 unique source terms. Appendix~\ref{app:eso_glossary} gives the prompts. To test larger retrieval glossary, we expand the ACL and ESO glossaries to 1K and 10K entries using unseen Wikidata terms from relevant domains.
 
 \subsection{Evaluation Metrics}
 \label{sec:evaluation}
@@ -29,18 +31,20 @@ We subsample 12.5K instances for Speech LLM fine-tuning. We build a 140K glossar
 Following IWSLT 2025 practice~\citep{agostinelli-etal-2025-findings}, we use StreamLAAL~\citep{papi-etal-2024-streamatt} as our latency metric. StreamLAAL segments the model hypothesis to align with reference sentences and reports the average latency over the resulting (hypothesis, reference) pairs.
 
 \paragraph{Translation Quality}
-We evaluate translation quality on the aligned (hypothesis, reference) sentence pairs using SacreBLEU~\citep{papineni-etal-2002-bleu,post-2018-call}.
+We evaluate aligned sentence triplets (transcript, hypothesis, reference) using SacreBLEU~\citep{papineni-etal-2002-bleu,post-2018-call} for surface-form accuracy and XCOMET-XXL~\citep{guerreiro-etal-2024-xcomet} for semantic accuracy.
+
 
 \paragraph{Terminology Accuracy}
-We introduce terminology accuracy to measure how accurately the model translates terms. For each terminology occurrence in the reference, we check whether its translation appears as an exact match in the aligned hypothesis. The metric is the percentage of such occurrences correctly matched, ranging from 0 to 100\%.
+We introduce terminology accuracy, which measures how accurately a model translates domain-specific terms. Our primary metric is exact match: for each term occurrence in the reference, we check whether its translation appears verbatim in the aligned hypothesis.
 
+To account for valid orthographic and inflectional variation, we also report a form-aware metric. This metric accepts differences in case, spacing, and hyphenation across all languages, as well as contiguous German lemma sequences identified by a fixed morphological analyzer. It does not accept synonyms or semantic paraphrases. Appendix~\ref{app:form_aware_metric} provides the complete evaluation protocol and results.
 
 
 \subsection{Model Configuration}
 \label{sec:retriever_training}
 
 \paragraph{Architecture}
-For the retriever, we use a Qwen3-Omni Audio Transformer\footnote{\url{https://huggingface.co/Atotti/Qwen3-Omni-AudioTransformer}} as the speech encoder, followed by a linear projection. For text encoding, we use the dense BGE-M3\footnote{\url{https://huggingface.co/BAAI/bge-m3}} encoder and extract the feature of \textsc{[CLS]} token. For the Speech LLM, we use Qwen3-Omni-30B-A3B-Instruct\footnote{\url{https://huggingface.co/Qwen/Qwen3-Omni-30B-A3B-Instruct}}.
+For the retriever, we use a Qwen3-Omni Audio Transformer\footnote{\url{https://huggingface.co/Atotti/Qwen3-Omni-AudioTransformer}} as the speech encoder, followed by a linear projection. For text encoding, we use the dense BGE-M3\footnote{\url{https://huggingface.co/BAAI/bge-m3}} encoder and use the contextualized representation at its first \textsc{[CLS]} position as the term vector. For the Speech LLM, we use Qwen3-Omni-30B-A3B-Instruct\footnote{\url{https://huggingface.co/Qwen/Qwen3-Omni-30B-A3B-Instruct}}.
 
 \paragraph{Training}
 We train both the cross-modal retriever and the Speech LLM with LoRA~\citep{hu2022lora}. For retriever training, the number of hard negative $N$ is 1024 and the global batch size is 8192. For Speech LLM training, we use sequence packing and a global batch size of 8192 tokens. Full hyperparameters and details are provided in Appendix~\ref{app:training_details}.
@@ -51,16 +55,6 @@ We train both the cross-modal retriever and the Speech LLM with LoRA~\citep{hu20
 We implement the inference agent in SimulEval~\citep{ma-etal-2020-simuleval}, varying the chunk size $l$ over ${0.96, 1.92, 2.88, 3.84}$ seconds. The Speech LLM is invoked once per chunk and generates up to 40 new tokens per call. We serve it with vLLM~\citep{kwon2023efficient} using tensor parallelism of size 2, decode with temperature $0.6$, top-$p{=}0.95$, and top-$k{=}20$, and strip the assistant's \texttt{<term>} tags from the hypothesis before scoring.
 
 For retrieval, we build a FAISS inner-product index over $\ell_2$-normalized term embeddings. At each step, the retriever encodes the current speech chunk together with a $1.92$-second look-back, and queries the index using only those windows whose right boundary lies within the current chunk. We use Top-$K{=}10$ and discard candidates with similarity below $\tau{=}0.78$\footnote{We select $\tau$ on the dev set to allow at most a 1\% drop in recall.}.
-
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=0.9\linewidth]{latex/figures/medicine_main_result.pdf}
-\caption{Quality–latency trade-off of \method and baselines on the ESO test set. Quality is measured by both terminology accuracy and BLEU. Across all three language directions, \method improves terminology accuracy over InfiniSST by nearly 40\% while also achieving slightly higher translation quality.}
-\label{fig:main_result_2}
-\vspace{-0.5cm}
-\end{figure*}
-
 
 
 \begin{figure}[t]
