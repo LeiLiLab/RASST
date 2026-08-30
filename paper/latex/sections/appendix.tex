@@ -36,6 +36,13 @@ We show the distribution of term duration on GigaSpeech training set in Figure \
     \label{fig:term_duration}
 \end{figure}
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{latex/figures/medicine_main_result.pdf}
+\caption{Quality--latency trade-off on ESO dataset En-De direction. Terminology accuracy uses strict exact-form matching. \method improves terminology accuracy and BLEU but not XCOMET.}
+\label{fig:eso_de_main}
+\end{figure}
+
 \definecolor{trainframe}{RGB}{78, 86, 96}
 \definecolor{trainsystembg}{RGB}{245, 248, 252}
 \definecolor{trainuserbg}{RGB}{247, 250, 246}
@@ -58,12 +65,7 @@ We show the distribution of term duration on GigaSpeech training set in Figure \
 \end{figure}
 
 
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\linewidth]{latex/figures/multiscale_inference_ablation_devraw.pdf}
-    \caption{Recall@10 on the GigaSpeech dev set for multi-scale inference in \method and two variants. Largest-infer uses the same retriever as \method but queries with only the largest window at inference. Largest-train trains the retriever with the largest window instead of the MFA-localized window. Multi-scale inference combined with MFA-localized training performs best.}
-    \label{fig:ablation_multiscale}
-\end{figure}
+
 
 \begin{figure}[t]
     \centering
@@ -143,11 +145,7 @@ Training is performed with DDP and expert parallelism (EP) of size 2 on two L40S
 \section{Additional Ablations}
 \label{sec:apdx_ablation}
 
-\crchange{This section reports additional ablations that do not fit in the main text.}
-
-
-
-
+This section reports additional ablations that do not fit in the main text.
 
 \begin{figure*}[t]
 \centering
@@ -166,21 +164,25 @@ Training is performed with DDP and expert parallelism (EP) of size 2 on two L40S
 \end{figure*}
 
 
-\begin{figure*}
-    \centering
-    \includegraphics[width=0.9\linewidth]{latex/figures/speechllm_ablation_ja.pdf}
-    \caption{Quality–latency trade-off of \method against two training-data variants: a version trained with LLM-generated distractors, and \textit{InfiniSST + RAG}, which adds retrieval at inference to a model not trained with terms $G_i$. \method achieves the best overall trade-off.}
-    \label{fig:ablation_speechllm}
-\end{figure*}
 
 \paragraph{Retriever training data} 
 We examine the impact of training data by comparing our default retriever, trained on both GigaSpeech and Wikidata, against a GigaSpeech-only variant. As shown in Figure~\ref{fig:retriever_data}, adding Wikidata substantially improves recall, with the largest gains at high $\tau$, indicating that the retriever assigns higher similarity to true positives when trained with Wikidata.
 
 \paragraph{Retriever encoders}
- We test different encoder combinations here. We additionally tried mE5 text encoder~\citep{wang2024multilingual}\footnote{\url{https://huggingface.co/intfloat/multilingual-e5-large}} and WavLM-large speech encoder~\citep{wavlm}\footnote{\url{https://huggingface.co/microsoft/wavlm-large}}. As shown in Figure~\ref{fig:ablation_retriever_encoder}, \crchange{Qwen3-Omni Audio Transformer + BGE-M3} achieves the best recall.
+ We test different encoder combinations here. We additionally tried mE5 text encoder~\citep{wang2024multilingual}\footnote{\url{https://huggingface.co/intfloat/multilingual-e5-large}} and WavLM-large speech encoder~\citep{wavlm}\footnote{\url{https://huggingface.co/microsoft/wavlm-large}}. As shown in Figure~\ref{fig:ablation_retriever_encoder}, Qwen3-Omni Audio Transformer + BGE-M3 achieves the best recall.
 
 \paragraph{Retriever context length.}
 \method trains the retriever with variable-length speech contexts and here we compare against fixed-length alternatives. As shown in Table~\ref{tab:ablation_context}, longer fixed-length contexts generally yield higher recall across glossary sizes. The variable-length setup matches the recall of the longest fixed-length context (5.76s) while offering better flexibility at inference.
+
+\paragraph{Term-Tag Supervision}
+The \texttt{\textless term\textgreater} tags in Speech LLM targets explicitly identify when a retrieved translation is realized. We train an otherwise matched En--Zh model without these tags. As shown in Figure~\ref{fig:term_tag_ablation}, the tagged model improves exact-form TERM\_ACC by 3.60--5.06 points across all latency settings while achieving similar BLEU scores, supporting the use of tags as training-time supervision. The tags are stripped before evaluation and are not displayed to user. 
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{latex/figures/term_tag_ablation.pdf}
+\caption{En--Zh ablation of training-time term tags. LAAL is in milliseconds and TERM is exact-form TERM\_ACC (\%).}
+\label{fig:term_tag_ablation}
+\end{figure}
 
 \begin{figure*}[t]
 \centering
@@ -205,6 +207,222 @@ Assistant 3 & \trainbox{trainassistantbg}{\appzh{成功地呈现了那个悲情�
 \caption{An example of En-Zh Speech LLM training data.}
 \label{fig:train_prompt_visual}
 \end{figure*}
+
+\section{\texorpdfstring{Form-Aware Terminology Accuracy}{Form-Aware Terminology Accuracy}}
+\label{app:form_aware_metric}
+
+
+The primary exact-form scorer first segments system hypothesis into sentences each aligned to a reference sentence. A glossary entry is eligible when its English source form occurs in the aligned source sentence and its target form occurs in the reference. Target forms are deduplicated, and each eligible target form is counted once per sentence. Form-aware metrics uses the same setting as exact-form scorer and differs only in determining whether the target form appears in the hypothesis sentence.
+
+For reproducibility, let $N(z)$ denote Unicode NFKC normalization followed by case folding and whitespace collapse. Let $C(z)$ concatenate only the Unicode letters and numbers in $N(z)$, thereby removing spaces, punctuation, and hyphens. For every eligible target form $t$ and aligned hypothesis $h$, we apply the following ordered rules; the first successful rule determines the match type.
+\begin{enumerate}[leftmargin=*,nosep]
+    \item \textbf{Exact form.} Accept if the unnormalized glossary target $t$ is a substring of the unnormalized hypothesis $h$.
+    \item \textbf{Normalized surface form.} If $t$ consists only of Latin letters or digits and $|C(t)|<4$, accept only when $N(t)$ occurs in $N(h)$ with Unicode word boundaries on both sides. For every other target, accept when $N(t)$ is a substring of $N(h)$. This rule handles case and Unicode-width variation without allowing a short acronym to match inside a longer word.
+    \item \textbf{Spacing or hyphenation variant.} If the previous rules fail, accept when $C(t)$ is a substring of $C(h)$, provided that $|C(t)|\geq4$ for Latin-alphanumeric targets and $|C(t)|\geq2$ otherwise. The minimum lengths prevent permissive matches for very short strings.
+    \item \textbf{German inflection.} For En--De only, if the previous rules fail, tokenize $t$ and $h$, discard punctuation and whitespace tokens, normalize each lemma with $N(\cdot)$, and accept only if the complete lemma sequence of $t$ equals a contiguous subsequence of the lemma sequence of $h$. We use spaCy 3.8.5 with \texttt{de\_core\_news\_sm} 3.8.0 and disable its parser and named-entity recognizer.
+\end{enumerate}
+The form-aware score counts a term as correct if any rule succeeds. It never accepts a synonym, paraphrase, reordered lemma sequence, or merely semantically related expression. Normalization is used only to test the hypothesis; eligibility continues to require the prescribed target surface form in the reference. The diagnostic was run on existing hypotheses, not newly decoded outputs. Across 32 system settings, it scored 27,296 eligible occurrences; every row with archived exact numerator and denominator reproduced the original exact count.
+
+
+\begin{table}[t]
+\centering
+% \color{red}
+% \scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrr}
+\toprule
+Condition & Exact & Form-aware & $\Delta$ \\
+\midrule
+ACL En--Zh & 88.99 & 89.10 & +0.11 \\
+ACL En--Ja & 84.57 & 84.57 & +0.00 \\
+ACL En--De & 82.99 & 87.38 & +4.39 \\
+ESO En--De & 78.21 & 82.23 & +4.02 \\
+\bottomrule
+\end{tabular}
+\caption{RASST exact-form and conservative form-aware TERM\_ACC (\%) at latency multiplier 2.}
+\label{tab:form_aware}
+\end{table}
+
+
+As shown in Table \ref{tab:form_aware}, the largest adjustment is in German, where inflection and productive compounding create valid surface variants. At latency multiplier 2, ACL En--De InfiniSST also rises from 67.59 to 74.44, while \method rises from 82.99 to 87.38; the form-aware margin therefore remains 12.94 points. On ESO En--De the corresponding margin is 23.03 points (82.23 versus 59.20). Thus normalization reduces both systems' apparent error, without changing the conclusion that retrieval improves terminology realization.
+
+
+% \begin{table*}[t]
+% \centering
+% \color{red}
+% \scriptsize
+% \setlength{\tabcolsep}{4pt}
+% \begin{tabular}{llrrrrr}
+% \toprule
+% Direction & LM & \method LAAL & \method XCOMET & InfiniSST LAAL & InfiniSST XCOMET & $\Delta$ XCOMET \\
+% \midrule
+% En--Zh & 1 & 1175.8 & 78.1183 & 1181.1 & 78.0393 & +0.0789 \\
+% En--Zh & 2 & 1821.5 & 82.3465 & 1765.7 & 82.2024 & +0.1442 \\
+% En--Zh & 3 & 2347.3 & 85.1050 & 2232.7 & 84.1425 & +0.9624 \\
+% En--Zh & 4 & 2797.6 & 84.3743 & 2616.3 & 83.0173 & +1.3570 \\
+% \midrule
+% En--De & 1 & 1026.4 & 82.2508 & 1121.0 & 81.6160 & +0.6347 \\
+% En--De & 2 & 1666.9 & 83.7358 & 1759.1 & 84.2266 & -0.4907 \\
+% En--De & 3 & 2253.8 & 83.3494 & 2390.0 & 83.2341 & +0.1154 \\
+% En--De & 4 & 2756.9 & 82.2060 & 2826.7 & 82.4453 & -0.2393 \\
+% \midrule
+% En--Ja & 1 & 1477.7 & 59.1527 & 1613.0 & 63.2561 & -4.1034 \\
+% En--Ja & 2 & 2231.1 & 70.3791 & 2291.2 & 72.6553 & -2.2762 \\
+% En--Ja & 3 & 2777.6 & 75.7851 & 2913.0 & 75.0910 & +0.6941 \\
+% En--Ja & 4 & 3212.3 & 77.6470 & 3400.5 & 73.1345 & +4.5125 \\
+% \bottomrule
+% \end{tabular}
+% \caption{\crchange{XCOMET-XXL (multiplied by 100) on ACL 60/60. LAAL is in milliseconds.}}
+% \label{tab:acl_xcomet}
+% \end{table*}
+
+
+
+
+% \begin{table*}[t]
+% \centering
+% \color{red}
+% \scriptsize
+% \setlength{\tabcolsep}{4pt}
+% \begin{tabular}{lrrrrrrrr}
+% \toprule
+% LM & Tagged LAAL & Tagged BLEU & Tagged TERM & No-tag LAAL & No-tag BLEU & No-tag TERM & $\Delta$ BLEU & $\Delta$ TERM \\
+% \midrule
+% 1 & 1175.8 & 43.8652 & 88.65 & 1274.4 & 45.3446 & 84.94 & -1.4794 & +3.71 \\
+% 2 & 1821.5 & 48.7921 & 88.99 & 1857.2 & 48.9172 & 85.39 & -0.1251 & +3.60 \\
+% 3 & 2347.3 & 50.8150 & 90.79 & 2361.0 & 49.9595 & 86.74 & +0.8554 & +4.05 \\
+% 4 & 2797.6 & 50.7421 & 89.89 & 2749.6 & 49.6701 & 84.83 & +1.0720 & +5.06 \\
+% \bottomrule
+% \end{tabular}
+% \caption{\crchange{En--Zh ablation of training-time term tags. LAAL is in milliseconds and TERM is exact-form TERM\_ACC (\%). Deltas are tagged minus no-tag.}}
+% \label{tab:term_tag_ablation}
+% \end{table*}
+
+\section{\texorpdfstring{Robustness to Glossary and Retrieval Quality}{Robustness to Glossary and Retrieval Quality}}
+\label{sec:robustness_analysis}
+
+\subsection{\texorpdfstring{Paper-Derived Glossaries}{Paper-Derived Glossaries}}
+
+To approximate a less curated setting, we extract a separate glossary from the paper PDF corresponding to each ACL talk using Gemini, without consulting the transcripts, references, or human-annotated glossary. These glossaries overlap with only 57 of 238 human-annotated glossary entries (23.95\% source-term coverage). We use the paper-derived glossary for \method retrieval but retain the human glossary as the fixed TERM\_ACC denominator for both systems. Table~\ref{tab:paper_glossary} shows the latency-multiplier-2 results. As expected, the gains are much smaller because retrieval cannot supply entries absent from the glossary. Nevertheless, terminology accuracy improves for En--Zh and En--De. 
+
+\begin{table}[t]
+\centering
+% \color{red}
+% \scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lcc}
+\toprule
+Direction & TERM ACC & BLEU \\
+\midrule
+En--Zh & 77.87 / 75.17 & 46.32 / 45.82 \\
+En--Ja & 65.32 / 65.96 & 27.76 / 27.72 \\
+En--De & 70.91 / 68.21 & 29.20 / 30.27 \\
+\bottomrule
+\end{tabular}
+\caption{ACL latency-multiplier-2 evaluation with paper-derived retrieval glossaries. Cells show \method / InfiniSST.}
+\label{tab:paper_glossary}
+\end{table}
+
+\subsection{\texorpdfstring{Retrieval Degradation}{Retrieval Degradation}}
+
+We replace 25\% or 50\% of retrieved entries with irrelevant entries from the same ACL glossary, holding the number of hints and inference configuration fixed. Table~\ref{tab:retrieval_degradation} reports results at latency multiplier 2. Exact-form TERM\_ACC decreases by at most 7.59 points under 50\% replacement and remains above the corresponding InfiniSST accuracy in all three directions. All six corrupted settings have lower XCOMET than their language's uncorrupted setting while have similar BLEU.
+
+\begin{table}[t]
+\centering
+% \color{red}
+% \scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{llrrr}
+\toprule
+Dir. & Replaced & TERM & BLEU & XCOMET \\
+\midrule
+En--Zh & 0\%  & 90.00 & 47.878 & 83.628 \\
+En--Zh & 25\% & 88.09 & 48.137 & 83.028 \\
+En--Zh & 50\% & 85.73 & 48.331 & 82.608 \\
+\midrule
+En--De & 0\%  & 83.10 & 30.869 & 83.966 \\
+En--De & 25\% & 79.79 & 31.077 & 83.214 \\
+En--De & 50\% & 75.51 & 31.584 & 83.496 \\
+\midrule
+En--Ja & 0\%  & 84.57 & 29.889 & 70.379 \\
+En--Ja & 25\% & 82.77 & 28.717 & 68.417 \\
+En--Ja & 50\% & 78.40 & 27.717 & 67.137 \\
+\bottomrule
+\end{tabular}
+\caption{Sensitivity to retrieval quality at latency multiplier 2. We randomly replaced 0, 25\%, 50\% of the retrieved terms with irrelevant terms.}
+\label{tab:retrieval_degradation}
+\end{table}
+
+
+\section{\texorpdfstring{{Qualitative and Failure Analysis}}{Qualitative and Failure Analysis}}
+\label{sec:qualitative_analysis}
+
+At latency multiplier 2, ACL 60/60 contains 3,266 evaluated terminology occurrences across the three directions. \method is exact-match correct in 638 cases where InfiniSST is wrong, while the reverse occurs in 127 cases. We manually categorize these 127 apparent regressions in Table~\ref{tab:qualitative_errors}.
+
+\begin{table}[t]
+\centering
+% \color{red}
+\small
+\begin{tabular}{lr}
+\toprule
+Category & Occurrences \\
+\midrule
+Synonym & 28 \\
+Grammar-conditioned surface change & 3 \\
+Spacing or capitalization & 12 \\
+StreamLAAL segmentation error & 48 \\
+Term absent & 14 \\
+Different concept or named entity & 22 \\
+\midrule
+Total & 127 \\
+\bottomrule
+\end{tabular}
+\caption{Manual categorization of cases where InfiniSST is exact-match correct and \method is not.}
+\label{tab:qualitative_errors}
+\end{table}
+
+The first three categories contain the intended term but not the reference surface form, for example ``Softmax'' versus ``Soft max'' and ``Transformer'' versus ``transformer.'' They account for 43 cases and motivate the form-aware diagnostic. A further 48 are boundary artifacts from mWERSegmenter splitting Chinese or Japanese output mid-sentence.
+
+Of the 14 genuinely absent terms, seven are not retrieved because their similarity falls just below $\tau{=}0.78$. The other seven are retrieved but not used: some hints arrive near the end of a sentence after the model has started generating another sentence, while others are omitted because the concept is inferable from context. The remaining 22 cases are genuine substitutions or hallucinations, including ``BETO'' rendered as ``BERT.'' Acoustic acronym confusions also occur without retrieval, such as ``BLEU'' rendered as ``blue.''
+
+\FloatBarrier
+\section{\texorpdfstring{ESO Glossary Construction}{ESO Glossary Construction}}
+\label{app:eso_glossary}
+
+We construct the ESO hard-term glossary with the following seven-stage pipeline. (1) GPT-5.4 processes batches of 10 sentences with full-talk context, extracts high-precision medical candidates, and associates each candidate with exact target spans; the dataset-provided German sentence translation is kept unchanged. (2) GPT-5.4 enforces exact-span and abbreviation consistency, dropping copied or speculative acronyms. (3) Deterministic checks retain only entries whose source and target strings occur in their corresponding sentences. (4) We deduplicate and normalize source forms without changing target strings. (5) GPT-5.4 examines batches of three terms against no-retrieval outputs and identifies terms that are genuinely difficult rather than harmless variants. (6) We manually inspect and correct the glossary. (7) We serialize the final 215 rows (212 unique English terms) used to build the index. Precision is prioritized over recall throughout.
+
+\begin{tcolorbox}[
+  colback=black!2,
+  colframe=black!55!black,
+  coltext=black,
+  title={Stage 1 prompt: candidate extraction},
+  fonttitle=\bfseries,
+  boxrule=0.4pt]
+\ttfamily\footnotesize
+Given the full transcript and sentence-level JSON, return one JSON item per sentence. Reuse the provided German translation exactly. Extract only genuinely domain-specific concepts such as procedures, diagnoses, biomarkers, clinical-trial terminology, anatomical terms, and acronyms. Exclude generic nouns, people, organizations, and vague phrases. For each retained English term, return a German target that is a contiguous substring of the provided German sentence. Precision is more important than recall; return an empty term list when no sufficiently technical term is present.
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+  colback=black!2,
+  colframe=black!55!black,
+  coltext=black,
+  title={Stage 2 prompt: exact span and abbreviation consistency},
+  fonttitle=\bfseries,
+  boxrule=0.4pt]
+\ttfamily\footnotesize
+Revise each candidate so every kept target is an exact contiguous span of the sentence translation. Do not add new terms. For abbreviations, keep the item only when its expansion or translation is clear and meaningful; drop a copied acronym, a speculative expansion, or an abbreviation that duplicates a full-form term. Preserve sentence and term identifiers and return JSON only.
+\end{tcolorbox}
+
+\begin{tcolorbox}[
+  colback=black!2,
+  colframe=black!55!black,
+  coltext=black,
+  title={Stage 5 prompt: hard-term filtering},
+  fonttitle=\bfseries,
+  boxrule=0.4pt]
+\ttfamily\footnotesize
+Given the English term, prescribed target, source sentence, reference, and no-RAG prediction, judge whether the prediction conveys the term in context. Accept exact forms, faithful synonyms, and harmless spelling or spacing variants. Mark wrong or missing when the term is omitted, mistranslated, over-generalized, replaced by another concept, or merely copied when an expansion is required. Use not assessable only for alignment failure and return one JSON judgment per identifier.
+\end{tcolorbox}
 
 \begin{figure*}[t] % 使用 figure* 环境使其跨双栏
 \begin{tcolorbox}[
@@ -252,235 +470,3 @@ IMPORTANT: output raw JSON only, no markdown code fences.\par
 \caption{Prompt template for Wikidata term utterance generation.}
 \label{fig:wikidata_utt_gen}
 \end{figure*}
-
-\section{\texorpdfstring{\crchange{Form-Aware Terminology Accuracy}}{Form-Aware Terminology Accuracy}}
-\label{app:form_aware_metric}
-
-\begin{crblock}
-The primary exact-form scorer first aligns each system output to the reference sentences with the same mWER-based segmentation used by StreamLAAL. A glossary entry is eligible when its English source form occurs in the aligned source sentence and its prescribed target form occurs in the reference. Target forms are deduplicated, and each eligible target form is counted once per sentence. Thus, the exact and form-aware metrics use an identical denominator.
-
-For reproducibility, let $N(z)$ denote Unicode NFKC normalization followed by case folding and whitespace collapse. Let $C(z)$ concatenate only the Unicode letters and numbers in $N(z)$, thereby removing spaces, punctuation, and hyphens. For every eligible target form $t$ and aligned hypothesis $h$, we apply the following ordered rules; the first successful rule determines the match type.
-\begin{enumerate}[leftmargin=*,nosep]
-    \item \textbf{Exact form.} Accept if the unnormalized glossary target $t$ is a substring of the unnormalized hypothesis $h$.
-    \item \textbf{Normalized surface form.} If $t$ consists only of Latin letters or digits and $|C(t)|<4$, accept only when $N(t)$ occurs in $N(h)$ with Unicode word boundaries on both sides. For every other target, accept when $N(t)$ is a substring of $N(h)$. This rule handles case and Unicode-width variation without allowing a short acronym to match inside a longer word.
-    \item \textbf{Spacing or hyphenation variant.} If the previous rules fail, accept when $C(t)$ is a substring of $C(h)$, provided that $|C(t)|\geq4$ for Latin-alphanumeric targets and $|C(t)|\geq2$ otherwise. The minimum lengths prevent permissive matches for very short strings.
-    \item \textbf{German inflection.} For En--De only, if the previous rules fail, tokenize $t$ and $h$, discard punctuation and whitespace tokens, normalize each lemma with $N(\cdot)$, and accept only if the complete lemma sequence of $t$ equals a contiguous subsequence of the lemma sequence of $h$. We use spaCy 3.8.5 with \texttt{de\_core\_news\_sm} 3.8.0 and disable its parser and named-entity recognizer.
-\end{enumerate}
-The form-aware score counts a term as correct if any rule succeeds. It never accepts a synonym, paraphrase, reordered lemma sequence, or merely semantically related expression. Normalization is used only to test the hypothesis; eligibility continues to require the prescribed target surface form in the reference. The diagnostic was run on existing hypotheses, not newly decoded outputs. Across 32 system settings, it scored 27,296 eligible occurrences; every row with archived exact numerator and denominator reproduced the original exact count.
-\end{crblock}
-
-\begin{table}[t]
-\centering
-\color{red}
-\scriptsize
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{lrrr}
-\toprule
-Condition & Exact & Form-aware & $\Delta$ \\
-\midrule
-ACL En--Zh & 88.99 & 89.10 & +0.11 \\
-ACL En--Ja & 84.57 & 84.57 & +0.00 \\
-ACL En--De & 82.99 & 87.38 & +4.39 \\
-ESO En--De & 78.21 & 82.23 & +4.02 \\
-\bottomrule
-\end{tabular}
-\caption{\crchange{RASST exact-form and conservative form-aware TERM\_ACC (\%) at latency multiplier 2.}}
-\label{tab:form_aware}
-\end{table}
-
-\begin{crblock}
-The largest adjustment is in German, where inflection and productive compounding create valid surface variants. At latency multiplier 2, ACL En--De InfiniSST also rises from 67.59 to 74.44, while \method rises from 82.99 to 87.38; the form-aware margin therefore remains 12.94 points. On ESO En--De the corresponding margin is 23.03 points (82.23 versus 59.20). Thus normalization reduces both systems' apparent error, without changing the conclusion that retrieval improves terminology realization.
-\end{crblock}
-
-\subsection{\texorpdfstring{\crchange{XCOMET-XXL}}{XCOMET-XXL}}
-
-\begin{table*}[t]
-\centering
-\color{red}
-\scriptsize
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{llrrrrr}
-\toprule
-Direction & LM & \method LAAL & \method XCOMET & InfiniSST LAAL & InfiniSST XCOMET & $\Delta$ XCOMET \\
-\midrule
-En--Zh & 1 & 1175.8 & 78.1183 & 1181.1 & 78.0393 & +0.0789 \\
-En--Zh & 2 & 1821.5 & 82.3465 & 1765.7 & 82.2024 & +0.1442 \\
-En--Zh & 3 & 2347.3 & 85.1050 & 2232.7 & 84.1425 & +0.9624 \\
-En--Zh & 4 & 2797.6 & 84.3743 & 2616.3 & 83.0173 & +1.3570 \\
-\midrule
-En--De & 1 & 1026.4 & 82.2508 & 1121.0 & 81.6160 & +0.6347 \\
-En--De & 2 & 1666.9 & 83.7358 & 1759.1 & 84.2266 & -0.4907 \\
-En--De & 3 & 2253.8 & 83.3494 & 2390.0 & 83.2341 & +0.1154 \\
-En--De & 4 & 2756.9 & 82.2060 & 2826.7 & 82.4453 & -0.2393 \\
-\midrule
-En--Ja & 1 & 1477.7 & 59.1527 & 1613.0 & 63.2561 & -4.1034 \\
-En--Ja & 2 & 2231.1 & 70.3791 & 2291.2 & 72.6553 & -2.2762 \\
-En--Ja & 3 & 2777.6 & 75.7851 & 2913.0 & 75.0910 & +0.6941 \\
-En--Ja & 4 & 3212.3 & 77.6470 & 3400.5 & 73.1345 & +4.5125 \\
-\bottomrule
-\end{tabular}
-\caption{\crchange{XCOMET-XXL (multiplied by 100) on ACL 60/60. LAAL is in milliseconds.}}
-\label{tab:acl_xcomet}
-\end{table*}
-
-\begin{crblock}
-\method has higher XCOMET in 8 of 12 ACL settings. Its mean difference is $+0.116$ points: $+0.636$ for En--Zh, $+0.005$ for En--De, and $-0.293$ for En--Ja. The En--Ja pattern changes with latency: retrieval hurts at the two lowest-latency settings but helps at the two higher-latency settings. We hypothesize that the base model's weaker partial-context Japanese translation makes additional terminology hints harder to integrate when little speech is available. Table~\ref{tab:eso_de_main} reports the ESO En--De XCOMET results; there \method is lower in all four settings, by 1.385 points on average.
-\end{crblock}
-
-\section{\texorpdfstring{\crchange{Term-Tag Supervision}}{Term-Tag Supervision}}
-
-\begin{crblock}
-The \texttt{\textless term\textgreater} tags in Speech LLM targets explicitly identify when a retrieved translation is realized. We train an otherwise matched En--Zh model without these tags. As shown in Table~\ref{tab:term_tag_ablation}, the tagged model improves exact-form TERM\_ACC by 3.60--5.06 points across all latency settings. Its mean BLEU is also comparable (48.5536 versus 48.4728), supporting the use of tags as training-time supervision. The tags are stripped before evaluation and are not required in user-facing output.
-\end{crblock}
-
-\begin{table*}[t]
-\centering
-\color{red}
-\scriptsize
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{lrrrrrrrr}
-\toprule
-LM & Tagged LAAL & Tagged BLEU & Tagged TERM & No-tag LAAL & No-tag BLEU & No-tag TERM & $\Delta$ BLEU & $\Delta$ TERM \\
-\midrule
-1 & 1175.8 & 43.8652 & 88.65 & 1274.4 & 45.3446 & 84.94 & -1.4794 & +3.71 \\
-2 & 1821.5 & 48.7921 & 88.99 & 1857.2 & 48.9172 & 85.39 & -0.1251 & +3.60 \\
-3 & 2347.3 & 50.8150 & 90.79 & 2361.0 & 49.9595 & 86.74 & +0.8554 & +4.05 \\
-4 & 2797.6 & 50.7421 & 89.89 & 2749.6 & 49.6701 & 84.83 & +1.0720 & +5.06 \\
-\bottomrule
-\end{tabular}
-\caption{\crchange{En--Zh ablation of training-time term tags. LAAL is in milliseconds and TERM is exact-form TERM\_ACC (\%). Deltas are tagged minus no-tag.}}
-\label{tab:term_tag_ablation}
-\end{table*}
-
-\section{\texorpdfstring{\crchange{Qualitative and Failure Analysis}}{Qualitative and Failure Analysis}}
-
-\begin{crblock}
-At latency multiplier 2, ACL 60/60 contains 3,266 evaluated terminology occurrences across the three directions. \method is exact-match correct in 638 cases where InfiniSST is wrong, while the reverse occurs in 127 cases. We manually categorize these 127 apparent regressions in Table~\ref{tab:qualitative_errors}.
-\end{crblock}
-
-\begin{table}[t]
-\centering
-\color{red}
-\small
-\begin{tabular}{lr}
-\toprule
-Category & Occurrences \\
-\midrule
-Synonym & 28 \\
-Grammar-conditioned surface change & 3 \\
-Spacing or capitalization & 12 \\
-StreamLAAL segmentation error & 48 \\
-Term absent & 14 \\
-Different concept or named entity & 22 \\
-\midrule
-Total & 127 \\
-\bottomrule
-\end{tabular}
-\caption{\crchange{Manual categorization of cases where InfiniSST is exact-match correct and \method is not.}}
-\label{tab:qualitative_errors}
-\end{table}
-
-\begin{crblock}
-The first three categories contain the intended term but not the reference surface form, for example ``Softmax'' versus ``Soft max'' and ``Transformer'' versus ``transformer.'' They account for 43 cases and motivate the form-aware diagnostic. A further 48 are boundary artifacts from mWERSegmenter splitting Chinese or Japanese output mid-sentence.
-
-Of the 14 genuinely absent terms, seven are not retrieved because their similarity falls just below $\tau{=}0.78$. The other seven are retrieved but not used: some hints arrive near the end of a sentence after the model has committed to another rendering, while others are omitted because the concept is inferable from context. The remaining 22 cases are genuine substitutions or hallucinations, including ``BETO'' rendered as ``BERT.'' Acoustic acronym confusions also occur without retrieval, such as ``BLEU'' rendered as ``blue.'' These cases suggest that better confidence calibration and delayed commitment may complement retrieval.
-\end{crblock}
-
-\section{\texorpdfstring{\crchange{Robustness to Glossary and Retrieval Quality}}{Robustness to Glossary and Retrieval Quality}}
-
-\subsection{\texorpdfstring{\crchange{Paper-Derived Glossaries}}{Paper-Derived Glossaries}}
-
-\begin{crblock}
-To approximate a less curated setting, we extract a separate glossary from the paper PDF corresponding to each ACL talk using Gemini, without consulting the transcripts, references, or human evaluation glossary. These glossaries overlap with only 57 of 238 human glossary entries (23.95\% source-term coverage). We use the paper-derived glossary for \method retrieval but retain the human glossary as the fixed TERM\_ACC denominator for both systems. Table~\ref{tab:paper_glossary} shows the latency-multiplier-2 results. As expected, the gains are much smaller because retrieval cannot supply entries absent from the index. Nevertheless, terminology accuracy improves for En--Zh and En--De. The extraction is a legacy run for which the exact Gemini model identifier was not archived, so we treat it as a robustness diagnostic rather than a fully reproducible headline result.
-\end{crblock}
-
-\begin{table}[t]
-\centering
-\color{red}
-\scriptsize
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{lcc}
-\toprule
-Direction & TERM & BLEU \\
-\midrule
-En--Zh & 77.87 / 75.17 & 46.32 / 45.82 \\
-En--Ja & 65.32 / 65.96 & 27.76 / 27.72 \\
-En--De & 70.91 / 68.21 & 29.20 / 30.27 \\
-\bottomrule
-\end{tabular}
-\caption{\crchange{ACL latency-multiplier-2 evaluation with paper-derived retrieval glossaries. Cells show \method / InfiniSST; TERM uses the unchanged human glossary.}}
-\label{tab:paper_glossary}
-\end{table}
-
-\subsection{\texorpdfstring{\crchange{Retrieval Degradation}}{Retrieval Degradation}}
-
-\begin{crblock}
-We replace 25\% or 50\% of sentence-relevant retrieved entries with irrelevant entries from the same ACL glossary, holding the number of hints and inference configuration fixed. Table~\ref{tab:retrieval_degradation} reports one fixed corruption seed at latency multiplier 2. Exact-form TERM\_ACC decreases by at most 7.59 points under 50\% replacement and remains above the corresponding InfiniSST accuracy in all three directions. All six corrupted settings have lower XCOMET than their language's uncorrupted setting, whereas BLEU is not monotonic, illustrating why a semantic quality metric is useful. Because this is a one-seed controlled corruption rather than naturally occurring interpreter noise, it measures sensitivity rather than full real-world robustness.
-\end{crblock}
-
-\begin{table}[t]
-\centering
-\color{red}
-\scriptsize
-\setlength{\tabcolsep}{2.5pt}
-\begin{tabular}{llrrr}
-\toprule
-Dir. & Replaced & TERM & BLEU & XCOMET \\
-\midrule
-En--Zh & 0\%  & 90.00 & 47.878 & 83.628 \\
-En--Zh & 25\% & 88.09 & 48.137 & 83.028 \\
-En--Zh & 50\% & 85.73 & 48.331 & 82.608 \\
-\midrule
-En--De & 0\%  & 83.10 & 30.869 & 83.966 \\
-En--De & 25\% & 79.79 & 31.077 & 83.214 \\
-En--De & 50\% & 75.51 & 31.584 & 83.496 \\
-\midrule
-En--Ja & 0\%  & 84.57 & 29.889 & 70.379 \\
-En--Ja & 25\% & 82.77 & 28.717 & 68.417 \\
-En--Ja & 50\% & 78.40 & 27.717 & 67.137 \\
-\bottomrule
-\end{tabular}
-\caption{\crchange{Sensitivity to same-domain retrieval corruption at latency multiplier 2. XCOMET denotes XCOMET-XXL multiplied by 100.}}
-\label{tab:retrieval_degradation}
-\end{table}
-
-\FloatBarrier
-\section{\texorpdfstring{\crchange{ESO Glossary Construction}}{ESO Glossary Construction}}
-\label{app:eso_glossary}
-
-\begin{crblock}
-We construct the ESO hard-term glossary with the following seven-stage pipeline. (1) GPT-5.4 processes batches of 10 sentences with full-talk context, extracts high-precision medical candidates, and associates each candidate with exact target spans; the dataset-provided German sentence translation is kept unchanged. (2) GPT-5.4 enforces exact-span and abbreviation consistency, dropping copied or speculative acronyms. (3) Deterministic checks retain only entries whose source and target strings occur in their corresponding sentences. (4) We deduplicate and normalize source forms without changing target strings. (5) GPT-5.4 examines batches of three terms against no-retrieval outputs and identifies terms that are genuinely difficult rather than harmless variants. (6) We manually inspect and correct the glossary. (7) We serialize the final 215 rows (212 unique English terms) used to build the index. Precision is prioritized over recall throughout.
-\end{crblock}
-
-\begin{tcolorbox}[
-  colback=red!2,
-  colframe=red!55!black,
-  coltext=red,
-  title={Stage 1 prompt: candidate extraction},
-  fonttitle=\bfseries,
-  boxrule=0.4pt]
-\ttfamily\footnotesize
-Given the full transcript and sentence-level JSON, return one JSON item per sentence. Reuse the provided German translation exactly. Extract only genuinely domain-specific concepts such as procedures, diagnoses, biomarkers, clinical-trial terminology, anatomical terms, and acronyms. Exclude generic nouns, people, organizations, and vague phrases. For each retained English term, return a German target that is a contiguous substring of the provided German sentence. Precision is more important than recall; return an empty term list when no sufficiently technical term is present.
-\end{tcolorbox}
-
-\begin{tcolorbox}[
-  colback=red!2,
-  colframe=red!55!black,
-  coltext=red,
-  title={Stage 2 prompt: exact span and abbreviation consistency},
-  fonttitle=\bfseries,
-  boxrule=0.4pt]
-\ttfamily\footnotesize
-Revise each candidate so every kept target is an exact contiguous span of the sentence translation. Do not add new terms. For abbreviations, keep the item only when its expansion or translation is clear and meaningful; drop a copied acronym, a speculative expansion, or an abbreviation that duplicates a full-form term. Preserve sentence and term identifiers and return JSON only.
-\end{tcolorbox}
-
-\begin{tcolorbox}[
-  colback=red!2,
-  colframe=red!55!black,
-  coltext=red,
-  title={Stage 5 prompt: hard-term filtering},
-  fonttitle=\bfseries,
-  boxrule=0.4pt]
-\ttfamily\footnotesize
-Given the English term, prescribed target, source sentence, reference, and no-RAG prediction, judge whether the prediction conveys the term in context. Accept exact forms, faithful synonyms, and harmless spelling or spacing variants. Mark wrong or missing when the term is omitted, mistranslated, over-generalized, replaced by another concept, or merely copied when an expansion is required. Use not assessable only for alignment failure and return one JSON judgment per identifier.
-\end{tcolorbox}

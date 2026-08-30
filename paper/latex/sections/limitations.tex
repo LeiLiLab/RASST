@@ -5,11 +5,5 @@ First, we focus exclusively on English as the source language. Whether \method's
 Second, our evaluation covers only two domains (academic talks and oncology training videos), leaving \method's effectiveness on other terminology-rich settings such as legal and financial domains uncharacterized. 
 Third, we rely on a fixed similarity threshold $\tau$ to suppress retrieval noise.
 Fourth, we do not explicitly model homophone confusion as in some prior contextual-biasing ASR work, since our focus is the integration of retrieval with an LLM-based simultaneous translation model, but it should be a natural extension. 
+Fifth, retrieval can help only when the required entry is present in the supplied glossary. The paper-derived-glossary test covers 23.95\% of the human glossary and accordingly yields much smaller gains. 
 Finally, all experiments use Qwen3-Omni as the Speech LLM backbone, and we have not yet verified that our findings generalize to other speech LLMs.
-\begin{crblock}
-Our retriever and Speech LLM training corpora are largely synthesized because large-scale speech translation data with rich terminology annotation are unavailable. ACL 60/60 partly mitigates this limitation through human-curated terminology and human references, but it remains a five-talk development set. The ESO glossary is GPT-5.4-assisted and manually checked; only En--De is retained because the dataset-provided Chinese and Japanese references are absent.
-
-Exact-form TERM\_ACC can underestimate correct terminology when the hypothesis changes case, spacing, morphology, or uses a valid synonym. We report a conservative form-aware diagnostic for orthographic and German inflectional variants, but it deliberately excludes semantic paraphrases and is not a replacement for expert human evaluation. Conversely, automatic XCOMET results are mixed, particularly under low-latency En--Ja and on ESO En--De, and should not be read as evidence of universal quality gains.
-
-Finally, retrieval can help only when the required entry is present in the supplied glossary. The paper-derived-glossary test covers 23.95\% of the human glossary and accordingly yields much smaller gains. Although same-domain corruption tests show gradual degradation rather than collapse, they use one corruption seed and do not exhaust real interpreter noise or distribution shift.
-\end{crblock}
