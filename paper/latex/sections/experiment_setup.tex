@@ -47,7 +47,7 @@ To account for valid orthographic and inflectional variation, we also report a f
 For the retriever, we use a Qwen3-Omni Audio Transformer\footnote{\url{https://huggingface.co/Atotti/Qwen3-Omni-AudioTransformer}} as the speech encoder, followed by a linear projection. For text encoding, we use the dense BGE-M3\footnote{\url{https://huggingface.co/BAAI/bge-m3}} encoder and use the contextualized representation at its first \textsc{[CLS]} position as the term vector. For the Speech LLM, we use Qwen3-Omni-30B-A3B-Instruct\footnote{\url{https://huggingface.co/Qwen/Qwen3-Omni-30B-A3B-Instruct}}.
 
 \paragraph{Training}
-We train both the cross-modal retriever and the Speech LLM with LoRA~\citep{hu2022lora}. For retriever training, the number of hard negative $N$ is 1024 and the global batch size is 8192. For Speech LLM training, we use sequence packing and a global batch size of 8192 tokens. Full hyperparameters and details are provided in Appendix~\ref{app:training_details}.
+We train both the cross-modal retriever and the Speech LLM with LoRA~\citep{hu2022lora}. For retriever training, the number of hard negative $N$ is 1024 and the global batch size is 8192. For Speech LLM training, we enable sequence packing with a maximum packed sequence length of 3,072 tokens and use a global batch size of 4 packed sequences. Full hyperparameters and details are provided in Appendix~\ref{app:training_details}.
 % Dev-only threshold-selection evidence is available at latex/figures/retriever_dev_pr_fixedraw_hn_comparison.pdf.
 
 \paragraph{Inference}

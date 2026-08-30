@@ -105,8 +105,8 @@ Training is performed with Distributed Data Parallel (DDP) on eight RTX A6000 GP
 
 \paragraph{Speech LLM}
 We fine-tune the Speech LLM using LoRA with rank $r{=}32$ and $\alpha{=}32$.
-We enable sequence packing with a maximum sequence length of 8192 tokens.
-We optimize with AdamW (learning rate $1\times10^{-4}$, weight decay 0.01) and gradient clipping (max norm 1.0), with a global batch size of 4.
+For Speech LLM training, we enable sequence packing with a maximum packed sequence length of 3,072 tokens and use a global batch size of 4 packed sequences.
+We optimize with AdamW (learning rate $1\times10^{-4}$, weight decay 0.01) and gradient clipping (max norm 1.0).
 Training is performed with DDP and expert parallelism (EP) of size 2 on four NVIDIA RTX A6000 GPUs.
 
 % \section{Case Study}
