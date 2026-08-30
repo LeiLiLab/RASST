@@ -14,7 +14,7 @@
 Figure~\ref{fig:main_result_1} shows that \method outperforms InfiniSST in exact-match terminology accuracy across all 12 ACL language--latency settings, with gains of 12.3--21.4 percentage points. Figure~\ref{fig:eso_de_main} presents the English--German results on ESO, where \method yields larger gains of 26.0--31.2 points across the four latency settings. We attribute the larger gains on ESO to the difficulty of recognizing and translating specialized oncology terms. By contrast, many terms annotated in ACL 60/60 are common words, such as \emph{words}, \emph{model}, and \emph{weights}, which are comparatively easy to translate. Notably, \method also surpasses the Offline baseline, demonstrating that access to the complete speech context alone is insufficient for reliable terminology translation. Although a gap to Offline + GT Terms remains because retrieval is imperfect, it is typically below five percentage points, indicating that \method captures most of the benefit of oracle terminology access. The form-aware evaluation in Appendix~\ref{app:form_aware_metric} confirms that these conclusions are not artifacts of orthographic or inflectional variation.
 
 \paragraph{RASST improves overall translation quality}
-On ACL 60/60, \method achieves higher BLEU than InfiniSST in 10 of the 12 settings, with a maximum gain of 3 BLEU points. By contrast, the two systems obtain comparable COMET scores. One likely explanation is that \method inserts retrieved target terms verbatim, which is more favored by a surface-form metric such as BLEU than by a neural semantic metric such as COMET. Moreover, although aligned target terms occur in 83.76--86.54\% of ACL sentences, they constitute only 10.66--18.06\% of the target tokens. Improvements in terminology accuracy therefore affect a limited proportion of the corpus.
+On ACL 60/60, \method achieves higher BLEU than InfiniSST in 10 of the 12 settings, with a maximum gain of 3 BLEU points. By contrast, the two systems obtain comparable XCOMET scores. One likely explanation is that \method inserts retrieved target terms verbatim, which is more favored by a surface-form metric such as BLEU than by a neural semantic metric such as XCOMET. Moreover, although aligned target terms occur in 83.76--86.54\% of ACL sentences, they constitute only 10.66--18.06\% of the target tokens. Improvements in terminology accuracy therefore affect a limited proportion of the corpus, although expert evaluation frameworks explicitly treat terminology errors as a distinct source of translation quality degradation~\citep{freitag-etal-2021-experts}.
 
 \paragraph{\method is robust to large glossary size}
 Figure~\ref{fig:ablation_glossary_bank} shows that \method remains competitive as the glossary scales to 10K terms. Going from 0.2K to 1K and then 10K terms gradually reduces terminology accuracy by less than 2\% and BLEU by less than 1 point, and \method still clearly outperforms the no-retrieval baseline.
@@ -70,7 +70,7 @@ Largest-infer & 47.8261 & 1868.37 & 84.72 \\
 Largest-train & 45.7960 & 1863.20 & 73.93 \\
 \bottomrule
 \end{tabular}
-\caption{End-to-end ablation of retrieval strategies on ACL En--Zh at latency multiplier 2.}
+\caption{End-to-end ablation of retrieval strategies on ACL En--Zh at latency multiplier 2. Decoding uses temperature 0.6.}
 \label{tab:multiscale_e2e}
 \end{table}
 
@@ -94,4 +94,3 @@ We evaluate the robustness of \method to variations in glossary and retrieval qu
 \subsection{Qualitative Analysis}
 
 We additionally present a case study examining the behavior of \method in Appendix~\ref{sec:qualitative_analysis}.
-
