@@ -2,7 +2,7 @@
 
 % Change "review" to "final" to generate the final (sometimes called camera-ready) version.
 % Change to "preprint" to generate a non-anonymous version with page numbers.
-\usepackage[review]{acl}
+\usepackage[final]{acl}
 
 % Standard package includes
 \usepackage{times}
@@ -62,6 +62,7 @@
 \input{math_commands}
 \usepackage{subcaption}
 \usepackage{wrapfig}
+\usepackage{placeins}
 \usepackage{enumitem}
 \usepackage{graphicx}
 \usepackage{xspace}
@@ -69,6 +70,7 @@
 \newcommand{\method}{RASST\xspace}
 \usepackage[most]{tcolorbox}
 \usepackage{multirow}
+\usepackage{float}
 
 \usepackage{CJKutf8}
 \usepackage{tabularx}
@@ -78,6 +80,10 @@
 
 \usepackage{xcolor}
 \newcommand{\siqi}[1]{\textcolor{red}{[Siqi: #1]}}
+\newif\ifshowcamerareadychanges
+\showcamerareadychangestrue
+\newcommand{\crchange}[1]{\ifshowcamerareadychanges{\color{red}#1}\else#1\fi}
+\newenvironment{crblock}{\par\begingroup\ifshowcamerareadychanges\color{red}\fi}{\par\endgroup}
 
 \title{\method: Retrieval-Augmented Simultaneous Speech Translation}
 

@@ -3,7 +3,7 @@
 Simultaneous Speech Translation (SST) aims to generate translations incrementally as partial speech input is received. 
 It has wide applications in international conferences and cross-lingual conversations~\citep{ma-etal-2020-simulmt, ren-etal-2020-simulspeech}. 
 Recently, Large Language Models (LLMs) have shown strong potential as backbones for SST systems~\citep{wang-etal-2025-conversational, ouyang-etal-2025-infinisst, fu2025efficientadaptivesimultaneousspeech, cheng2025seedliveinterpret20endtoend}. 
-However, they still struggle to accurately translate domain-specific terminologies, including technical jargon, person and location names, and abbreviations.
+However, they still struggle to accurately translate domain-specific terminology, including technical jargon, person and location names, and abbreviations.
 \begin{CJK*}{UTF8}{gkai}
 As shown in Table~\ref{tab:intro}, a plain SST system translates "Shinzo Abe" incorrectly as "新三·阿贝", which is a phonetic transliteration rather than the official translation of the politician's name. 
 \end{CJK*} % still need a better example here
@@ -43,7 +43,8 @@ However, retrieval-augmented SST poses unique challenges. Beyond requiring a cro
 % \end{table}
 % \end{CJK*}
 
-To address these challenges, we propose \textbf{R}etrieval-\textbf{A}ugmented \textbf{S}imultaneous \textbf{S}peech \textbf{T}ranslation (\method). \method trains a lightweight speech--text retriever on variable-duration speech contexts with a contrastive loss, and performs multi-scale inference for accurate retrieval under partial input. We further synthesize training data that teaches the Speech LLM to select relevant retrieved terms and decide when to introduce them during generation, conditioned on the prior speech context and previously generated translation. Experiments on the ACL 60/60 dev set and ESO test set show that \method improves terminology translation accuracy by nearly 40\% percent and BLEU by up to 3 points on three language directions (En$\rightarrow$Zh/De/Ja), while adding negligible computational overhead.
+To address these challenges, we propose \textbf{R}etrieval-\textbf{A}ugmented \textbf{S}imultaneous \textbf{S}peech \textbf{T}ranslation (\method). \method trains a lightweight speech--text retriever on variable-duration speech contexts with a contrastive loss, and performs multi-scale inference for accurate retrieval under partial input. We further synthesize training data that teaches the Speech LLM to select relevant retrieved terms and decide when to introduce them during generation, conditioned on the prior speech context and previously generated translation. 
+Across both the ACL 60/60 development set and the ESO oncology test set, \method consistently outperforms InfiniSST in every language and latency regime evaluated, yielding gains of 12.3--31.22\% in terminology accuracy and up to 3 BLEU points. Its retrieval module adds negligible computational cost and scales robustly to glossaries containing 10K entries. Component-wise ablations further confirm the contribution of each part of \method.
 
 % To address these challenges, we propose \textbf{R}etrieval-\textbf{A}ugmented \textbf{S}imultaneosu \textbf{S}peech \textbf{T}ranslation (\method), a method to effectively retrieve text terms based on streaming speech input and generate incremental translation. 
 % We train a cross-modal speech-text retriever with short audio context using contrastive loss. 
