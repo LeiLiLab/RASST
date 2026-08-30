@@ -11,38 +11,10 @@
 \subsection{Main Results}
 
 \paragraph{\method substantially improves terminology accuracy}
-\begin{crblock}
-Figure~\ref{fig:main_result_1} shows that \method improves exact-form TERM\_ACC over InfiniSST in all 12 ACL language--latency settings, with gains of 12.3--21.4 percentage points. The improvement is largest for acronyms and symbolic terms at latency multiplier 2 ($+35.0$ points), followed by multiword terms ($+29.7$) and single-word terms ($+12.2$). Table~\ref{tab:eso_de_main} reports only the human-reference En--De direction of ESO: \method improves exact-form TERM\_ACC by 26.0--31.2 points across the four settings. The form-aware diagnostic and failure analysis in Appendix~\ref{app:form_aware_metric} show that these conclusions do not depend on strict casing or inflectional matching.
-\end{crblock}
+Figure~\ref{fig:main_result_1} shows that \method outperforms InfiniSST in exact-match terminology accuracy across all 12 ACL language--latency settings, with gains of 12.3--21.4 percentage points. Figure~\ref{fig:eso_de_main} presents the English--German results on ESO, where \method yields larger gains of 26.0--31.2 points across the four latency settings. We attribute the larger gains on ESO to the difficulty of recognizing and translating specialized oncology terms. By contrast, many terms annotated in ACL 60/60 are common words, such as \emph{words}, \emph{model}, and \emph{weights}, which are comparatively easy to translate. Notably, \method also surpasses the Offline baseline, demonstrating that access to the complete speech context alone is insufficient for reliable terminology translation. Although a gap to Offline + GT Terms remains because retrieval is imperfect, it is typically below five percentage points, indicating that \method captures most of the benefit of oracle terminology access. The form-aware evaluation in Appendix~\ref{app:form_aware_metric} confirms that these conclusions are not artifacts of orthographic or inflectional variation.
 
-\begin{table*}[t]
-\centering
-\color{red}
-\small
-\setlength{\tabcolsep}{5pt}
-\begin{tabular}{llrrrr}
-\toprule
-Method & LM & StreamLAAL (ms) $\downarrow$ & BLEU $\uparrow$ & XCOMET $\uparrow$ & TERM\_ACC (\%) $\uparrow$ \\
-\midrule
-InfiniSST & 1 & 1295.5 & 22.8060 & 76.441 & 42.97 \\
-InfiniSST & 2 & 1874.4 & 26.0778 & 78.710 & 51.16 \\
-InfiniSST & 3 & 2449.7 & 26.7200 & 78.369 & 52.40 \\
-InfiniSST & 4 & 2913.3 & 28.1365 & 78.643 & 56.41 \\
-\midrule
-\method & 1 & 1023.7 & 22.6187 & 70.878 & 72.64 \\
-\method & 2 & 1839.0 & 26.7696 & 77.507 & 78.21 \\
-\method & 3 & 2334.4 & 26.9742 & 76.988 & 83.62 \\
-\method & 4 & 2782.6 & 28.9154 & 78.386 & 82.38 \\
-\bottomrule
-\end{tabular}
-\caption{\crchange{ESO En--De results. This is the only evaluated ESO direction with a dataset-provided human reference. XCOMET denotes XCOMET-XXL multiplied by 100; TERM\_ACC uses exact-form matching.}}
-\label{tab:eso_de_main}
-\end{table*}
-
-\paragraph{\crchange{Overall translation quality is mixed}}
-\begin{crblock}
-On ACL 60/60, \method improves BLEU in 10/12 settings and XCOMET in 8/12, with a 12-cell mean XCOMET change of $+0.116$. In the low-latency En--Ja regime, retrieved hints can further burden a base model that already struggles with partial-context Japanese translation, producing the largest negative XCOMET differences; the difference becomes positive at higher latency. On ESO En--De, BLEU improves in 3/4 settings, whereas XCOMET is lower in all four by 1.385 points on average. Thus the general-quality effect is incremental and setting dependent, rather than uniformly positive. Terminology remains an important dimension of human translation evaluation~\citep{freitag-etal-2021-experts}: aligned target terms account for 10.66--18.06\% of ACL target tokens and occur in 83.76--86.54\% of its sentences, so the larger terminology gains need not translate into equally large corpus-level BLEU changes.
-\end{crblock}
+\paragraph{RASST improves overall translation quality}
+On ACL 60/60, \method achieves higher BLEU than InfiniSST in 10 of the 12 settings, with a maximum gain of 3 BLEU points. By contrast, the two systems obtain comparable COMET scores. One likely explanation is that \method inserts retrieved target terms verbatim, which is more favored by a surface-form metric such as BLEU than by a neural semantic metric such as COMET. Moreover, although aligned target terms occur in 83.76--86.54\% of ACL sentences, they constitute only 10.66--18.06\% of the target tokens. Improvements in terminology accuracy therefore affect a limited proportion of the corpus.
 
 \paragraph{\method is robust to large glossary size}
 Figure~\ref{fig:ablation_glossary_bank} shows that \method remains competitive as the glossary scales to 10K terms. Going from 0.2K to 1K and then 10K terms gradually reduces terminology accuracy by less than 2\% and BLEU by less than 1 point, and \method still clearly outperforms the no-retrieval baseline.
@@ -74,12 +46,19 @@ We examine the effect of training-time hard negatives and the inference-time thr
 
 Figure~\ref{fig:ablation_hn_tau} shows the results. First, increasing $N$ yields clearly higher recall at the same precision, confirming the value of hard-negative mining. Second, recall degrades as the glossary grows. Based on these curves, we set $\tau{=}0.78$ at inference: it costs at most a 1\% drop in recall while roughly reducing the retrieval noise by half. Compared with $\tau=0$ in Figure \ref{fig:ablation_speechllm_tau}, $\tau=0.78$ achieves higher terminology accuracy. 
 
-\paragraph{\crchange{Multi-Scale Inference}}
-We examine the contribution of multi-scale inference. As described in Section~\ref{sec:retriever}, \method's retriever queries with speech windows at multiple scales and keeps the terms with the highest similarities. We compare against two variants. The first reuses our retriever but queries with only the largest window at inference time, but this introduces a training–inference mismatch, since the retriever was trained with MFA-aligned windows around each term. The second variant removes this mismatch by training the retriever directly with the largest window, without MFA-based window localization. Results are shown in Figure \ref{fig:ablation_multiscale}. Multi-scale inference combined with MFA-localized training performs best: it loses less than 1\% in recall when scaling from 1K to 100K glossary, compared to drops of over 2\% and 5\% for the two variants. \crchange{The end-to-end En--Zh evaluation at latency multiplier 2 in Table~\ref{tab:multiscale_e2e} confirms that this retrieval gain reaches the translation output: multi-scale inference attains 90.00\% TERM\_ACC, versus 84.72\% for largest-window inference and 73.93\% when the retriever is also trained on the largest window.}
+\paragraph{Multi-Scale Inference}
+We examine the contribution of multi-scale inference. As described in Section~\ref{sec:retriever}, \method's retriever queries with speech windows at multiple scales and keeps the terms with the highest similarities. We compare against two variants. The first reuses our retriever but queries with only the largest window at inference time, but this introduces a training–inference mismatch, since the retriever was trained with MFA-aligned windows around each term. The second variant removes this mismatch by training the retriever directly with the largest window, without MFA-based window localization. Results are shown in Figure \ref{fig:ablation_multiscale}. Multi-scale inference combined with MFA-localized training performs best: it loses less than 1\% in recall when scaling from 1K to 100K glossary, compared to drops of over 2\% and 5\% for the two variants. The end-to-end En--Zh evaluation at latency multiplier 2 in Table~\ref{tab:multiscale_e2e} confirms that this retrieval gain reaches the translation output: multi-scale inference achieves 90.00\% terminology accuracy, versus 84.72\% for largest-window inference and 73.93\% when the retriever is also trained on the largest window.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{latex/figures/multiscale_inference_ablation_devraw.pdf}
+    \caption{Recall@10 on the GigaSpeech dev set for multi-scale inference in \method and two variants. Largest-infer uses the same retriever as \method but queries with only the largest window at inference. Largest-train trains the retriever with the largest window instead of the MFA-localized window. Multi-scale inference combined with MFA-localized training performs best.}
+    \label{fig:ablation_multiscale}
+\end{figure}
 
 \begin{table}[t]
 \centering
-\color{red}
+% \color{red}
 \small
 \setlength{\tabcolsep}{3.5pt}
 \begin{tabular}{lrrr}
@@ -91,11 +70,28 @@ Largest-infer & 47.8261 & 1868.37 & 84.72 \\
 Largest-train & 45.7960 & 1863.20 & 73.93 \\
 \bottomrule
 \end{tabular}
-\caption{\crchange{End-to-end multi-scale ablation on ACL En--Zh at latency multiplier 2.}}
+\caption{End-to-end ablation of retrieval strategies on ACL En--Zh at latency multiplier 2.}
 \label{tab:multiscale_e2e}
 \end{table}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.9\linewidth]{latex/figures/speechllm_ablation_ja.pdf}
+    \caption{Quality–latency trade-off of \method against two training-data variants: a version trained with LLM-generated distractors, and \textit{InfiniSST + RAG}, which adds retrieval at inference to a model not trained with terms $G_i$. \method achieves the best overall trade-off.}
+    \label{fig:ablation_speechllm}
+\end{figure*}
+
 
 \paragraph{Speech LLM Training Data}
 We ablate the distractor-sampling strategy used to construct $G_i$ during Speech LLM training. Besides retriever mined distractors in \method, we train two variants: one with LLM-generated distractors, and one with no retrieved terms at all (equivalent to InfiniSST). At inference, all variants use the same retriever to populate $G_i$ from the speech chunk before the Speech LLM generates the translation. Results are shown in Figure \ref{fig:ablation_speechllm}. The model trained with LLM-generated distractors achieves slightly lower terminology accuracy and BLEU than \method. More surprisingly, \textit{InfiniSST + RAG}, which sees no retrieved terms during training but is given them at inference, matches \method's terminology accuracy but has much worse BLEU score. Inspecting its outputs, we find that it tends to copy retrieved terms verbatim without checking whether they actually appear in the source or inserting them at the right time.
 
-More ablations on retriever training data, encoder choice and context length can be found in Appendix \ref{sec:apdx_ablation}.
+More ablations on retriever training data, encoder choice, context length, and tag supervision can be found in Appendix \ref{sec:apdx_ablation}.
+
+\subsection{Robustness Analysis}
+
+We evaluate the robustness of \method to variations in glossary and retrieval quality in Appendix~\ref{sec:robustness_analysis}.
+
+\subsection{Qualitative Analysis}
+
+We additionally present a case study examining the behavior of \method in Appendix~\ref{sec:qualitative_analysis}.
+
