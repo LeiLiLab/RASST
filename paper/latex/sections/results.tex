@@ -38,8 +38,22 @@ Wall-Clock Time (s)    & 0.036 & 0.042 & 0.042 & 0.043 \\
 \paragraph{\method is computationally efficient}
 Table~\ref{tab:rag_compute_rtf} reports the additional computational cost introduced by the retriever. We run evaluation on two NVIDIA RTX A6000 GPUs, serving the Speech LLM with vLLM at tensor parallelism 2 and \texttt{gpu\_memory\_utilization}{=}0.72, while the retriever encoder fits in the remaining GPU memory. The retriever's wall-clock time per chunk is at most $3.75\%$ of the chunk size, and becomes smaller as the chunk grows, which makes it negligible in practice.
 
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{latex/figures/multiscale_inference_ablation_devraw.pdf}
+    \caption{Recall@10 on the GigaSpeech dev set for multi-scale inference in \method and two variants. Largest-infer uses the same retriever as \method but queries with only the largest window at inference. Largest-train trains the retriever with the largest window instead of the MFA-localized window. Multi-scale inference combined with MFA-localized training performs best.}
+    \label{fig:ablation_multiscale}
+\end{figure}
+
 \subsection{Ablation Studies}
 \label{sec:ablations}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.9\linewidth]{latex/figures/speechllm_ablation_ja.pdf}
+    \caption{Quality–latency trade-off of \method against two training-data variants: a version trained with LLM-generated distractors, and \textit{InfiniSST + RAG}, which adds retrieval at inference to a model not trained with terms $G_i$. \method achieves the best overall trade-off.}
+    \label{fig:ablation_speechllm}
+\end{figure*}
 
 \paragraph{Retriever hard negatives and threshold}
 We examine the effect of training-time hard negatives and the inference-time threshold $\tau$. In addition to the default retriever trained with $N{=}1024$ hard negatives, we train two variants with $N{=}256$ and $N{=}0$. We evaluate their precision and recall on the GigaSpeech dev set against three glossaries: a 1K glossary built from GigaSpeech noun phrases, and 10K and 100K extensions with Wikidata terms unseen during training. For each (retriever variant, glossary) pair, we sweep $\tau$ from $0$ to $1$ to obtain a precision-recall curve. 
@@ -48,13 +62,6 @@ Figure~\ref{fig:ablation_hn_tau} shows the results. First, increasing $N$ yields
 
 \paragraph{Multi-Scale Inference}
 We examine the contribution of multi-scale inference. As described in Section~\ref{sec:retriever}, \method's retriever queries with speech windows at multiple scales and keeps the terms with the highest similarities. We compare against two variants. The first reuses our retriever but queries with only the largest window at inference time, but this introduces a training–inference mismatch, since the retriever was trained with MFA-aligned windows around each term. The second variant removes this mismatch by training the retriever directly with the largest window, without MFA-based window localization. Results are shown in Figure \ref{fig:ablation_multiscale}. Multi-scale inference combined with MFA-localized training performs best: it loses less than 1\% in recall when scaling from 1K to 100K glossary, compared to drops of over 2\% and 5\% for the two variants. The end-to-end En--Zh evaluation at latency multiplier 2 in Table~\ref{tab:multiscale_e2e} confirms that this retrieval gain reaches the translation output: multi-scale inference achieves 90.00\% terminology accuracy, versus 84.72\% for largest-window inference and 73.93\% when the retriever is also trained on the largest window.
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\linewidth]{latex/figures/multiscale_inference_ablation_devraw.pdf}
-    \caption{Recall@10 on the GigaSpeech dev set for multi-scale inference in \method and two variants. Largest-infer uses the same retriever as \method but queries with only the largest window at inference. Largest-train trains the retriever with the largest window instead of the MFA-localized window. Multi-scale inference combined with MFA-localized training performs best.}
-    \label{fig:ablation_multiscale}
-\end{figure}
 
 \begin{table}[t]
 \centering
@@ -73,14 +80,6 @@ Largest-train & 45.7960 & 1863.20 & 73.93 \\
 \caption{End-to-end ablation of retrieval strategies on ACL En--Zh at latency multiplier 2. Decoding uses temperature 0.6.}
 \label{tab:multiscale_e2e}
 \end{table}
-
-\begin{figure*}
-    \centering
-    \includegraphics[width=0.9\linewidth]{latex/figures/speechllm_ablation_ja.pdf}
-    \caption{Quality–latency trade-off of \method against two training-data variants: a version trained with LLM-generated distractors, and \textit{InfiniSST + RAG}, which adds retrieval at inference to a model not trained with terms $G_i$. \method achieves the best overall trade-off.}
-    \label{fig:ablation_speechllm}
-\end{figure*}
-
 
 \paragraph{Speech LLM Training Data}
 We ablate the distractor-sampling strategy used to construct $G_i$ during Speech LLM training. Besides retriever mined distractors in \method, we train two variants: one with LLM-generated distractors, and one with no retrieved terms at all (equivalent to InfiniSST). At inference, all variants use the same retriever to populate $G_i$ from the speech chunk before the Speech LLM generates the translation. Results are shown in Figure \ref{fig:ablation_speechllm}. The model trained with LLM-generated distractors achieves slightly lower terminology accuracy and BLEU than \method. More surprisingly, \textit{InfiniSST + RAG}, which sees no retrieved terms during training but is given them at inference, matches \method's terminology accuracy but has much worse BLEU score. Inspecting its outputs, we find that it tends to copy retrieved terms verbatim without checking whether they actually appear in the source or inserting them at the right time.
