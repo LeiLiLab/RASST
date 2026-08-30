@@ -85,7 +85,7 @@ After each chunk $\vc_i$ arrives, the retriever returns candidate terms $G_i$ li
 \label{sec:retriever}
 
 \paragraph{Architecture}
-We adopt a dual-encoder architecture. For text, we use the pre-trained BGE-M3 encoder~\citep{bge-m3} to map each source-language term $e_j$ to a feature vector $\vg_j\in\mathbb{R}^d$. For speech, we use the Audio Transformer of Qwen3-Omni~\citep{yang2025qwen3technicalreport} followed by a linear projection to the same dimension $d$. Since terms are typically short, the speech encoder reads only the current chunk $\vc_i$ together with a look-back window of duration $t_\text{lookback}$, rather than the full history $\vs_{\leq i}$ as in Equation \ref{eqn:G_i}. We denote this input as $\vc_i'$ and the resulting features as $\vf_i\in\mathbb{R}^{m\times d}$, with $m$ as the number of frames in $\vc_i'$.
+We adopt a dual-encoder architecture. For text, we use the pre-trained BGE-M3 encoder~\citep{bge-m3} to map each source-language term $e_j$ to a feature vector $\vg_j\in\mathbb{R}^d$. For speech, we use the Audio Transformer of Qwen3-Omni~\citep{xu2025qwen3omnitechnicalreport} followed by a linear projection to the same dimension $d$. Since terms are typically short, the speech encoder reads only the current chunk $\vc_i$ together with a look-back window of duration $t_\text{lookback}$, rather than the full history $\vs_{\leq i}$ as in Equation \ref{eqn:G_i}. We denote this input as $\vc_i'$ and the resulting features as $\vf_i\in\mathbb{R}^{m\times d}$, with $m$ as the number of frames in $\vc_i'$.
 
 \begin{figure}
     \centering

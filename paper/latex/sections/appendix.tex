@@ -99,15 +99,15 @@ Variable 2.88--5.76s & 99.20 & 98.97 & 98.58 \\
 We train the retriever with LoRA applied to both the speech and text encoders.
 For the audio encoder, LoRA is inserted into the query/key/value/output projections and MLP blocks with rank $r{=}32$ and scaling factor $\alpha{=}64$.
 For the text encoder, LoRA targets the query/key/value projections with rank $r{=}16$ and $\alpha{=}32$.
-We train with a multi-positive InfoNCE objective using a fixed temperature $\tau{=}0.03$.
+We train with a multi-positive InfoNCE objective using a fixed temperature $\gamma{=}0.03$.
 We optimize with AdamW (learning rate $1\times10^{-4}$, weight decay 0.01), cosine annealing with 10\% warmup, and gradient clipping (max norm 1.0) under BF16 mixed precision.
 Training is performed with Distributed Data Parallel (DDP) on eight RTX A6000 GPUs with a global batch size of 8192.
 
 \paragraph{Speech LLM}
-We fine-tune the Speech LLM using LoRA with rank $r{=}8$ and $\alpha{=}32$.
-We enable sequence packing with a maximum sequence length of 2028 tokens.
+We fine-tune the Speech LLM using LoRA with rank $r{=}32$ and $\alpha{=}32$.
+We enable sequence packing with a maximum sequence length of 8192 tokens.
 We optimize with AdamW (learning rate $1\times10^{-4}$, weight decay 0.01) and gradient clipping (max norm 1.0), with a global batch size of 4.
-Training is performed with DDP and expert parallelism (EP) of size 2 on two L40S GPUs.
+Training is performed with DDP and expert parallelism (EP) of size 2 on four NVIDIA RTX A6000 GPUs.
 
 % \section{Case Study}
 % \begin{CJK*}{UTF8}{gbsn}
@@ -151,7 +151,7 @@ This section reports additional ablations that do not fit in the main text.
 \centering
 % Dev-only tau-selection evidence: fixed raw denominator over raw/10k/100k banks.
 \includegraphics[width=0.9\linewidth]{latex/figures/retriever_dev_pr_fixedraw_hn_comparison.pdf}
-\caption{Precision–recall curves across glossary sizes for retrievers trained with $N{=}0, 256, 1024$ hard negatives, obtained by sweeping $\tau \in [0,1]$. The dashed vertical line marks $\tau{=}0.78$, the operating point at which recall drops by 1\% from $\tau{=}0$ at the 1K glossary.}
+\caption{Precision--recall curves across glossary sizes for retrievers trained with $N{=}0, 256, 1024$ hard negatives, obtained by sweeping $\tau \in [0,1]$. The dashed horizontal line marks a 1\% recall drop; the red annotations show the corresponding $\tau\approx0.78$ operating points.}
 \label{fig:ablation_hn_tau}
 \end{figure*}
 
@@ -349,7 +349,7 @@ En--Ja & 25\% & 82.77 & 28.717 & 68.417 \\
 En--Ja & 50\% & 78.40 & 27.717 & 67.137 \\
 \bottomrule
 \end{tabular}
-\caption{Sensitivity to retrieval quality at latency multiplier 2. We randomly replaced 0, 25\%, 50\% of the retrieved terms with irrelevant terms.}
+\caption{Sensitivity to retrieval quality at latency multiplier 2. We randomly replaced 0, 25\%, 50\% of the retrieved terms with irrelevant terms. Decoding uses temperature 0.6.}
 \label{tab:retrieval_degradation}
 \end{table}
 

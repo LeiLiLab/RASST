@@ -4,7 +4,7 @@
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.9\linewidth]{latex/figures/new_main_result_tagged.pdf}
-\caption{Quality--latency trade-off on ACL 60/60. X-axis is latency measured by StreamLAAL in milisecond. Y-axis is quality measured by terminology accuracy (exact match), BLEU and XCOMET-XXL. \method improves terminology accuracy and BLEU in all three directions.}
+\caption{Quality--latency trade-off on ACL 60/60. X-axis is latency measured by StreamLAAL in milliseconds. Y-axis is quality measured by terminology accuracy (exact match), BLEU and XCOMET-XXL. \method improves terminology accuracy and BLEU in all three directions.}
 \label{fig:main_result_1}
 \vspace{-0.5cm}
 \end{figure*}
@@ -12,7 +12,7 @@
 \subsection{Data}
 \label{sec:task_datasets}
 
-\paragraph{Retriever Training} We synthesize the retriever training data from GigaSpeech~\citep{chen21o_interspeech} and Wikidata\footnote{\url{https://www.wikidata.org/}}. GigaSpeech is a multi-domain English ASR corpus containing 10K hours of high-quality labeled audio. We process it following the procedure in Section~\ref{sec:retriever}, yielding 4.7M training pairs. The variable speech-context duration is sampled uniformly from ${2.88, 3.84, 4.80, 5.76}$ seconds, corresponding to the inference-time chunk sizes ${0.96, 1.92, 2.88, 3.84}$ plus a $t_\text{lb}=1.92$-second look-back. The look-back captures terms that cross chunk boundaries and we set it to $1.92$ seconds since most terms are shorter than this, as shown in Figure~\ref{fig:term_duration}.
+\paragraph{Retriever Training} We synthesize the retriever training data from GigaSpeech~\citep{chen21o_interspeech} and Wikidata\footnote{\url{https://www.wikidata.org/}}. GigaSpeech is a multi-domain English ASR corpus containing 10K hours of high-quality labeled audio. We process it following the procedure in Section~\ref{sec:retriever}, yielding 4.7M training pairs. The variable speech-context duration is sampled uniformly from ${2.88, 3.84, 4.80, 5.76}$ seconds, corresponding to the inference-time chunk sizes ${0.96, 1.92, 2.88, 3.84}$ plus a $t_\text{lookback}=1.92$-second look-back. The look-back captures terms that cross chunk boundaries and we set it to $1.92$ seconds since most terms are shorter than this, as shown in Figure~\ref{fig:term_duration}.
 
 For Wikidata, we extract candidate terms from the RDF truthy dump, keeping entities that have both an English \texttt{rdfs:label} and at least one \texttt{wdt:P31} triple. Full processing details are given in Appendix~\ref{sec:apdx_wikidata_proc}. For each retained term, we prompt Gemini-2.5-Flash to generate three natural utterances of 5--15 words containing the term (Figure \ref{fig:wikidata_utt_gen}). We then synthesize the utterances with CosyVoice 3\footnote{FunAudioLLM/Fun-CosyVoice3-0.5B-2512}, using speaker prompts randomly sampled from GigaSpeech. This results in 2.9M training pairs.
 
