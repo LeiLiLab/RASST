@@ -61,7 +61,7 @@ xCOMET 乘以 100；每种语言对四个 `lm` cells 等权平均。
 | full `segments.jsonl` | `21ccef92d1721dc66631b8d604d6a50a4dd05a31166dcc6371a082c2964a385a` |
 | `xcomet_acl_block5_validation.json` | `44d754d1526ef6872b19626619b259c48278cac3a190edd003f9e85a5b3e57f5` |
 
-- Code：`luojiaxuan/rebuttal-experiments@285ebd1`。
+- Code：`luojiaxuan/rebuttal-experiments@dd736a5`。
 - Hyper00 staging：
   `/data02/jaxan/RASST_rebuttal_20260710/results/xcomet_acl_block5_20260713/`。
 - Taurus backup staging：

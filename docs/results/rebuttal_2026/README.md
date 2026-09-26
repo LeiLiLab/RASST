@@ -223,7 +223,7 @@ overall-quality improvement。
 
 Legacy glossary 的 exact historical Gemini model identifier 未保存在 extraction
 旁，正式文本只能称 `paper-derived glossary v1`，不能称 fresh Gemini 2.5 Flash。
-对应的 Git source of truth 已同步到 `main@60c995e`，包括 reported/pool 两套
+对应的 Git source of truth 已同步到 `main@7862b20`，包括 reported/pool 两套
 TERM_ACC 字段和 author-confirmed snapshot。
 完整数据 artifact 的预定 Hugging Face 目标仍为
 `gavinlaw/rasst-main-result-data` 下的 versioned rebuttal artifact；在上传前状态为

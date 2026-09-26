@@ -284,16 +284,16 @@ ESO/Medicine.
 - `origin/main:docs/results/acl_paper_extracted_lm2/author_reported_lm2_update.tsv`:
   author-confirmed default-`lm=2` paper-derived TERM_ACC/BLEU, with
   reported-vs-pooled aggregation kept separate.
-- `origin/main@4446ad8`: compact retrieval-degradation rebuttal table.
-- `origin/main@ae24301`: En-Zh target-tag ablation.
+- `origin/main@3392db2`: compact retrieval-degradation rebuttal table.
+- `origin/main@c95ed52`: En-Zh target-tag ablation.
 - `docs/results/rebuttal_2026/term_type_analysis_acl_lm1_lm2.md`: ACL-only
   `lm=1/2` terminology-type gains/losses/both-wrong proportions, latency
   comparison, examples, and reproducible taxonomy.
-- `origin/main@06afe4d`: validated ACL xCOMET paired results.
-- `origin/main@7277d08`: masked BLEU and term-prevalence diagnostics.
+- `origin/main@f4727f0`: validated ACL xCOMET paired results.
+- `origin/main@84a0e9c`: masked BLEU and term-prevalence diagnostics.
 - `origin/main`: multi-scale end-to-end ablation under
   `docs/results/multiscale_retriever_e2e_lm2/`.
-- `luojiaxuan/rebuttal-experiments@e77a5e6`: three-language ACL-only failure audit.
+- `luojiaxuan/rebuttal-experiments@3730446`: three-language ACL-only failure audit.
 - `docs/results/rebuttal_2026/eso_hard_term_pipeline/`: 七阶段 ESO hard-term
   protocol、Stage 1/2/5 exact prompts 与 SHA-256。
 - [Salesky et al. (2023), Secs. 3.4--3.7 and App. A.5](https://aclanthology.org/2023.iwslt-1.2/):

@@ -136,7 +136,7 @@
   "staging": {
     "root": "/mnt/aries/data4/jiaxuanluo/rasst-retrieval-degradation",
     "git_branch": "luojiaxuan/rebuttal-experiments",
-    "git_implementation_commit": "cff4a34",
+    "git_implementation_commit": "ab20a25",
     "hf_dataset_destination": "gavinlaw/rasst-rebuttal-retrieval-degradation-acl",
     "hf_upload_status": "blocked_missing_authorized_credentials",
     "hf_upload_note": "Taurus and Aries have no Hugging Face token. Hyper00 is authenticated as a different user, so those credentials were not used."

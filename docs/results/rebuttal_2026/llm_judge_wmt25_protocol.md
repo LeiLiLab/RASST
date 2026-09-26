@@ -153,7 +153,7 @@ win/tie/loss；缺任一 shard、重复 request key 或非整数 response 时禁
   sample 为确定性的 proportional paired stratification，不能当作全量质量结果。
 - 当前 full Flash bundle：
   `/mnt/taurus/data2/jiaxuanluo/RASST_release_runs/rebuttal_2026/llm_judge_wmt25/full_flash_api_default_corrected_eso`。
-  它由 Git commit `e229a4257ef1099e97b5f33d2eab17e89b9da84f` 的 runner 生成，
+  它由 Git commit `2c6668b15c19a08c7229cb7fad66810cbf7d4abe` 的 runner 生成，
   `run_config_sha256` 为
   `5d01d8c2790be654272dc848aba265239a4c34838c91490b850148a76232628a`，
   `run_manifest.json` SHA-256 为

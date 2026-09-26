@@ -82,9 +82,9 @@ En-Ja rerun 的轻量 xCOMET 汇总见 [`retrieval_degradation_ja_rerun_xcomet_s
 ## Source of Truth
 
 - 实现分支：`luojiaxuan/rebuttal-experiments`
-- 首个实现 commit：`d269d52`
-- 显式 local GPU 修复：`257ff8b`
-- 多语言日志/PID 隔离：`6f5610e`
+- 首个实现 commit：`edf370e`
+- 显式 local GPU 修复：`b932900`
+- 多语言日志/PID 隔离：`73d07f3`
 - 实验 manifest：`code/rasst/manifests/retrieval_degradation_acl_lm2.json`
 - Aries 临时 staging：`/mnt/aries/data4/jiaxuanluo/rasst-retrieval-degradation`
 - Hyper00 xCOMET staging：`/data02/jaxan/RASST_rebuttal_20260710/retrieval_degradation_20260712`
