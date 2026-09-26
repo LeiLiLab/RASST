@@ -1,0 +1,254 @@
+\section{Wikidata Processing}
+\label{sec:apdx_wikidata_proc}
+We normalize each label by removing parenthetical qualifiers, lowercasing for deduplication, and retaining only short alphabetic or hyphenated terms with at most five words. We further require a non-empty short description from the glossary index that does not simply repeat the term, which filters out many ambiguous or non-English labels. To avoid a corpus dominated by very frequent instance types such as people, taxa, or scholarly articles, we assign each entity a primary \texttt{P31} type using its least frequent instance type and rank terms with inverse-type-frequency sampling. Terms appearing in the held-out evaluation glossaries are removed before training.
+
+For each retained term, we prompt Gemini-2.5-Flash to generate three natural utterances of 5--15 words containing the term (Figure \ref{fig:wikidata_utt_gen}). We then synthesize the utterances with CosyVoice 3\footnote{\url{https://huggingface.co/FunAudioLLM/Fun-CosyVoice3-0.5B-2512}}, using speaker prompts randomly sampled from GigaSpeech.
+
+
+
+\section{Speech LLM Data Synthesis}
+\label{sec:speechllm_data_synth}
+
+As in InfiniSST, we build robust segments of 28.8 seconds, filter out those with WER larger than 0.1 using parakeet-0.6b-tdt-v2\footnote{\url{https://huggingface.co/nvidia/parakeet-tdt-0.6b-v2}} and generate the target language translation with Qwen3-30B-A3B-Instruct-2507-FP8~\citep{yang2025qwen3technicalreport}\footnote{\url{https://huggingface.co/Qwen/Qwen3-30B-A3B-Instruct-2507-FP8}} and filter out those with MetricX score~\citep{juraska-etal-2024-metricx}\footnote{\url{https://huggingface.co/google/metricx-24-hybrid-xl-v2p6}} worse than -3. Finally we build the interleaved training data using SimAlign~\citep{jalili-sabet-etal-2020-simalign} with LaBSE~\citep{feng-etal-2022-language}. 
+
+\begin{tcolorbox}[
+    colback=gray!5,
+    colframe=gray!50,
+    title=Translation Prompt,
+    fonttitle=\bfseries,
+    boxrule=0.5pt
+]
+\ttfamily\small
+You are given English document split into lines. Translate each line into Chinese. Do not include any other text.\\
+\textless begin\textgreater\\
+\{\}\\
+\textless end\textgreater
+\end{tcolorbox}
+
+\section{Term Duration Distribution}
+\label{app:term_duration}
+We show the distribution of term duration on GigaSpeech training set in Figure \ref{fig:term_duration}.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.9\linewidth]{latex/figures/term_duration_dist.pdf}
+    \caption{The distribution of term duration on GigaSpeech training set. }
+    \label{fig:term_duration}
+\end{figure}
+
+\definecolor{trainframe}{RGB}{78, 86, 96}
+\definecolor{trainsystembg}{RGB}{245, 248, 252}
+\definecolor{trainuserbg}{RGB}{247, 250, 246}
+\definecolor{trainassistantbg}{RGB}{255, 249, 239}
+\providecommand{\appzh}[1]{\begin{CJK*}{UTF8}{gbsn}#1\end{CJK*}}
+\newcommand{\trainbox}[2]{%
+    \fcolorbox{trainframe}{#1}{%
+        \begin{minipage}{\dimexpr\linewidth-2\fboxsep-2\fboxrule\relax}
+        #2
+        \end{minipage}%
+    }%
+}
+
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\linewidth]{latex/figures/retriever_encoder_ablation_devraw.pdf}
+\caption{Recall@10 across glossary sizes for different encoder combinations. Qwen3-Omni-AuT + BGE-M3 achieves the highest recall.}
+\label{fig:ablation_retriever_encoder}
+\end{figure}
+
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{latex/figures/multiscale_inference_ablation_devraw.pdf}
+    \caption{Recall@10 on the GigaSpeech dev set for multi-scale inference in \method and two variants. Largest-infer uses the same retriever as \method but queries with only the largest window at inference. Largest-train trains the retriever with the largest window instead of the MFA-localized window. Multi-scale inference combined with MFA-localized training performs best.}
+    \label{fig:ablation_multiscale}
+\end{figure}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.8\linewidth]{latex/figures/retriever_data_ablation_dev.pdf}
+    \caption{Recall@10 under different threshold $\tau$ on the GigaSpeech dev set for retrievers trained with and without Wikidata.}
+    \label{fig:retriever_data}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccc}
+\toprule
+Context Length & 1K & 10K & 100K \\
+\midrule
+Fixed 1.92s & 98.11 & 97.47 & 95.18 \\
+Fixed 3.84s & 98.65 & 98.31 & 97.58 \\
+Fixed 5.76s & \textbf{99.64} & \textbf{99.58} & \textbf{99.33} \\
+Variable 2.88--5.76s & 99.20 & 98.97 & 98.58 \\
+\bottomrule
+\end{tabular}
+\caption{Recall@10 of retrievers trained with different context lengths, across glossary sizes. Longer speech contexts yield higher recall.}
+\label{tab:ablation_context}
+\end{table}
+
+
+
+\section{Training Details}\label{app:training_details}
+
+\paragraph{Retriever}
+We train the retriever with LoRA applied to both the speech and text encoders.
+For the audio encoder, LoRA is inserted into the query/key/value/output projections and MLP blocks with rank $r{=}32$ and scaling factor $\alpha{=}64$.
+For the text encoder, LoRA targets the query/key/value projections with rank $r{=}16$ and $\alpha{=}32$.
+We train with a multi-positive InfoNCE objective using a fixed temperature $\tau{=}0.03$.
+We optimize with AdamW (learning rate $1\times10^{-4}$, weight decay 0.01), cosine annealing with 10\% warmup, and gradient clipping (max norm 1.0) under BF16 mixed precision.
+Training is performed with Distributed Data Parallel (DDP) on eight RTX A6000 GPUs with a global batch size of 8192.
+
+\paragraph{Speech LLM}
+We fine-tune the Speech LLM using LoRA with rank $r{=}8$ and $\alpha{=}32$.
+We enable sequence packing with a maximum sequence length of 2028 tokens.
+We optimize with AdamW (learning rate $1\times10^{-4}$, weight decay 0.01) and gradient clipping (max norm 1.0), with a global batch size of 4.
+Training is performed with DDP and expert parallelism (EP) of size 2 on two L40S GPUs.
+
+% \section{Case Study}
+% \begin{CJK*}{UTF8}{gbsn}
+% \label{sec:case_study}
+
+% We summarize five talks under a fixed chunk size of 1.92 seconds (stride size 0.48 seconds) for En$\rightarrow$Zh translation with ACL glossaries.
+% We compare our retrieval-augmented system (RASST) against a baseline without retrieval.
+% We compare the average performance across the five sampled talks. 
+% As shown in the analysis, \textbf{RASST} achieves an average Term Accuracy of \textbf{0.8930} and a BLEU score of \textbf{47.50}. 
+% In contrast, the \textit{baseline} only reaches 0.7299 in Term Accuracy and 45.66 in BLEU. 
+% This significant margin demonstrates that RASST consistently preserves key information better than the baseline.
+
+% \paragraph{Chunks with terms.}
+% We group term-emission chunks into:
+% \begin{itemize}
+%   \item \textbf{Category 1 (retrieval correct, RASST correct, base wrong).}
+%   Retrieval surfaces the correct glossary entry and RASST realizes it, while the baseline omits or paraphrases it.
+%   A representative example is \texttt{2022.acl-long.117} where retrieval includes \texttt{CDA$\rightarrow$CDA} and RASST outputs ``CDA'', but the baseline outputs ``CDR'' (confusion between close acronyms).
+
+%   \item \textbf{Category 2 (retrieval correct, RASST wrong, base correct/wrong).}
+%   Retrieval is correct, but RASST fails to realize the glossary surface form.
+%   For example in \texttt{2022.acl-long.110}, retrieval includes \texttt{FLR$\rightarrow$最终延迟减少}, yet RASST emits ``FLR'' without the Chinese glossary surface form.
+
+%   \item \textbf{Category 3 (retrieval wrong).}
+%   Retrieval fails to include the corresponding glossary entry in the final map at the term-emission chunk.
+%   These are term-bearing chunks where the retriever returns an incorrect term list (often topical but irrelevant), and the needed entry is absent.
+%   For example, in \texttt{2022.acl-long.117} the chunk requires \textit{baseline}$\rightarrow$基线, but the retrieved map contains unrelated items such as \texttt{data augmentation$\rightarrow$数据增强} and \texttt{domain generalization$\rightarrow$领域泛化} while missing \texttt{baseline$\rightarrow$基线}.
+% \end{itemize}
+
+% \paragraph{Chunks without terms.}
+% We observe cases where retrieval over-triggers and injects a glossary translation absent from the reference, while the baseline remains consistent with the reference.
+% For example, in \texttt{2022.acl-long.110}, RASST emits ``延迟降低'' (from \textit{latency reduction}) whereas the baseline uses ``延迟减少'' (reference-consistent paraphrase).
+% \end{CJK*}
+
+\section{Additional Ablations}
+\label{sec:apdx_ablation}
+
+Additional ablations that cannot fit in the main text is here. 
+
+
+
+
+
+\begin{figure*}[t]
+\centering
+% Dev-only tau-selection evidence: fixed raw denominator over raw/10k/100k banks.
+\includegraphics[width=0.9\linewidth]{latex/figures/retriever_dev_pr_fixedraw_hn_comparison.pdf}
+\caption{Precision–recall curves across glossary sizes for retrievers trained with $N{=}0, 256, 1024$ hard negatives, obtained by sweeping $\tau \in [0,1]$. The dashed vertical line marks $\tau{=}0.78$, the operating point at which recall drops by 1\% from $\tau{=}0$ at the 1K glossary.}
+\label{fig:ablation_hn_tau}
+\end{figure*}
+
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.9\linewidth]{latex/figures/speechllm_ablation_zh_tau_compare.pdf}
+    \caption{Quality–latency trade-off of \method with $\tau=0$ and $\tau=0.78$.} 
+    \label{fig:ablation_speechllm_tau}
+\end{figure*}
+
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.9\linewidth]{latex/figures/speechllm_ablation_ja.pdf}
+    \caption{Quality–latency trade-off of \method against two training-data variants: a version trained with LLM-generated distractors, and \textit{InfiniSST + RAG}, which adds retrieval at inference to a model not trained with terms $G_i$. \method achieves the best overall trade-off.}
+    \label{fig:ablation_speechllm}
+\end{figure*}
+
+\paragraph{Retriever training data} 
+We examine the impact of training data by comparing our default retriever, trained on both GigaSpeech and Wikidata, against a GigaSpeech-only variant. As shown in Figure~\ref{fig:retriever_data}, adding Wikidata substantially improves recall, with the largest gains at high $\tau$, indicating that the retriever assigns higher similarity to true positives when trained with Wikidata.
+
+\paragraph{Retriever encoders}
+ We test different encoder combinations here. We additionally tried mE5 text encoder~\citep{wang2024multilingual}\footnote{\url{https://huggingface.co/intfloat/multilingual-e5-large}} and WavLM-large speech encoder~\citep{wavlm}\footnote{\url{https://huggingface.co/microsoft/wavlm-large}}. As shown in Figure~\ref{fig:ablation_retriever_encoder}, Qwen3-Omni-Aut + BGE-M3 achieves the best recall. 
+
+\paragraph{Retriever context length.}
+\method trains the retriever with variable-length speech contexts and here we compare against fixed-length alternatives. As shown in Table~\ref{tab:ablation_context}, longer fixed-length contexts generally yield higher recall across glossary sizes. The variable-length setup matches the recall of the longest fixed-length context (5.76s) while offering better flexibility at inference.
+
+\begin{figure*}[t]
+\centering
+\begingroup
+\setlength{\fboxsep}{5pt}
+\setlength{\fboxrule}{0.35pt}
+\renewcommand{\arraystretch}{1.08}
+\scriptsize
+\begin{tabularx}{\textwidth}{@{}>{\bfseries}p{0.12\textwidth}>{\raggedright\arraybackslash}X@{}}
+System & \trainbox{trainsystembg}{You are a professional simultaneous interpreter. You will be given chunks of English audio and you need to translate the audio into Chinese text. Use the \texttt{term\_map} as a reference for terminology if provided.} \\
+\addlinespace[0.45ex]
+User 1 & \trainbox{trainuserbg}{\texttt{<audio>} \par \textbf{term\_map:} \texttt{things} $\rightarrow$ \appzh{事}; \texttt{everything} $\rightarrow$ \appzh{所有努力}; \texttt{right} $\rightarrow$ \appzh{权利}; \texttt{thing} $\rightarrow$ \appzh{东西}; \texttt{that thing} $\rightarrow$ \appzh{那东西}.} \\
+Assistant 1 & \trainbox{trainassistantbg}{\appzh{她会做些我本意不想让她做的}\texttt{<term>}\appzh{事}\texttt{</term>}\appzh{。这样一来，之前}\texttt{<term>}\appzh{所有努力}\texttt{</term>}\appzh{都白费了，我不得不重新写一遍。}} \\
+\addlinespace[0.45ex]
+User 2 & \trainbox{trainuserbg}{\texttt{<audio>} \par \textbf{term\_map:} \texttt{the Porch Gable} $\rightarrow$ \appzh{门廊小屋}; \texttt{story} $\rightarrow$ \appzh{传说}; \texttt{Anne} $\rightarrow$ \appzh{安妮}; \texttt{seclusion} $\rightarrow$ \appzh{静谧}; \texttt{Diana} $\rightarrow$ \appzh{戴安娜}; \texttt{gabelle} $\rightarrow$ \appzh{法国盐税}; \texttt{that story} $\rightarrow$ \appzh{这个故事}; \texttt{porch} $\rightarrow$ \appzh{门廊}.} \\
+Assistant 2 & \trainbox{trainassistantbg}{\appzh{然而，最终}\texttt{<term>}\appzh{传说}\texttt{</term>}\appzh{终于完成了，}\texttt{<term>}\appzh{安妮}\texttt{</term>}\appzh{在}\texttt{<term>}\appzh{门廊小屋}\texttt{</term>}\appzh{的}\texttt{<term>}\appzh{静谧}\texttt{</term>}\appzh{中把它读给了}\texttt{<term>}\appzh{戴安娜}\texttt{</term>}\appzh{听。她}} \\
+\addlinespace[0.45ex]
+User 3 & \trainbox{trainuserbg}{\texttt{<audio>} \par \textbf{term\_map:} \texttt{Diana} $\rightarrow$ \appzh{戴安娜}; \texttt{watchful eye} $\rightarrow$ \appzh{密切留意}; \texttt{Robert Ray} $\rightarrow$ \appzh{罗伯特·雷}; \texttt{her pathetic scene} $\rightarrow$ \appzh{那个悲情场景}; \texttt{scene} $\rightarrow$ \appzh{现场}; \texttt{that scene} $\rightarrow$ \appzh{那场戏}.} \\
+Assistant 3 & \trainbox{trainassistantbg}{\appzh{成功地呈现了那个悲情场景，同时又没有牺牲}\texttt{<term>}\appzh{罗伯特·雷}\texttt{</term>}\appzh{，她一边读一边}\texttt{<term>}\appzh{密切留意}\texttt{</term>}\appzh{着}\texttt{<term>}\appzh{戴安娜}\texttt{</term>}\appzh{的反应。戴安娜}} \\
+\end{tabularx}
+\endgroup
+\caption{An example of En-Zh Speech LLM training data.}
+\label{fig:train_prompt_visual}
+\end{figure*}
+
+\begin{figure*}[t] % 使用 figure* 环境使其跨双栏
+\begin{tcolorbox}[
+    enhanced,
+    % breakable, % 注意：在浮动环境（figure*）中无法跨页，如果你希望它浮动在顶部/底部，通常不需要 breakable
+    colback=gray!3,
+    colframe=gray!55!black,
+    title={Prompt template for Wikidata term utterance generation},
+    fonttitle=\bfseries,
+    boxrule=0.4pt,
+    arc=1mm,
+    left=1.5mm,
+    right=1.5mm,
+    top=1mm,
+    bottom=1mm,
+    width=\textwidth % 确保宽度撑满双栏
+]
+{\ttfamily\footnotesize
+\textbf{System instruction:}\par
+You are a dataset builder for speech recognition research.\par
+Your task: given a list of terms with their short descriptions, generate short English utterances (5--15 words each) that a speaker might say in a lecture, tutorial, or technical discussion. Use the description as context to produce accurate, meaningful sentences, but do NOT just copy the description.\par
+Each utterance MUST contain the given term EXACTLY as written (same spelling, but case may differ). Vary sentence structure and term position (beginning, middle, end). Do NOT repeat the same pattern across terms.\par
+Output valid JSON only -- no markdown fences, no explanation.\par
+\vspace{0.5em}
+\textbf{User prompt:}\par
+Generate \{variants\_per\_term\} short utterances (5--15 words) for EACH of the following terms. Use the description as context to make the utterance accurate and meaningful. Each utterance must contain the term verbatim.\par
+\vspace{0.5em}
+Terms with descriptions:\par
+[\par
+\hspace*{1em}\{"term": "Seismology", "description": "scientific study of earthquakes"\},\par
+\hspace*{1em}\{"term": "dataflow graph", "description": "graph representation of data dependencies"\}\par
+]\par
+\vspace{0.5em}
+Return a JSON object mapping each term to a list of \{variants\_per\_term\} utterance strings. Example format:\par
+\{\par
+\hspace*{1em}"Seismology": [\par
+\hspace*{2em}"Seismology helps us understand earthquake patterns.",\par
+\hspace*{2em}"The field of seismology has advanced rapidly."\par
+\hspace*{1em}]\par
+\}\par
+\vspace{0.5em}
+IMPORTANT: output raw JSON only, no markdown code fences.\par
+}
+\end{tcolorbox}
+\caption{Prompt template for Wikidata term utterance generation.}
+\label{fig:wikidata_utt_gen}
+\end{figure*}

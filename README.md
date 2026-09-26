@@ -4,6 +4,20 @@ This repository contains the release code, models, data links, and reproduction 
 
 The tracked paper PDF is [RASST](https://arxiv.org/abs/2601.22777).
 
+## Source of Truth
+
+- Code, release documentation, and editable paper sources are canonical in
+  [LeiLiLab/RASST](https://github.com/LeiLiLab/RASST).
+- The editable paper is tracked under [`paper/`](paper/) and synchronized with
+  the [EMNLP 26 RASST Overleaf project](https://www.overleaf.com/project/6a08a5f98270c576002d785d).
+  The current import corresponds to Overleaf `master` commit
+  `c96fc4b36dbc22155cdfd832cfa50b548cbfd88b`.
+- Pulling from and pushing to Overleaf uses the documented Git subtree workflow
+  in [`docs/overleaf_sync.md`](docs/overleaf_sync.md). Authentication tokens are
+  local credentials and must not be committed.
+- Published datasets and model parameters remain in the Hugging Face
+  repositories listed under [Release Assets](#release-assets).
+
 ## Main Results
 
 RASST uses one global cache policy for all final main-result cells:
