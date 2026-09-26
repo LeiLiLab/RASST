@@ -189,7 +189,7 @@ end-to-end inference 等待 Aries GPU 资源，尚无可引用指标。**
   [`paper_plus_nlp_ai_cs_10k_coverage.tsv`](paper_plus_nlp_ai_cs_10k_coverage.tsv)，
   paper-only 对照见
   [`realistic_glossary_coverage.tsv`](realistic_glossary_coverage.tsv)。
-- 运行代码已在 `main` commit `0d14e4c`。Aries staging root 为
+- 运行代码已在 `main` commit `d25668c`。Aries staging root 为
   `/mnt/aries/data6/jiaxuanluo/RASST_release_runs/rebuttal_acl_paper_plus_nlp_ai_cs_10k_lm2_20260713T031147Z`；
   Slurm job 为 `47211`。15 个 index 与 15 个 sidecar manifest 已在 Taurus 构建，
   复制到 Aries 后逐文件 SHA-256 一致。
