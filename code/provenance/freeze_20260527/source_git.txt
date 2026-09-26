@@ -1,7 +1,7 @@
 remote git@github.com:LeiLiLab/InfiniSST.git
 branch rasst-freeze-20260527
 tag rasst-freeze-20260527
-commit 54f3471c556473dde7fb52ac85cff62bb6fc41ee
+commit 1e6f02893c69a6ee05073e87cac6a9bbbec48659
 source_checkout /home/jiaxuanluo/InfiniSST
 created_utc 2026-05-27
 
