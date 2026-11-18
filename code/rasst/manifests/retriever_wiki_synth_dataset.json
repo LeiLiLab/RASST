@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "event_id": "20261118T000000__release_dataset__retriever_wiki_synth",
+  "event_type": "release_dataset_manifest",
+  "family": "retriever_training_dataset",
+  "variant": "wiki_synth_3variant_gsv2_varctx2p88_3p84_4p80_5p76",
+  "status": "release_manifest",
+  "notes": [
+    "Wiki-synthetic part of the RASST retriever training data: Wikidata terms, Gemini-2.5-Flash sentences that contain each term, CosyVoice 3 speech, and the MFA-localized variable-context chunks used to train gavinlaw/rasst-retriever-hn1024.",
+    "The release keeps every built wiki row and flags the 2,567,645 rows that the hn1024 trainer kept after its p31_rank < 1,000,000 cutoff.",
+    "The GigaSpeech-derived part of the retriever training data is not included because GigaSpeech audio cannot be redistributed.",
+    "Chunk audio is packed as WebDataset tar shards (<key>.flac + <key>.json). FLAC is a lossless re-encode of the 16 kHz mono PCM16 WAV files read by the trainer.",
+    "The original data pipeline is documented in code/legacy/documents/code/data_pre/wiki_synth/PIPELINE.md."
+  ],
+  "metadata": {
+    "release_data": {
+      "hf_repo_id": "gavinlaw/rasst-retriever-wiki-synth-en",
+      "hf_revision": "main",
+      "local_path": "data/retriever_training/wiki_synth",
+      "license": "cc-by-nc-4.0"
+    },
+    "sources": {
+      "terms_json": "/mnt/gemini/data1/jiaxuanluo/wiki_synth_data/3variant/top_1000k_terms.json",
+      "p31_ranking_jsonl": "/mnt/gemini/data1/jiaxuanluo/wiki_synth_data/p31_full/wiki_synth_terms_p31_ranked.jsonl",
+      "utterances_jsonl": "/mnt/gemini/home/jiaxuanluo/wiki_synth_tts_3variant_gigaspeech_full0_31/wiki_synth_3variant_gs_v2_clean_full0_31.jsonl",
+      "retriever_train_jsonl": "/mnt/gemini/home/jiaxuanluo/term_train_3variant_gsv2_full0_31_clean_mfa_gsrepaired_gsdedup_varctx2p88_3p84_4p80_5p76.jsonl",
+      "retriever_train_stats_json": "/mnt/gemini/home/jiaxuanluo/term_train_3variant_gsv2_full0_31_clean_mfa_gsrepaired_gsdedup_varctx2p88_3p84_4p80_5p76_stats.json",
+      "wiki_audio_root": "/mnt/gemini/home/jiaxuanluo/term_train_audio_chunks_gsv2full_gsdedup_varctx2p88_3p84_4p80_5p76/wiki_synth"
+    },
+    "expected": {
+      "terms": 1000000,
+      "utterances": 2998703,
+      "retriever_train_total_rows": 7554926,
+      "retriever_train_wiki_rows": 2893705,
+      "hn1024_wiki_rows": 2567645
+    },
+    "packaging": {
+      "samples_per_shard": 15000,
+      "audio_format": "flac",
+      "sample_rate": 16000
+    },
+    "provenance": {
+      "term_source": "Wikidata RDF truthy dump: entities with an English rdfs:label and at least one wdt:P31 triple, ranked by inverse P31-type frequency",
+      "utterance_generator": "Gemini-2.5-Flash, three 5-15 word utterance variants per term that contain the term verbatim",
+      "tts": "Fun-CosyVoice3-0.5B-2512 with GigaSpeech speaker prompts (gavinlaw/gigaspeech_speaker_prompts_v2)",
+      "alignment": "Montreal Forced Aligner word timestamps; chunks re-cut to 2.88, 3.84, 4.80 and 5.76 s contexts",
+      "trained_checkpoint": "gavinlaw/rasst-retriever-hn1024"
+    },
+    "hn1024_training": {
+      "checkpoint": "gavinlaw/rasst-retriever-hn1024",
+      "wandb_run": "lh1b88kw",
+      "slurm_job": 45227,
+      "wiki_rank_cutoff": 1000000,
+      "rule": "the trainer skips rows with p31_rank >= 0 and p31_rank >= wiki_rank_cutoff",
+      "log_evidence": "[DATA] wiki_rank=1000000: kept 7,228,866, skipped 326,060 wiki entries beyond rank cutoff"
+    }
+  }
+}
