@@ -51,6 +51,7 @@ submission-ready Markdown 回复稿位于
 | SLM en-zh | [gavinlaw/rasst-speech-llm-zh-cap16-denoise-ttag](https://huggingface.co/gavinlaw/rasst-speech-llm-zh-cap16-denoise-ttag) |
 | Baseline SLM (InfiniSST, no RAG) | [gavinlaw/rasst-infinisst-baseline](https://huggingface.co/gavinlaw/rasst-infinisst-baseline) |
 | SLM SFT dataset (de/ja/zh, JSONL only) | [gavinlaw/rasst-speech-llm-sft-cap16-denoise-ttag](https://huggingface.co/datasets/gavinlaw/rasst-speech-llm-sft-cap16-denoise-ttag) |
+| Retriever training data, wiki-synthetic part (terms, sentences, speech chunks) | [gavinlaw/rasst-retriever-wiki-synth-en](https://huggingface.co/datasets/gavinlaw/rasst-retriever-wiki-synth-en) |
 
 Download all public release assets into ignored local paths:
 
@@ -192,6 +193,17 @@ RASST_ALLOW_DOWNLOAD=1 bash code/rasst/scripts/upload_hf_slm_dataset.sh download
 ```
 
 Audio is not redistributed; reconstruct it from GigaSpeech. See [docs/slm_training_dataset.md](docs/slm_training_dataset.md).
+
+The wiki-synthetic part of the retriever training data (1M Wikidata terms,
+2,998,703 generated sentences, and 2,893,705 speech chunks with term spans,
+audio included) is published separately. The GigaSpeech-derived part is not,
+since GigaSpeech audio cannot be redistributed. See
+[docs/retriever_wiki_synth_dataset.md](docs/retriever_wiki_synth_dataset.md).
+
+```bash
+# Tables only (terms, sentences, training index).
+RASST_ALLOW_DOWNLOAD=1 bash code/rasst/scripts/upload_hf_wiki_synth_dataset.sh download --execute --text-only
+```
 
 Retriever training and MaxSim index construction are exposed separately:
 
