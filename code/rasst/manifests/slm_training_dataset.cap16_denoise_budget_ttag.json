@@ -9,7 +9,8 @@
   "code_root": "/mnt/taurus/data2/jiaxuanluo/RASST/code/rasst",
   "notes": [
     "Release-facing Speech-LLM SFT dataset (cap16 denoise-budget term tagging) for de, ja, zh.",
-    "Only JSONL metadata + stats/recipe are published. Audio is NOT redistributed: each 'audios' entry is rewritten to a GigaSpeech-style relative key 'audio/<lang>/<gigaspeech_audio_id>/<window>/<index>.wav'.",
+    "Only JSONL metadata, stats/recipe, and clip boundaries are published. Audio is NOT redistributed: each 'audios' entry is rewritten to a relative key 'audio/<lang>/<gigaspeech_audio_id>/<utterance_index>/<clip_index>.wav'.",
+    "<lang>/audio_clip_map.parquet maps every clip key to its GigaSpeech opus file, start sample, and length at 16 kHz; <lang>/aligned_utterances.tsv lists the utterance spans and target trajectories the clips were cut from. code/rasst/tools/reconstruct_slm_sft_audio.py rebuilds the clips from a GigaSpeech copy.",
     "Reconstruct the referenced clips from GigaSpeech separately; see docs/slm_training_dataset.md.",
     "The training recipe (data-prep -> train -> HF export) is described by code/rasst/manifests/slm_training.cap16_denoise_budget_ttag.json."
   ],
@@ -23,7 +24,8 @@
         "url": "https://github.com/SpeechColab/GigaSpeech",
         "redistributed": false,
         "relative_prefix": "audio",
-        "note": "Audio clips are derived from GigaSpeech and are not included. JSONL 'audios' fields hold relative keys only."
+        "note": "Audio clips are derived from GigaSpeech and are not included. JSONL 'audios' fields hold relative keys; audio_clip_map.parquet gives each key's GigaSpeech opus file, start sample, and length.",
+        "gigaspeech_root": "/mnt/taurus/data/siqiouyang/datasets/gigaspeech"
       }
     },
     "recipe": {
@@ -44,6 +46,7 @@
       "de": {
         "source_dir": "/mnt/gemini/data1/jiaxuanluo/speech_llm_de_cap16_denoise_budget_20260525/de/hn1024_tau078_cap16_denoise_budget_ttag_v1",
         "audio_root": "/mnt/gemini/data/jiaxuanluo/audio_clips_siqi_de_v2",
+        "alignment_tsv": "/mnt/gemini/data1/jiaxuanluo/train_xl_case_robust_asr-filtered_de_metricx-qe3.0_align.tsv",
         "expected_train_rows": 12500,
         "expected_dev_rows": 355,
         "files": {
@@ -61,6 +64,7 @@
       "ja": {
         "source_dir": "/mnt/gemini/data1/jiaxuanluo/speech_llm_ja_cap16_denoise_budget_20260525/ja/hn1024_tau078_cap16_denoise_budget_ttag_v1",
         "audio_root": "/mnt/gemini/data/jiaxuanluo/audio_clips_siqi_ja_v2",
+        "alignment_tsv": "/mnt/gemini/data1/jiaxuanluo/train_xl_case_robust_asr-filtered_ja_metricx-qe3.0_align.tsv",
         "expected_train_rows": 12500,
         "expected_dev_rows": 355,
         "files": {
@@ -79,6 +83,7 @@
       "zh": {
         "source_dir": "/mnt/taurus/data1/jiaxuanluo/speech_llm_zh_cap16_denoise_budget_20260526/zh/hn1024_tau078_cap16_denoise_budget_ttag_v1",
         "audio_root": "/mnt/gemini/data/jiaxuanluo/audio_clips_siqi_zh_v2",
+        "alignment_tsv": "/mnt/gemini/data1/jiaxuanluo/train_xl_case_robust_asr-filtered_zh_metricx-qe3.0_align.tsv",
         "expected_train_rows": 12500,
         "expected_dev_rows": 355,
         "files": {

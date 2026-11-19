@@ -1,16 +1,24 @@
 #!/usr/bin/env python3
 """Prepare, upload, and download the public RASST Speech-LLM SFT dataset.
 
-Only JSONL metadata and stats/recipe are published. Audio is never
-redistributed: every JSONL ``audios`` entry is rewritten to a GigaSpeech-style
-relative key (``audio/<lang>/<gigaspeech_audio_id>/<window>/<index>.wav``), and
+Only JSONL metadata, stats/recipe, and clip boundaries are published. Audio is
+never redistributed: every JSONL ``audios`` entry is rewritten to a relative key
+(``audio/<lang>/<gigaspeech_audio_id>/<utterance_index>/<clip_index>.wav``), and
 any remaining internal absolute mount/home path is scrubbed from the JSONL and
 stats files. A final leak guard fails fast if an internal path survives.
+
+For each language, ``audio_clip_map.parquet`` maps every clip key to its
+GigaSpeech opus file, start sample, and length (16 kHz), and
+``aligned_utterances.tsv`` lists the utterance boundaries and target-side
+trajectories the clips were cut from, so users can rebuild the audio with
+``code/rasst/tools/reconstruct_slm_sft_audio.py``.
 """
 
 from __future__ import annotations
 
 import argparse
+import ast
+import concurrent.futures as cf
 import json
 import os
 import re
@@ -194,6 +202,178 @@ def stage_stats(src: Path, dst: Path) -> None:
     dst.write_text(out, encoding="utf-8")
 
 
+SAMPLE_RATE = 16000
+ALIGNMENT_TEXT_COLUMNS = ("tgt_text", "trajectory")
+
+
+def load_alignment(path: Path, need: Set[str]) -> Dict[str, Dict[str, Any]]:
+    """Read the aligned TSV rows for the needed utterances.
+
+    The clips were cut by splitting each utterance span ``<opus>:<start>:<frames>``
+    into ``len(trajectory)`` equal base chunks, so the target trajectory length is
+    part of the boundary definition.
+    """
+    if not path.is_file():
+        raise ReleaseSlmError(f"Missing alignment TSV: {path}")
+    out: Dict[str, Dict[str, Any]] = {}
+    with path.open("r", encoding="utf-8", newline="") as f:
+        header = f.readline().rstrip("\n").split("\t")
+        col = {name: i for i, name in enumerate(header)}
+        for name in ("id", "audio", *ALIGNMENT_TEXT_COLUMNS):
+            if name not in col:
+                raise ReleaseSlmError(f"{path} lacks column {name!r}")
+        for line in f:
+            parts = line.rstrip("\n").split("\t")
+            if parts[0] not in need:
+                continue
+            opus, start, frames = parts[col["audio"]].rsplit(":", 2)
+            trajectory = ast.literal_eval(parts[col["trajectory"]].replace("\x00", ""))
+            out[parts[0]] = {
+                "opus": opus,
+                "start": int(start),
+                "frames": int(frames),
+                "trajectory": trajectory,
+                "tgt_text": parts[col["tgt_text"]],
+            }
+    missing = need - set(out)
+    if missing:
+        raise ReleaseSlmError(f"{len(missing)} utterances missing from {path}, e.g. {sorted(missing)[:3]}")
+    return out
+
+
+def build_clip_map(
+    lang: str,
+    spec: Mapping[str, Any],
+    gigaspeech_root: str,
+    lang_dir: Path,
+    *,
+    max_rows: int,
+) -> Dict[str, Any]:
+    """Write ``audio_clip_map.parquet`` and ``aligned_utterances.tsv`` for one language.
+
+    Clip ``i`` of an utterance with ``T`` base chunks of ``b`` samples covers
+    ``[round(i*m*b), round(min((i+1)*m, T)*b))`` relative to the utterance start,
+    where ``m`` is the number of base chunks per clip. ``m`` is the row's
+    ``merge_multiplier`` when that reproduces the clip lengths on disk, and is
+    read from the first clip otherwise; every clip length is checked either way.
+    """
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    import soundfile as sf
+
+    src_dir = Path(str(spec["source_dir"]))
+    audio_root = str(spec["audio_root"]).rstrip("/") + "/"
+    gs_prefix = gigaspeech_root.rstrip("/") + "/"
+    rows: List[Tuple[str, str, int, List[str]]] = []
+    for split in ("train", "dev"):
+        with (src_dir / str(spec["files"][split])).open("r", encoding="utf-8") as f:
+            for count, line in enumerate(f):
+                if max_rows and count >= max_rows:
+                    break
+                record = json.loads(line)
+                audios = record["audios"]
+                rel = [a[len(audio_root):].split("/") for a in audios]
+                if any(len(r) != 3 or r[:2] != rel[0][:2] for r in rel):
+                    raise ReleaseSlmError(f"Unexpected clip layout in {split}: {audios[:2]}")
+                rows.append((split, f"{rel[0][0]}_{rel[0][1]}", int(record.get("merge_multiplier", 1)), audios))
+
+    meta = load_alignment(Path(str(spec["alignment_tsv"])), {utt for _, utt, _, _ in rows})
+    for utt, m in meta.items():
+        if not m["opus"].startswith(gs_prefix):
+            raise ReleaseSlmError(f"{utt}: opus path outside gigaspeech_root: {m['opus']}")
+    opus_files = sorted({m["opus"] for m in meta.values()})
+    clip_paths = sorted({a for _, _, _, audios in rows for a in audios})
+    with cf.ThreadPoolExecutor(64) as pool:
+        opus_frames = dict(zip(opus_files, pool.map(lambda p: sf.info(p).frames, opus_files)))
+        disk = dict(zip(clip_paths, pool.map(lambda p: sf.info(p), clip_paths)))
+
+    clips: Dict[str, Dict[str, Any]] = {}
+    utterances: Dict[str, Dict[str, Any]] = {}
+    field_mismatch = 0
+    field_values_on_mismatch: Dict[int, int] = {}
+    for split, utt, field_mult, audios in rows:
+        m = meta[utt]
+        tlen = len(m["trajectory"])
+        total = min(m["frames"], opus_frames[m["opus"]] - m["start"])
+        base = total / tlen
+        def clip_lengths(m: int) -> List[int]:
+            return [
+                max(1, int(round(min((i + 1) * m, tlen) * base)) - int(round(i * m * base)))
+                for i in range(len(audios))
+            ]
+
+        if clip_lengths(field_mult) == [disk[a].frames for a in audios]:
+            mult = field_mult
+        else:
+            mult = max(1, int(round(disk[audios[0]].frames / base)))
+            field_mismatch += 1
+            field_values_on_mismatch[field_mult] = field_values_on_mismatch.get(field_mult, 0) + 1
+        gs_path = m["opus"][len(gs_prefix):]
+        for idx, path in enumerate(audios):
+            seg_start = int(round(idx * mult * base))
+            seg_end = int(round(min((idx + 1) * mult, tlen) * base))
+            frames = max(1, seg_end - seg_start)
+            info = disk[path]
+            if info.frames != frames or info.samplerate != SAMPLE_RATE:
+                raise ReleaseSlmError(
+                    f"{path}: disk has {info.frames} frames @ {info.samplerate} Hz, boundaries give {frames} (m={mult})"
+                )
+            start = m["start"] + seg_start
+            record = {
+                "key": f"audio/{lang}/{path[len(audio_root):]}",
+                "utter_id": utt,
+                "gigaspeech_audio_id": Path(gs_path).stem,
+                "gigaspeech_path": gs_path,
+                "clip_index": idx,
+                "chunk_multiplier": mult,
+                "start_sample": start,
+                "num_samples": frames,
+                "start_sec": start / SAMPLE_RATE,
+                "duration_sec": frames / SAMPLE_RATE,
+                "pad_samples": max(0, start + frames - opus_frames[m["opus"]]),
+            }
+            previous = clips.setdefault(record["key"], record)
+            if previous != record:
+                raise ReleaseSlmError(f"Conflicting boundaries for {record['key']}")
+        entry = utterances.setdefault(utt, {
+            "id": utt,
+            "audio": f"{gs_path}:{m['start']}:{m['frames']}",
+            "n_frames": m["frames"],
+            "trajectory_len": tlen,
+            "chunk_multiplier": mult,
+            "num_clips": len(audios),
+            "splits": [],
+            "tgt_text": m["tgt_text"],
+            "trajectory": json.dumps(m["trajectory"], ensure_ascii=False),
+        })
+        if entry["chunk_multiplier"] != mult or entry["num_clips"] != len(audios):
+            raise ReleaseSlmError(f"{utt}: rows disagree on clip layout")
+        if split not in entry["splits"]:
+            entry["splits"].append(split)
+
+    clip_rows = [clips[k] for k in sorted(clips)]
+    pq.write_table(pa.Table.from_pylist(clip_rows), lang_dir / "audio_clip_map.parquet", compression="zstd")
+    fields = ["id", "audio", "n_frames", "trajectory_len", "chunk_multiplier", "num_clips", "splits", *ALIGNMENT_TEXT_COLUMNS]
+    lines = ["\t".join(fields)]
+    for utt in sorted(utterances):
+        entry = {**utterances[utt], "splits": ",".join(utterances[utt]["splits"])}
+        values = [str(entry[name]) for name in fields]
+        if any("\t" in v or "\n" in v for v in values):
+            raise ReleaseSlmError(f"{utt}: tab or newline inside a TSV field")
+        lines.append("\t".join(values))
+    (lang_dir / "aligned_utterances.tsv").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    assert_no_leak((lang_dir / "aligned_utterances.tsv").read_text(encoding="utf-8"), f"{lang}/aligned_utterances.tsv")
+    return {
+        "clips": len(clip_rows),
+        "utterances": len(utterances),
+        "gigaspeech_opus_files": len(opus_files),
+        "clips_with_padding": sum(1 for r in clip_rows if r["pad_samples"]),
+        "rows_whose_merge_multiplier_differs_from_clips": field_mismatch,
+        "merge_multiplier_values_on_those_rows": {str(k): v for k, v in sorted(field_values_on_mismatch.items())},
+        "rows": len(rows),
+    }
+
+
 def write_dataset_card(stage_root: Path, manifest: Mapping[str, Any], per_lang: Mapping[str, Any]) -> None:
     rid = repo_id(manifest)
     rec = recipe(manifest)
@@ -202,14 +382,30 @@ def write_dataset_card(stage_root: Path, manifest: Mapping[str, Any], per_lang: 
     src_url = str(audio_source.get("url") or "https://github.com/SpeechColab/GigaSpeech")
     download_root = str(release_data_meta(manifest).get("local_path") or "data/slm_training")
 
-    rows = ["| Language | Train rows | Dev rows | Audio refs | Unique GigaSpeech audio IDs |", "| --- | ---: | ---: | ---: | ---: |"]
+    rows = [
+        "| Language | Train rows | Dev rows | Utterances | Clips | Unique GigaSpeech audio IDs |",
+        "| --- | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    stale_notes = []
     for lang in sorted(per_lang):
         info = per_lang[lang]
+        clip_map = info["audio_clip_map"]
         rows.append(
-            f"| {lang} | {info['train_rows']} | {info['dev_rows']} | "
-            f"{info['audio_refs']} | {info['unique_gigaspeech_audio_ids']} |"
+            f"| {lang} | {info['train_rows']} | {info['dev_rows']} | {clip_map['utterances']} | "
+            f"{clip_map['clips']} | {info['unique_gigaspeech_audio_ids']} |"
         )
+        stale = clip_map["rows_whose_merge_multiplier_differs_from_clips"]
+        if stale:
+            stale_notes.append(f"`{lang}` ({stale} of {clip_map['rows']} rows)")
     counts_table = "\n".join(rows)
+    stale_text = ""
+    if stale_notes:
+        stale_text = (
+            "\nThe JSONL field `merge_multiplier` does not reproduce the clips in "
+            + ", ".join(stale_notes)
+            + ". The clips are what the models were trained on, so use `chunk_multiplier` from "
+            "`audio_clip_map.parquet` when you need the chunk size.\n"
+        )
 
     text = f"""---
 license: other
@@ -224,37 +420,73 @@ tags:
 
 # RASST Speech-LLM SFT Data (cap16 denoise-budget term tagging)
 
-This dataset contains the release-facing supervised fine-tuning (SFT) JSONL used
-to train the RASST Speech-LLMs for streaming speech translation with domain
-terminology, for `de`, `ja`, and `zh`. Only the JSONL metadata and the
-data-prep stats/recipe are published.
+This dataset contains the supervised fine-tuning (SFT) data used to train the
+RASST Speech-LLMs for streaming speech translation with domain terminology, for
+`de`, `ja`, and `zh`: chunk-by-chunk translation trajectories built from
+{src_dataset} ({src_url}), with retrieved term maps and `<t>` term tags.
 
-**Audio is not included.** Each JSONL row keeps an `audios` field whose entries
+**Audio is not included.** Each JSONL row has an `audios` field whose entries
 are relative keys of the form:
 
 ```text
-audio/<lang>/<gigaspeech_audio_id>/<window_seconds>/<index>.wav
+audio/<lang>/<gigaspeech_audio_id>/<utterance_index>/<clip_index>.wav
 ```
 
-These clips are derived from **{src_dataset}** ({src_url}). To train or
-reproduce, obtain the audio from {src_dataset} separately and re-point the
-`audios` keys to your local reconstructed clips. See `audio_sources.json` for
-the per-language inventory of referenced GigaSpeech audio IDs.
+`audio_clip_map.parquet` gives the exact boundaries of every clip in the
+original GigaSpeech recording, so the audio can be rebuilt from a GigaSpeech
+copy (see below).
 
 ## Contents
 
 ```text
-<lang>/<train_jsonl>      # SFT training rows (system/user/assistant messages + term metadata)
-<lang>/<dev_jsonl>        # held-out dev rows (first 355)
-<lang>/*_wrap_stats.json  # term-tagging wrap stats
+<lang>/<train_jsonl>             # SFT training rows (system/user/assistant messages + term metadata)
+<lang>/<dev_jsonl>               # 355 dev rows (their utterances also appear in the train file)
+<lang>/audio_clip_map.parquet    # clip key -> GigaSpeech opus file, start sample, length (16 kHz)
+<lang>/aligned_utterances.tsv    # utterance spans and target-side trajectories the clips were cut from
+<lang>/*_wrap_stats.json         # term-tagging wrap stats
 <lang>/validation_summary.json
-audio_sources.json        # GigaSpeech provenance + referenced audio IDs (no internal paths)
-dataset_manifest.json     # recipe, repo id, and per-language row/audio counts
+audio_sources.json               # GigaSpeech provenance + referenced audio IDs
+dataset_manifest.json            # recipe, repo id, and per-language counts
 ```
 
 ## Row counts
 
 {counts_table}
+
+## Audio clip boundaries
+
+Each utterance is a span `<gigaspeech_opus>:<start_sample>:<num_samples>` of a
+GigaSpeech recording at 16 kHz (the `audio` column of `aligned_utterances.tsv`,
+same format as the original aligned TSV). The span is split into
+`trajectory_len` equal base chunks, one per entry of the target
+`trajectory`, and clip `i` covers base chunks `[i*m, min((i+1)*m, trajectory_len))`
+with `m = chunk_multiplier`. In this release every base chunk is 0.96 s
+(15,360 samples).
+
+`audio_clip_map.parquet` has one row per clip key with the result:
+`gigaspeech_path` (path inside the GigaSpeech release, e.g.
+`audio/audiobook/P0001/AUD0000000003.opus`), `start_sample` and `num_samples` in the
+recording, `start_sec` and `duration_sec`, `utter_id`, `clip_index`,
+`chunk_multiplier`, and `pad_samples` (zeros appended past the end of the recording).
+{stale_text}
+To rebuild the clips you need the full-length GigaSpeech opus files from the
+official GigaSpeech download. Then:
+
+```bash
+git clone https://github.com/LeiLiLab/RASST.git
+cd RASST
+python code/rasst/tools/reconstruct_slm_sft_audio.py \\
+  --dataset-dir <local copy of this dataset> \\
+  --gigaspeech-root <dir that contains GigaSpeech audio/>
+```
+
+Clips are written to `<dataset-dir>/<key>`, where the JSONL `audios` keys point.
+Start positions and lengths match the training clips exactly; sample values can
+differ slightly with the Opus decoder build.
+
+English transcripts are part of the GigaSpeech database and are not
+redistributed here; `aligned_utterances.tsv` carries only the span boundaries
+and our target-language translations.
 
 ## Recipe
 
@@ -265,25 +497,25 @@ dataset_manifest.json     # recipe, repo id, and per-language row/audio counts
 - Denoise-budget policy: `{rec.get('denoise_budget_version', 'cap16_denoise_budget_v1')}`
 - Base model: `{rec.get('base_model', 'Qwen3-Omni-30B-A3B-Instruct')}` (LoRA r{rec.get('lora_rank', 32)} a{rec.get('lora_alpha', 32)}, {rec.get('max_epochs', 1)} epoch, max_length {rec.get('max_length', 3072)})
 
-The full data-prep -> train -> HF export recipe is described in the RASST
+The full data-prep, training, and HF export recipe is described in the RASST
 repository at `code/rasst/manifests/slm_training.cap16_denoise_budget_ttag.json`.
 
 ## Download into the RASST repo
 
 ```bash
-git clone https://github.com/luojiaxuan/RASST.git
+git clone https://github.com/LeiLiLab/RASST.git
 cd RASST
-RASST_ALLOW_DOWNLOAD=1 bash code/rasst/scripts/upload_hf_slm_dataset.sh download
+RASST_ALLOW_DOWNLOAD=1 bash code/rasst/scripts/upload_hf_slm_dataset.sh download --execute
 ```
 
 This populates the ignored local path `{download_root}`.
 
-Source repository: https://github.com/luojiaxuan/RASST
+Source repository: https://github.com/LeiLiLab/RASST
 
 HF dataset repo: `{rid}`
 
-Released as a research artifact. Check the GigaSpeech license before
-redistributing any audio you reconstruct from these references.
+Released as a research artifact. GigaSpeech audio is licensed for non-commercial
+research and education; follow the GigaSpeech terms for any audio you rebuild.
 """
     # The card uses a public clone path in its commands and carries no internal
     # data/audio paths, so it is exempt from the strict leak guard applied to the
@@ -340,6 +572,10 @@ def prepare_package(manifest: Mapping[str, Any], stage_root: Path, *, force: boo
                 raise ReleaseSlmError(f"{lang} dev row mismatch: got {n_dev}, expected {exp_dev}")
         for stat_name in files.get("stats", []) or []:
             stage_stats(src_dir / str(stat_name), lang_dir / str(stat_name))
+        clip_map = build_clip_map(
+            lang, spec, str(audio_source["gigaspeech_root"]), lang_dir, max_rows=max_rows
+        )
+        print(f"[CLIP_MAP] {lang} {clip_map}", flush=True)
         per_lang_report[lang] = {
             "train_jsonl": str(files["train"]),
             "dev_jsonl": str(files["dev"]),
@@ -349,6 +585,7 @@ def prepare_package(manifest: Mapping[str, Any], stage_root: Path, *, force: boo
             "unique_clips": len(stats.clip_keys),
             "unique_gigaspeech_audio_ids": len(stats.uttids),
             "stats_files": list(files.get("stats", []) or []),
+            "audio_clip_map": clip_map,
         }
         audio_sources["languages"][lang] = {
             "relative_prefix": f"audio/{lang}",
