@@ -33,6 +33,7 @@ jiwer==4.0.0
 # --- Audio / data / numerics ---
 numpy==1.26.4
 pandas==2.2.3
+pyarrow==20.0.0
 scipy==1.15.3
 soundfile==0.13.1
 librosa==0.11.0

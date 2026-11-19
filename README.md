@@ -50,13 +50,15 @@ submission-ready Markdown 回复稿位于
 | SLM en-ja | [gavinlaw/rasst-speech-llm-ja-cap16-denoise-ttag](https://huggingface.co/gavinlaw/rasst-speech-llm-ja-cap16-denoise-ttag) |
 | SLM en-zh | [gavinlaw/rasst-speech-llm-zh-cap16-denoise-ttag](https://huggingface.co/gavinlaw/rasst-speech-llm-zh-cap16-denoise-ttag) |
 | Baseline SLM (InfiniSST, no RAG) | [gavinlaw/rasst-infinisst-baseline](https://huggingface.co/gavinlaw/rasst-infinisst-baseline) |
-| SLM SFT dataset (de/ja/zh, JSONL only) | [gavinlaw/rasst-speech-llm-sft-cap16-denoise-ttag](https://huggingface.co/datasets/gavinlaw/rasst-speech-llm-sft-cap16-denoise-ttag) |
-| Retriever training data, wiki-synthetic part (terms, sentences, speech chunks) | [gavinlaw/rasst-retriever-wiki-synth-en](https://huggingface.co/datasets/gavinlaw/rasst-retriever-wiki-synth-en) |
+| SLM SFT data: GigaSpeech streaming translation trajectories (de/ja/zh) | [gavinlaw/rasst-speech-llm-sft-cap16-denoise-ttag](https://huggingface.co/datasets/gavinlaw/rasst-speech-llm-sft-cap16-denoise-ttag) |
+| Retriever training data, wiki-synthetic part | [gavinlaw/rasst-retriever-wiki-synth-en](https://huggingface.co/datasets/gavinlaw/rasst-retriever-wiki-synth-en) |
+
+The training datasets are described in [Training Data](#training-data).
 
 Download all public release assets into ignored local paths:
 
 ```bash
-git clone https://github.com/luojiaxuan/RASST.git
+git clone https://github.com/LeiLiLab/RASST.git
 cd RASST
 
 RASST_ALLOW_DOWNLOAD=1 bash code/rasst/scripts/download_release_data.sh --download
@@ -181,30 +183,6 @@ RASST_ALLOW_LAUNCH=1 bash code/rasst/scripts/reproduce_slm.sh \
   --lang all --stage all --launch
 ```
 
-The SFT training data (JSONL + stats only, audio held out) is published
-separately. Stage it locally or download it with:
-
-```bash
-# Stage the JSONL-only dataset (audio paths rewritten to GigaSpeech-style keys).
-bash code/rasst/scripts/upload_hf_slm_dataset.sh prepare
-
-# Download the published dataset into data/slm_training/.
-RASST_ALLOW_DOWNLOAD=1 bash code/rasst/scripts/upload_hf_slm_dataset.sh download --execute
-```
-
-Audio is not redistributed; reconstruct it from GigaSpeech. See [docs/slm_training_dataset.md](docs/slm_training_dataset.md).
-
-The wiki-synthetic part of the retriever training data (1M Wikidata terms,
-2,998,703 generated sentences, and 2,893,705 speech chunks with term spans,
-audio included) is published separately. The GigaSpeech-derived part is not,
-since GigaSpeech audio cannot be redistributed. See
-[docs/retriever_wiki_synth_dataset.md](docs/retriever_wiki_synth_dataset.md).
-
-```bash
-# Tables only (terms, sentences, training index).
-RASST_ALLOW_DOWNLOAD=1 bash code/rasst/scripts/upload_hf_wiki_synth_dataset.sh download --execute --text-only
-```
-
 Retriever training and MaxSim index construction are exposed separately:
 
 ```bash
@@ -219,6 +197,50 @@ RASST_ALLOW_LAUNCH=1 bash code/rasst/scripts/train_retriever.sh
 RASST_ALLOW_LAUNCH=1 bash code/rasst/scripts/build_index.sh
 ```
 
+## Training Data
+
+### Speech-LLM SFT data
+
+[`gavinlaw/rasst-speech-llm-sft-cap16-denoise-ttag`](https://huggingface.co/datasets/gavinlaw/rasst-speech-llm-sft-cap16-denoise-ttag)
+holds the SFT data for `de`, `ja`, and `zh`: 12,500 training rows and 355 dev
+rows per language. Each row is a chunk-by-chunk streaming translation trajectory
+over a GigaSpeech utterance. User turns carry the English audio chunks and the
+retrieved term map; assistant turns carry the translation of each chunk, with
+terms wrapped in `<t>...</t>`. Translations come from
+Qwen3-30B-A3B-Instruct-2507, filtered with MetricX-QE.
+
+GigaSpeech audio is not redistributed. For each language,
+`audio_clip_map.parquet` gives every clip's GigaSpeech opus file, start sample,
+and length at 16 kHz, and `aligned_utterances.tsv` gives the utterance spans and
+target trajectories the clips were cut from. With the full-length opus files
+from the official GigaSpeech download, rebuild the clips into the paths the
+JSONL `audios` keys point to:
+
+```bash
+RASST_ALLOW_DOWNLOAD=1 bash code/rasst/scripts/upload_hf_slm_dataset.sh download --execute
+python code/rasst/tools/reconstruct_slm_sft_audio.py \
+  --dataset-dir data/slm_training/cap16_denoise_budget_ttag \
+  --gigaspeech-root /path/to/GigaSpeech
+```
+
+See [docs/slm_training_dataset.md](docs/slm_training_dataset.md).
+
+### Retriever training data
+
+[`gavinlaw/rasst-retriever-wiki-synth-en`](https://huggingface.co/datasets/gavinlaw/rasst-retriever-wiki-synth-en)
+holds the wiki-synthetic part of the retriever training data, audio included:
+1M Wikidata terms, 2,998,703 generated English sentences that contain them,
+and 2,893,705 synthesized speech chunks with MFA term spans (222 GB of FLAC
+WebDataset shards). The `in_hn1024_train` column marks the 2,567,645 chunks the
+released retriever trained on. The GigaSpeech-derived part of the retriever data
+is not published because GigaSpeech audio cannot be redistributed. See
+[docs/retriever_wiki_synth_dataset.md](docs/retriever_wiki_synth_dataset.md).
+
+```bash
+# Tables only (terms, sentences, training index); drop --text-only for the audio shards.
+RASST_ALLOW_DOWNLOAD=1 bash code/rasst/scripts/upload_hf_wiki_synth_dataset.sh download --execute --text-only
+```
+
 ## Code Layout
 
 The active release code lives under `code/rasst/`:
@@ -230,6 +252,7 @@ code/rasst/eval/                 serial SimulEval eval, scorer, agent
 code/rasst/analysis/main_result/ main-result table and figure builders
 code/rasst/manifests/            release manifests
 code/rasst/scripts/              public launch/download wrappers
+code/rasst/tools/                HF release export and SFT audio rebuild tools
 ```
 
 `code/legacy/` is kept as frozen provenance from the original InfiniSST-derived
