@@ -506,19 +506,19 @@ def _encode_audio_projected_seq_batch_packed(
     )
     feature_lens = torch.tensor(mel_lens, dtype=torch.long, device=device)
 
+    encoder = retriever.audio_encoder
+    base_encoder = encoder.get_base_model() if hasattr(encoder, "get_base_model") else encoder
     with torch.amp.autocast("cuda", dtype=torch.bfloat16):
-        if os.environ.get("RASST_RAG_AUT_BATCH_ISOLATE", "1").strip().lower() in {
-            "1",
-            "true",
-            "yes",
-        }:
+        # Transformers 5 splits attention at the cu_seqlens blocks inside the tower and has no
+        # _prepare_attention_mask; earlier releases need the explicit block mask to keep samples apart.
+        if hasattr(base_encoder, "_prepare_attention_mask"):
             hidden_states = _audio_encoder_forward_packed_isolated(
-                retriever.audio_encoder,
+                encoder,
                 input_features,
                 feature_lens,
             )
         else:
-            outputs = retriever.audio_encoder(input_features, feature_lens)
+            outputs = encoder(input_features, feature_lens)
             hidden_states = outputs.last_hidden_state
 
         if hidden_states.ndim == 2:
@@ -553,8 +553,7 @@ def _encode_audio_projected_seq_batch(
 
     By default this uses the packed AuT path expected by Qwen3-Omni:
     ``[C, sum(T_i)]`` plus ``feature_lens``. Set
-    ``RASST_RAG_AUT_BATCH_MODE=serial`` to force the per-sample path, or
-    ``packed_strict`` to disable fallback on packed-forward errors.
+    ``RASST_RAG_AUT_BATCH_MODE=serial`` to force the per-sample path.
     """
     if not audio_arrays:
         raise ValueError("_encode_audio_projected_seq_batch requires non-empty audio_arrays")
@@ -564,16 +563,7 @@ def _encode_audio_projected_seq_batch(
     if mode in {"serial", "per_sample", "per-sample", "0", "false"}:
         return _encode_audio_projected_seq_batch_serial(mel_list, retriever, device)
 
-    try:
-        return _encode_audio_projected_seq_batch_packed(mel_list, retriever, device)
-    except Exception as exc:
-        if mode in {"packed_strict", "strict"}:
-            raise
-        logger.warning(
-            "Packed Qwen3-Omni AuT batch failed; falling back to serial mode: %s",
-            exc,
-        )
-        return _encode_audio_projected_seq_batch_serial(mel_list, retriever, device)
+    return _encode_audio_projected_seq_batch_packed(mel_list, retriever, device)
 
 
 def _retrieve_topk(
